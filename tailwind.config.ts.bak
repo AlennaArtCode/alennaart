@@ -1,0 +1,57 @@
+import type { Config } from "tailwindcss";
+
+const config: Config = {
+    content: [
+        "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
+        "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+        "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    ],
+    theme: {
+        extend: {
+            colors: {
+                // FONDO BASE (Mapeado a tu antiguo 'primary')
+                // Usamos #0F1116 como el nuevo estándar en lugar de morado
+                primary: {
+                    DEFAULT: '#0F1116', // Fondo Base (Deep Grey)
+                    dark: '#0A0B0E',    // Fondo más oscuro (para secciones alternas)
+                    surface: '#151827', // Superficies (Cards) - antes 'primary-light'
+                    border: 'rgba(255, 255, 255, 0.06)', // Borde sutil
+                },
+                // TEXTO (Nuevos tokens semánticos)
+                content: {
+                    primary: '#E6E7EE',   // Texto principal (No blanco puro)
+                    secondary: '#A9ADBC', // Texto secundario
+                    muted: '#777C90',     // Hints / Texto tenue
+                },
+                // ACENTOS
+                accent: {
+                    DEFAULT: '#F0B429', // Dorado Principal (CTA)
+                    hover: '#FFCC4D',   // Dorado Hover (Luz)
+                    mystic: '#5B2BFF',  // Violeta profundo (Detalles mínimos)
+                },
+                // Mantenemos compatibilidad con clases antiguas si las hay
+                dark: '#0F1116',
+                light: '#E6E7EE',
+            },
+            fontFamily: {
+                sans: ['var(--font-outfit)', 'sans-serif'], // UI, Párrafos
+                serif: ['var(--font-cormorant)', 'serif'], // Títulos H1, Display
+            },
+            // SOMBRAS PREMIUM (2 capas: profundidad + borde de luz)
+            boxShadow: {
+                'premium': '0 10px 30px -10px rgba(0, 0, 0, 0.45), 0 1px 0 0 rgba(255, 255, 255, 0.06) inset',
+                'glow': '0 0 20px rgba(240, 180, 41, 0.15)', // Glow sutil dorado
+            },
+            // RADIOS CONSISTENTES
+            borderRadius: {
+                'card': '16px',
+                'btn': '12px',
+            },
+            letterSpacing: {
+                'luxury': '0.05em', // Tracking ligero para títulos
+            }
+        },
+    },
+    plugins: [],
+};
+export default config;

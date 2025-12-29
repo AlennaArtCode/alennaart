@@ -1,0 +1,252 @@
+@import "tailwindcss";
+
+
+@theme {
+  /* Mapeo de variables CSS para compatibilidad */
+  --color-primary: #0A0510;
+  /* Void Purple - Darker, Deeper */
+  --color-primary-dark: #050208;
+  --color-primary-surface: #13091F;
+  --color-primary-border: rgba(224, 176, 255, 0.1);
+
+  /* Branding Palette: Neon Wireframe & Champagne */
+  --color-accent: #E5C09D;
+  /* Champagne Gold (Text) */
+  --color-accent-hover: #F0B429;
+  --color-accent-mystic: #E0B0FF;
+  /* Soft Lilac */
+  --color-accent-neon: #4D4DFF;
+  /* Neon Blue (Wireframe) */
+  --color-accent-ruby: #D90254;
+  /* Ruby (Logo Swirl) */
+
+  --color-content-primary: #E6E7EE;
+  --color-content-secondary: #B8B0CA;
+  --color-content-muted: #84779E;
+
+  --shadow-premium: 0 20px 40px -10px rgba(10, 5, 16, 0.8), 0 1px 0 0 rgba(229, 192, 157, 0.1) inset;
+  --shadow-glow: 0 0 30px rgba(217, 2, 84, 0.3);
+  /* Ruby Glow */
+
+  --radius-card: 16px;
+  --radius-btn: 12px;
+}
+
+:root {
+  font-family: var(--font-outfit), sans-serif;
+  /* Default UI font - Scaled Up for Premium Feel */
+  font-size: 18px;
+  line-height: 1.7;
+  /* Altura de línea premium */
+  font-weight: 300;
+  /* Lighter weight for elegance */
+
+  color-scheme: dark;
+  color: #E6E7EE;
+  /* Texto primario suave */
+  background-color: #0A0510;
+  /* Fondo base */
+
+  /* Suavizado de fuente para pantallas retina (clave para el look editorial) */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: #0F1116;
+  overflow-x: hidden;
+}
+
+/* --- REGLAS DE TIPOGRAFÍA EDITORIAL --- */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.font-serif {
+  font-family: var(--font-cormorant), serif;
+  font-weight: 500;
+  /* Elegant weight */
+  letter-spacing: 0.01em;
+}
+
+.font-script {
+  font-family: var(--font-pinyon), cursive;
+}
+
+h1 {
+  line-height: 1.1;
+  /* El tamaño se maneja con clases de Tailwind (text-5xl, etc) */
+}
+
+p {
+  color: #B8B0CA;
+  /* Texto secundario por defecto */
+  margin-bottom: 1.5rem;
+}
+
+/* --- COMPONENTES UI REUTILIZABLES --- */
+
+/* Glass Panel (Modern Future) */
+.glass-panel {
+  @apply backdrop-blur-xl bg-primary-surface/30 border border-white/5 shadow-premium;
+}
+
+/* Crystal Tech - Sharper, Reflective */
+/* Crystal Tech - Sharper, Reflective */
+.glass-crystal {
+  @apply backdrop-blur-2xl bg-white/5 border border-white/10;
+  box-shadow: 0 0 30px rgba(77, 77, 255, 0.1),
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06),
+    inset 0 0 20px rgba(255, 255, 255, 0.05);
+  /* Inner reflection */
+}
+
+/* Cards con borde luminoso sutil */
+.card-premium {
+  @apply backdrop-blur-2xl bg-white/5 border border-white/10 rounded-card;
+  box-shadow: 0 0 30px rgba(77, 77, 255, 0.1),
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06),
+    inset 0 0 20px rgba(255, 255, 255, 0.05);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-premium:hover {
+  @apply border-accent-neon/40 bg-white/10;
+  box-shadow: 0 0 40px rgba(77, 77, 255, 0.2);
+  transform: translateY(-5px) scale(1.01);
+}
+
+/* Botón Primario (Dorado Sólido) */
+.btn-primary {
+  @apply bg-accent text-primary-dark font-sans font-medium px-8 py-3 rounded-btn cursor-pointer inline-block text-center border-none;
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  @apply bg-accent-hover shadow-glow transform -translate-y-0.5;
+}
+
+/* Botón Secundario (Ghost/Outline) */
+.btn-secondary {
+  @apply bg-transparent border border-primary-border text-content-primary px-8 py-3 rounded-btn cursor-pointer inline-block text-center;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  @apply border-content-secondary bg-white/5;
+}
+
+/* Scrollbar elegante */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0A0510;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2D3142;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #F0B429;
+}
+
+/* Utilities Extras */
+.noise-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 50;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* Digital Starfield */
+.starfield {
+  background-color: transparent;
+  background-image:
+    radial-gradient(white, rgba(255, 255, 255, .2) 2px, transparent 3px),
+    radial-gradient(white, rgba(255, 255, 255, .15) 1px, transparent 2px),
+    radial-gradient(white, rgba(255, 255, 255, .1) 2px, transparent 3px);
+  background-size: 550px 550px, 350px 350px, 250px 250px;
+  background-position: 0 0, 40px 60px, 130px 270px;
+}
+
+/* Floating Animation */
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float 7s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+/* Da Vinci Grid Accent - Adjusted for Space */
+/* Da Vinci Grid Accent - Adjusted for Space */
+.davinci-grid {
+  background-size: 40px 40px;
+  background-image:
+    linear-gradient(to right, rgba(77, 77, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(77, 77, 255, 0.08) 1px, transparent 1px);
+  mask-image: radial-gradient(circle at center, black 60%, transparent 100%);
+}
+
+/* 3D Perspective Floor */
+.perspective-container {
+  perspective: 1000px;
+  overflow: hidden;
+}
+
+.perspective-grid {
+  position: absolute;
+  bottom: -50%;
+  left: -50%;
+  width: 200%;
+  height: 100%;
+  background-image:
+    linear-gradient(to right, rgba(77, 77, 255, 0.1) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(77, 77, 255, 0.1) 1px, transparent 1px);
+  background-size: 50px 50px;
+  transform: rotateX(60deg);
+  transform-origin: 50% 0;
+  mask-image: linear-gradient(to bottom, transparent 0%, black 40%, black 100%);
+  animation: grid-move 20s linear infinite;
+}
+
+@keyframes grid-move {
+  0% {
+    transform: rotateX(60deg) translateY(0);
+  }
+
+  100% {
+    transform: rotateX(60deg) translateY(50px);
+  }
+}
