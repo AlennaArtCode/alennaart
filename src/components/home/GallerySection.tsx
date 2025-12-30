@@ -1,8 +1,8 @@
-'use client';
-
+import { useState } from 'react';
 import { galleryData, GalleryItem } from '@/data/galleryData';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X } from 'lucide-react';
 
 // Helper to get image path (using placeholder if file likely missing)
 const getImageUrl = (fileName: string) => {
@@ -20,6 +20,8 @@ const getImageUrl = (fileName: string) => {
 };
 
 export default function GallerySection() {
+    const [selectedItem, setSelectedItem] = useState<GalleryItem | null>(null);
+
     const trinity = galleryData.find(c => c.category === "THE TRINITY")?.items || [];
     const geometry = galleryData.find(c => c.category === "SACRED GEOMETRY")?.items || [];
     const anomalies = galleryData.find(c => c.category === "ANOMALIES")?.items || [];
@@ -33,7 +35,7 @@ export default function GallerySection() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {trinity.map((item) => (
-                        <TrinityCard key={item.id} item={item} />
+                        <TrinityCard key={item.id} item={item} onSelect={() => setSelectedItem(item)} />
                     ))}
                 </div>
             </div>
@@ -44,7 +46,7 @@ export default function GallerySection() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {geometry.map((item) => (
-                        <GeometryCard key={item.id} item={item} />
+                        <GeometryCard key={item.id} item={item} onSelect={() => setSelectedItem(item)} />
                     ))}
                 </div>
             </div>
@@ -65,17 +67,113 @@ export default function GallerySection() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto">
                         {anomalies.map((item) => (
-                            <AnomalyCard key={item.id} item={item} />
+                            <AnomalyCard key={item.id} item={item} onSelect={() => setSelectedItem(item)} />
                         ))}
                     </div>
                 </div>
             </div>
+
+            {/* FLOATING DETAIL MODAL */}
+            <AnimatePresence>
+                {selectedItem && (
+                    <ArtDetailModal item={selectedItem} onClose={() => setSelectedItem(null)} />
+                )}
+            </AnimatePresence>
 
         </section>
     );
 }
 
 // --- SUB-COMPONENTS ---
+
+function ArtDetailModal({ item, onClose }: { item: GalleryItem, onClose: () => void }) {
+    const [isExpanded, setIsExpanded] = useState(false);
+
+    return (
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+            onClick={onClose}
+        >
+            <motion.div
+                layoutId={`card-${item.id}`}
+                className={`relative bg-[#0A0510]/95 border border-accent/40 rounded-2xl shadow-[0_0_50px_rgba(197,160,89,0.2)] overflow-hidden transition-all duration-500 ${isExpanded ? 'w-full h-full max-w-5xl max-h-[90vh] flex flex-col md:flex-row' : 'w-full max-w-md'}`}
+                onClick={(e: React.MouseEvent) => e.stopPropagation()}
+            >
+                {/* Background Glows (Only in standard view) */}
+                {!isExpanded && (
+                    <>
+                        <div className="absolute -top-20 -left-20 w-40 h-40 bg-accent/20 blur-[60px] rounded-full" />
+                        <div className="absolute -bottom-20 -right-20 w-40 h-40 bg-accent/20 blur-[60px] rounded-full" />
+                    </>
+                )}
+
+                {/* Close Button */}
+                <button
+                    onClick={onClose}
+                    className="absolute top-4 right-4 z-20 text-white/50 hover:text-white transition-colors bg-black/20 p-2 rounded-full backdrop-blur-sm"
+                >
+                    <X size={24} />
+                </button>
+
+                {/* IMAGE SECTION */}
+                <div
+                    className={`relative cursor-zoom-in group flex items-center justify-center overflow-hidden ${isExpanded ? 'w-full md:w-2/3 h-[50vh] md:h-full bg-black/40' : 'w-full h-80'}`}
+                    onClick={() => setIsExpanded(!isExpanded)}
+                >
+                    {/* Spotlight Effect - Behind Image - Softer and Larger */}
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(197,160,89,0.25)_0%,transparent_60%)] opacity-100 blur-3xl" />
+
+                    <Image
+                        src={getImageUrl(item.imageFileName)}
+                        alt={item.title}
+                        fill
+                        className={`object-contain transition-transform duration-700 z-10 drop-shadow-[0_0_15px_rgba(0,0,0,0.5)] ${isExpanded ? 'p-4 scale-100' : 'scale-90 group-hover:scale-100'}`}
+                    />
+
+                    {/* Seamless Fade to Bottom - Hides the "cut" */}
+                    <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-[#0A0510] to-transparent z-20 pointer-events-none" />
+
+                    {/* Zoom Hint */}
+                    <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity z-30 bg-white/10 backdrop-blur text-white text-xs px-2 py-1 rounded border border-white/20">
+                        {isExpanded ? 'Minimize' : 'Click to Expand'}
+                    </div>
+                </div>
+
+                {/* INFO SECTION */}
+                <div className={`relative p-8 space-y-6 flex flex-col justify-center ${isExpanded ? 'w-full md:w-1/3 border-t md:border-t-0 md:border-l border-white/10' : ''}`}>
+
+                    <div className="space-y-2">
+                        <span className="text-accent text-xs font-mono uppercase tracking-[0.2em] block">
+                            {item.rarity}
+                        </span>
+                        <h2 className="text-4xl font-serif font-bold text-white drop-shadow-lg">
+                            {item.title}
+                        </h2>
+                        <h3 className="text-white/60 font-light text-lg font-serif italic">
+                            {item.subtitle}
+                        </h3>
+                    </div>
+
+                    <div className="h-px w-full bg-gradient-to-r from-transparent via-accent/50 to-transparent" />
+
+                    <p className="text-content-secondary leading-relaxed font-light text-sm">
+                        {item.description}
+                    </p>
+
+                    {/* Actions - Removed "Details", Kept "Mint" */}
+                    <div className="pt-4">
+                        <button className="w-full bg-accent text-black font-bold py-4 rounded text-sm uppercase tracking-widest hover:bg-white transition-colors shadow-[0_0_15px_rgba(197,160,89,0.3)] hover:shadow-[0_0_30px_rgba(197,160,89,0.5)]">
+                            Mint Artifact
+                        </button>
+                    </div>
+                </div>
+            </motion.div>
+        </motion.div>
+    );
+}
 
 function Header({ title, subtitle, centered = false }: { title: string, subtitle: string, centered?: boolean }) {
     return (
@@ -93,13 +191,14 @@ function Header({ title, subtitle, centered = false }: { title: string, subtitle
     );
 }
 
-function TrinityCard({ item }: { item: GalleryItem }) {
+function TrinityCard({ item, onSelect }: { item: GalleryItem, onSelect: () => void }) {
     return (
         <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             className="group relative h-[600px] overflow-hidden rounded-2xl cursor-pointer"
+            onClick={onSelect}
         >
             <div className="absolute inset-0 bg-black/20 z-0" />
 
@@ -125,10 +224,7 @@ function TrinityCard({ item }: { item: GalleryItem }) {
                     <p className="text-white/80 font-light text-sm mb-4">{item.subtitle}</p>
 
                     <div className="h-0 overflow-hidden group-hover:h-auto transition-all duration-500 opacity-0 group-hover:opacity-100">
-                        <p className="text-content-secondary text-sm mb-4 border-t border-white/10 pt-4">
-                            {item.description}
-                        </p>
-                        <ActionButton />
+                        <ActionButton onDetails={onSelect} />
                     </div>
                 </div>
             </div>
@@ -136,13 +232,14 @@ function TrinityCard({ item }: { item: GalleryItem }) {
     );
 }
 
-function GeometryCard({ item }: { item: GalleryItem }) {
+function GeometryCard({ item, onSelect }: { item: GalleryItem, onSelect: () => void }) {
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="group relative bg-[#0F1116] border border-accent/20 hover:border-accent transition-colors duration-300 rounded-xl overflow-hidden shadow-lg hover:shadow-[0_0_20px_rgba(197,160,89,0.15)]"
+            onClick={onSelect}
+            className="group relative bg-[#0F1116] border border-accent/20 hover:border-accent transition-colors duration-300 rounded-xl overflow-hidden shadow-lg hover:shadow-[0_0_20px_rgba(197,160,89,0.15)] cursor-pointer"
         >
             <div className="aspect-square relative overflow-hidden bg-black/50">
                 <Image
@@ -163,19 +260,20 @@ function GeometryCard({ item }: { item: GalleryItem }) {
                     </span>
                 </div>
                 <p className="text-xs text-content-muted mb-3 font-mono">{item.subtitle}</p>
-                <p className="text-sm text-content-secondary line-clamp-2 group-hover:line-clamp-none transition-all">
-                    {item.description}
-                </p>
+                <div className="flex justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span className="text-accent text-xs uppercase font-bold tracking-widest">View Analysis +</span>
+                </div>
             </div>
         </motion.div>
     );
 }
 
-function AnomalyCard({ item }: { item: GalleryItem }) {
+function AnomalyCard({ item, onSelect }: { item: GalleryItem, onSelect: () => void }) {
     return (
         <motion.div
             whileHover={{ scale: 1.02 }}
-            className="relative flex flex-col md:flex-row bg-black/60 border border-accent-neon/30 rounded-xl overflow-hidden group"
+            onClick={onSelect}
+            className="relative flex flex-col md:flex-row bg-black/60 border border-accent-neon/30 rounded-xl overflow-hidden group cursor-pointer"
         >
             {/* Glitch Effect Overlay on Hover */}
             <div className="absolute inset-0 bg-accent-neon/5 opacity-0 group-hover:opacity-100 pointer-events-none mix-blend-overlay transition-opacity" />
@@ -199,11 +297,8 @@ function AnomalyCard({ item }: { item: GalleryItem }) {
                 <span className="text-accent-neon text-xs font-mono mb-4 block">
                     &gt;&gt; {item.subtitle}
                 </span>
-                <p className="text-sm text-gray-400 mb-6 relative z-10">
-                    {item.description}
-                </p>
 
-                <button className="self-start px-6 py-2 border border-accent-neon text-accent-neon hover:bg-accent-neon hover:text-white transition-all duration-300 rounded font-mono text-xs uppercase tracking-widest shadow-[0_0_10px_rgba(77,77,255,0.2)] hover:shadow-[0_0_20px_rgba(77,77,255,0.6)]">
+                <button className="self-start px-6 py-2 border border-accent-neon text-accent-neon group-hover:bg-accent-neon group-hover:text-white transition-all duration-300 rounded font-mono text-xs uppercase tracking-widest shadow-[0_0_10px_rgba(77,77,255,0.2)] hover:shadow-[0_0_20px_rgba(77,77,255,0.6)]">
                     Analyze Signal
                 </button>
             </div>
@@ -211,10 +306,16 @@ function AnomalyCard({ item }: { item: GalleryItem }) {
     );
 }
 
-function ActionButton() {
+function ActionButton({ onDetails }: { onDetails?: () => void }) {
     return (
         <div className="flex gap-3">
-            <button className="flex-1 bg-accent/10 border border-accent text-accent hover:bg-accent hover:text-black px-4 py-2 rounded font-bold text-xs uppercase tracking-widest transition-all shadow-[0_0_10px_rgba(197,160,89,0.1)] hover:shadow-[0_0_20px_rgba(197,160,89,0.5)]">
+            <button
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onDetails?.();
+                }}
+                className="flex-1 bg-accent/10 border border-accent text-accent hover:bg-accent hover:text-black px-4 py-2 rounded font-bold text-xs uppercase tracking-widest transition-all shadow-[0_0_10px_rgba(197,160,89,0.1)] hover:shadow-[0_0_20px_rgba(197,160,89,0.5)]"
+            >
                 Details
             </button>
             <button className="flex-1 bg-white/5 border border-white/20 text-white hover:bg-white/10 px-4 py-2 rounded font-bold text-xs uppercase tracking-widest transition-all">

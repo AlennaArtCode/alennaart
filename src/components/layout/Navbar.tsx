@@ -27,10 +27,10 @@ export default function Navbar() {
                     <Link href="/universe" className="text-xs font-bold uppercase tracking-widest text-content-secondary hover:text-content-primary transition-colors">
                         Universe
                     </Link>
-                    <Link href="/portfolio" className="text-xs font-bold uppercase tracking-widest text-content-secondary hover:text-content-primary transition-colors">
+                    <Link href="/#collection" className="text-xs font-bold uppercase tracking-widest text-content-secondary hover:text-content-primary transition-colors">
                         Portfolio
                     </Link>
-                    <Link href="#" className="hidden lg:block text-xs font-bold uppercase tracking-widest text-content-secondary hover:text-content-primary transition-colors">
+                    <Link href="/#roadmap" className="hidden lg:block text-xs font-bold uppercase tracking-widest text-content-secondary hover:text-content-primary transition-colors">
                         Roadmap
                     </Link>
                 </div>

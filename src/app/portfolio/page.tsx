@@ -1,9 +1,9 @@
-import Portfolio from '@/components/art/Portfolio';
+import ShowcaseGrid from '@/components/art/ShowcaseGrid';
 
 export default function PortfolioPage() {
     return (
         <main>
-            <Portfolio />
+            <ShowcaseGrid />
         </main>
     );
 }

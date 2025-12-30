@@ -37,10 +37,14 @@ export default function Home() {
         <Hero />
 
         {/* 1.5. Portfolio Gallery (The Collection) */}
-        <GallerySection />
+        <div id="collection">
+          <GallerySection />
+        </div>
 
         {/* 2. Roadmap (The Journey) */}
-        <Roadmap />
+        <div id="roadmap">
+          <Roadmap />
+        </div>
 
         {/* 3. The Prime Product (Sales Block) */}
         <section className="py-32 px-6">

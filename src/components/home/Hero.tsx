@@ -77,6 +77,8 @@ export default function Hero() {
                                 className="object-contain drop-shadow-[0_0_50px_rgba(240,180,41,0.3)]"
                                 priority
                             />
+                            {/* Seamless Fade to Bottom - Hides the "cut" */}
+                            <div className="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-t from-[#050505] via-[#050505]/40 to-transparent z-10 pointer-events-none" />
                         </div>
                     </motion.div>
                     {/* Scroll Down Indicator (Circular Text) */}
