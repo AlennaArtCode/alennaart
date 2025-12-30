@@ -1,79 +1,120 @@
-import { useState } from 'react';
-import { galleryData, GalleryItem } from '@/data/galleryData';
+'use client';
+
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
-// Helper to get image path (using placeholder if file likely missing)
-const getImageUrl = (fileName: string) => {
-    // START: Temporary mapping for user uploaded images
-    if (fileName.includes('1 Sin Fondo')) return '/art/geometry_sample_1.png'; // Mapped ORIGO to sample 1
-    if (fileName.includes('7 Sin Fondo')) return '/art/geometry_sample_2.jpg'; // Mapped AEGIS to sample 2
-    if (fileName.includes('image_9867e8')) return '/art/lion-transparent.png'; // KAISER -> Lion
-    if (fileName.includes('Mask')) return '/art/lion-transparent.png'; // LEGATUS -> Lion (Fallback until Mask is uploaded)
-    // END: Temporary mapping
-
-    // Check if it's an absolute path (placeholder) already
-    if (fileName.startsWith('http')) return fileName;
-
-    // In production, this would point to the actual file in public/
-    // For now, we fallback to a stylish placeholder
-    return `https://placehold.co/600x800/100515/C5A059/png?text=${fileName.split('.')[0]}`;
+// Helper to keep types consistent
+type GalleryItem = {
+    id: string;
+    title: string;
+    category: string;
+    rarity: string;
+    image_url: string;
+    description?: string;
+    subtitle?: string; // Mapped from DB description or type
+    memory_log?: any; // kept for compatibility if we add complex json later
 };
 
 export default function GallerySection() {
     const [selectedItem, setSelectedItem] = useState<GalleryItem | null>(null);
+    const [items, setItems] = useState<GalleryItem[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    const trinity = galleryData.find(c => c.category === "THE TRINITY")?.items || [];
-    const geometry = galleryData.find(c => c.category === "SACRED GEOMETRY")?.items || [];
-    const anomalies = galleryData.find(c => c.category === "ANOMALIES")?.items || [];
+    useEffect(() => {
+        const fetchGallery = async () => {
+            const { data, error } = await supabase
+                .from('artworks')
+                .select('*')
+                .eq('is_public', true)
+                .order('created_at', { ascending: false });
+
+            if (data) {
+                // Map DB fields to UI expected structure
+                const mappedItems = data.map((d: any) => ({
+                    id: d.id,
+                    title: d.title,
+                    category: d.category,
+                    rarity: d.rarity || 'Common',
+                    image_url: d.image_url || d.image_path, // Fallback
+                    description: d.description,
+                    subtitle: d.description ? d.description.substring(0, 50) + "..." : "Artifact from the Void",
+                    memory_log: null // DB doesn't have this JSON yet, can be added later
+                }));
+                setItems(mappedItems);
+            }
+            setLoading(false);
+        };
+
+        fetchGallery();
+    }, []);
+
+    const trinity = items.filter(i => i.category === "Trinity");
+    // const geometry = items.filter(i => i.category === "Geometry"); 
+    // Show ALL non-trinity/non-anomalies as Geometry for now to ensure content appears
+    const geometry = items.filter(i => i.category === "Geometry" || i.category === "Fine Art" || i.category === "Concept");
+    const anomalies = items.filter(i => i.category === "Anomaly" || i.category === "Anomalies");
+
+    if (loading) return <div className="py-32 text-center text-white/20 font-mono animate-pulse">Scanning Archives...</div>;
 
     return (
         <section className="py-32 relative z-10 space-y-32">
 
             {/* SECCIÓN A: THE TRINITY */}
-            <div className="container mx-auto px-6">
-                <Header title="The Trinity" subtitle="The Architects of the Golden Web" />
-
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {trinity.map((item) => (
-                        <TrinityCard key={item.id} item={item} onSelect={() => setSelectedItem(item)} />
-                    ))}
-                </div>
-            </div>
-
-            {/* SECCIÓN B: SACRED GEOMETRY */}
-            <div className="container mx-auto px-6">
-                <Header title="Sacred Geometry" subtitle="The Imperial Guard" centered />
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {geometry.map((item) => (
-                        <GeometryCard key={item.id} item={item} onSelect={() => setSelectedItem(item)} />
-                    ))}
-                </div>
-            </div>
-
-            {/* SECCIÓN C: CHROMATIC ANOMALIES */}
-            <div className="relative border-t border-accent-neon/20 bg-black/40 backdrop-blur-sm py-24">
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-accent-neon to-transparent shadow-[0_0_20px_#4D4DFF]" />
-
+            {trinity.length > 0 && (
                 <div className="container mx-auto px-6">
-                    <div className="mb-16 text-center">
-                        <h2 className="text-4xl md:text-5xl font-bold font-serif text-transparent bg-clip-text bg-gradient-to-r from-accent-neon to-accent-ruby animate-pulse tracking-tighter">
-                            CHROMATIC ANOMALIES
-                        </h2>
-                        <p className="text-accent-neon/60 font-mono text-sm tracking-widest mt-2 uppercase">
-                            // System Warning: Foreign Frequency Detected
-                        </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto">
-                        {anomalies.map((item) => (
-                            <AnomalyCard key={item.id} item={item} onSelect={() => setSelectedItem(item)} />
+                    <Header title="The Trinity" subtitle="The Architects of the Golden Web" />
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        {trinity.map((item) => (
+                            <TrinityCard key={item.id} item={item} onSelect={() => setSelectedItem(item)} />
                         ))}
                     </div>
                 </div>
-            </div>
+            )}
+
+            {/* SECCIÓN B: SACRED GEOMETRY */}
+            {geometry.length > 0 && (
+                <div className="container mx-auto px-6">
+                    <Header title="Sacred Geometry" subtitle="The Imperial Guard" centered />
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {geometry.map((item) => (
+                            <GeometryCard key={item.id} item={item} onSelect={() => setSelectedItem(item)} />
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* SECCIÓN C: CHROMATIC ANOMALIES */}
+            {anomalies.length > 0 && (
+                <div className="relative border-t border-accent-neon/20 bg-black/40 backdrop-blur-sm py-24">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-accent-neon to-transparent shadow-[0_0_20px_#4D4DFF]" />
+                    <div className="container mx-auto px-6">
+                        <div className="mb-16 text-center">
+                            <h2 className="text-4xl md:text-5xl font-bold font-serif text-transparent bg-clip-text bg-gradient-to-r from-accent-neon to-accent-ruby animate-pulse tracking-tighter">
+                                CHROMATIC ANOMALIES
+                            </h2>
+                            <p className="text-accent-neon/60 font-mono text-sm tracking-widest mt-2 uppercase">
+                            // System Warning: Foreign Frequency Detected
+                            </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto">
+                            {anomalies.map((item) => (
+                                <AnomalyCard key={item.id} item={item} onSelect={() => setSelectedItem(item)} />
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* EMPTY STATE */}
+            {items.length === 0 && (
+                <div className="py-20 text-center text-white/30 font-serif">
+                    <p>The archives are currently silent.</p>
+                </div>
+            )}
 
             {/* FLOATING DETAIL MODAL */}
             <AnimatePresence>
@@ -129,7 +170,7 @@ function ArtDetailModal({ item, onClose }: { item: GalleryItem, onClose: () => v
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(197,160,89,0.25)_0%,transparent_60%)] opacity-100 blur-3xl" />
 
                     <Image
-                        src={getImageUrl(item.imageFileName)}
+                        src={item.image_url}
                         alt={item.title}
                         fill
                         className={`object-contain transition-transform duration-700 z-10 drop-shadow-[0_0_15px_rgba(0,0,0,0.5)] ${isExpanded ? 'p-4 scale-100' : 'scale-90 group-hover:scale-100'}`}
@@ -138,11 +179,6 @@ function ArtDetailModal({ item, onClose }: { item: GalleryItem, onClose: () => v
                     {/* Seamless Fade - Top and Bottom */}
                     <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-[#0A0510] to-transparent z-20 pointer-events-none" />
                     <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-[#0A0510] to-transparent z-20 pointer-events-none" />
-
-                    {/* Zoom Hint */}
-                    <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity z-30 bg-white/10 backdrop-blur text-white text-xs px-2 py-1 rounded border border-white/20">
-                        {isExpanded ? 'Minimize' : 'Click to Expand'}
-                    </div>
                 </div>
 
                 {/* INFO SECTION */}
@@ -167,7 +203,6 @@ function ArtDetailModal({ item, onClose }: { item: GalleryItem, onClose: () => v
                                     animate={{ pathLength: 1 }}
                                     transition={{ duration: 1.5, ease: "easeInOut", delay: 0.5 }}
                                 />
-                                {/* Optional: A shining particle at the tip */}
                                 <motion.circle
                                     r="2" fill="#C5A059"
                                     initial={{ cx: "0%", opacity: 0 }}
@@ -184,40 +219,9 @@ function ArtDetailModal({ item, onClose }: { item: GalleryItem, onClose: () => v
                             <div className="absolute top-0 right-0 p-2 opacity-20">
                                 <div className="border border-[#C5A059] px-2 text-[8px] font-mono text-[#C5A059] uppercase">Classified</div>
                             </div>
-
-                            {item.memory_log ? (
-                                <div className="space-y-4 font-mono text-sm leading-relaxed">
-                                    <div className="grid grid-cols-2 gap-4 pb-4 border-b border-[#C5A059]/20">
-                                        <div>
-                                            <span className="text-[#C5A059] text-[10px] uppercase block mb-1 opacity-70">Date</span>
-                                            <span className="text-white/80">{item.memory_log.date_recorded}</span>
-                                        </div>
-                                        <div>
-                                            <span className="text-[#C5A059] text-[10px] uppercase block mb-1 opacity-70">Origin State</span>
-                                            <span className="text-white/80">{item.memory_log.origin_state}</span>
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <span className="text-[#C5A059] text-[10px] uppercase block mb-1 opacity-70">Memory Fragment</span>
-                                        <p className="text-white/90 italic">"{item.memory_log.memory_fragment}"</p>
-                                    </div>
-
-                                    <div className="pt-2">
-                                        <span className="text-[#C5A059] text-[10px] uppercase block mb-1 opacity-70">Custodian Mission</span>
-                                        <p className="text-white/60">{item.memory_log.custodian_mission}</p>
-                                    </div>
-                                </div>
-                            ) : (
-                                // Fallback for items without specific memory log yet
-                                <div className="space-y-4 font-mono text-sm leading-relaxed opacity-60">
-                                    <div className="flex items-center gap-2 text-[#C5A059]">
-                                        <span className="animate-pulse">●</span>
-                                        <span>Accessing Memory Banks...</span>
-                                    </div>
-                                    <p className="text-white/60">{item.description}</p>
-                                </div>
-                            )}
+                            <div className="space-y-4 font-mono text-sm leading-relaxed opacity-80">
+                                <p className="text-white/80">{item.description || "Data corruption detected. Description unavailable."}</p>
+                            </div>
                         </div>
 
                         {/* Action Area */}
@@ -226,13 +230,6 @@ function ArtDetailModal({ item, onClose }: { item: GalleryItem, onClose: () => v
                                 Mint Artifact
                             </button>
                         </div>
-                    </div>
-
-                    {/* Actions - Removed "Details", Kept "Mint" */}
-                    <div className="pt-4">
-                        <button className="w-full bg-accent text-black font-bold py-4 rounded text-sm uppercase tracking-widest hover:bg-white transition-colors shadow-[0_0_15px_rgba(197,160,89,0.3)] hover:shadow-[0_0_30px_rgba(197,160,89,0.5)]">
-                            Mint Artifact
-                        </button>
                     </div>
                 </div>
             </motion.div>
@@ -266,24 +263,19 @@ function TrinityCard({ item, onSelect }: { item: GalleryItem, onSelect: () => vo
             onClick={onSelect}
         >
             <div className="absolute inset-0 bg-[#0A0510] z-0" />
-
-            {/* Spotlight Glow - Behind Image */}
             <div className="absolute inset-x-0 top-1/4 h-1/2 bg-accent/20 blur-[100px] opacity-60 rounded-full pointer-events-none mix-blend-screen" />
 
-            {/* Image with Zoom Effect */}
             <Image
-                src={getImageUrl(item.imageFileName)}
+                src={item.image_url}
                 alt={item.title}
                 fill
                 className="object-cover transition-transform duration-700 ease-out group-hover:scale-110 z-10"
                 priority={false}
             />
 
-            {/* Gradient Overlay - Lighter and Bottom focused */}
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-40 group-hover:opacity-60 transition-opacity z-20" />
             <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-black to-transparent opacity-80 z-20" />
 
-            {/* Content - Glass Panel within Card */}
             <div className="absolute bottom-0 left-0 w-full p-8 translate-y-4 group-hover:translate-y-0 transition-transform duration-500 z-30">
                 <div className="backdrop-blur-md bg-white/5 border border-white/10 p-6 rounded-xl border-l-4 border-l-accent">
                     <span className="text-accent text-xs font-mono uppercase tracking-widest block mb-2">
@@ -302,35 +294,70 @@ function TrinityCard({ item, onSelect }: { item: GalleryItem, onSelect: () => vo
 }
 
 function GeometryCard({ item, onSelect }: { item: GalleryItem, onSelect: () => void }) {
+    // Rarity Styling Logic
+    const isLegendary = item.rarity === 'Legendary';
+    const isEpic = item.rarity === 'Epic';
+    const isRare = item.rarity === 'Rare';
+
+    let borderColor = 'border-white/10';
+    let glowColor = 'hover:shadow-[0_0_20px_rgba(255,255,255,0.1)]';
+    let badgeStyle = 'bg-white/10 text-white/60';
+    let titleStyle = 'group-hover:text-white';
+
+    if (isLegendary) {
+        borderColor = 'border-[#FFD700]/50';
+        glowColor = 'shadow-[0_0_15px_rgba(255,215,0,0.1)] hover:shadow-[0_0_30px_rgba(255,215,0,0.4)]';
+        badgeStyle = 'bg-[#FFD700]/20 text-[#FFD700] border border-[#FFD700]/40';
+        titleStyle = 'group-hover:text-[#FFD700]';
+    } else if (isEpic) {
+        borderColor = 'border-purple-500/40';
+        glowColor = 'hover:shadow-[0_0_30px_rgba(168,85,247,0.3)]';
+        badgeStyle = 'bg-purple-500/20 text-purple-300 border border-purple-500/30';
+        titleStyle = 'group-hover:text-purple-300';
+    } else if (isRare) {
+        borderColor = 'border-blue-400/30';
+        glowColor = 'hover:shadow-[0_0_20px_rgba(96,165,250,0.2)]';
+        badgeStyle = 'bg-blue-400/10 text-blue-300 border border-blue-400/20';
+        titleStyle = 'group-hover:text-blue-300';
+    }
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             onClick={onSelect}
-            className="group relative bg-[#0F1116] border border-accent/20 hover:border-accent transition-colors duration-300 rounded-xl overflow-hidden shadow-lg hover:shadow-[0_0_20px_rgba(197,160,89,0.15)] cursor-pointer"
+            className={`
+                group relative bg-[#0F1116] border ${borderColor} 
+                transition-all duration-500 rounded-xl overflow-hidden cursor-pointer
+                ${glowColor}
+            `}
         >
+            {isLegendary && (
+                <div className="absolute inset-0 bg-gradient-to-t from-[#FFD700]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+            )}
+
             <div className="aspect-square relative overflow-hidden bg-black/50">
                 <Image
-                    src={getImageUrl(item.imageFileName)}
+                    src={item.image_url}
                     alt={item.title}
                     fill
-                    className="object-contain p-8 transition-transform duration-500 group-hover:scale-105 group-hover:rotate-1"
+                    className={`object-contain p-8 transition-transform duration-500 group-hover:scale-105 ${isLegendary ? 'drop-shadow-[0_0_10px_rgba(255,215,0,0.3)]' : ''}`}
                 />
             </div>
 
-            <div className="p-6 border-t border-white/5 bg-white/[0.02]">
+            <div className="p-6 border-t border-white/5 bg-white/[0.02] relative z-10">
                 <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-xl font-serif font-bold text-white group-hover:text-accent transition-colors">
+                    <h3 className={`text-xl font-serif font-bold text-white transition-colors ${titleStyle}`}>
                         {item.title}
                     </h3>
-                    <span className="bg-accent/10 text-accent text-[10px] px-2 py-1 rounded border border-accent/20 uppercase">
+                    <span className={`text-[10px] px-2 py-1 rounded uppercase tracking-wider font-bold ${badgeStyle}`}>
                         {item.rarity}
                     </span>
                 </div>
-                <p className="text-xs text-content-muted mb-3 font-mono">{item.subtitle}</p>
+                <p className="text-xs text-white/40 mb-3 font-mono truncate">{item.subtitle}</p>
                 <div className="flex justify-end opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span className="text-accent text-xs uppercase font-bold tracking-widest">View Analysis +</span>
+                    <span className={`text-xs uppercase font-bold tracking-widest ${isLegendary ? 'text-[#FFD700]' : 'text-accent'}`}>View Analysis +</span>
                 </div>
             </div>
         </motion.div>
@@ -344,12 +371,11 @@ function AnomalyCard({ item, onSelect }: { item: GalleryItem, onSelect: () => vo
             onClick={onSelect}
             className="relative flex flex-col md:flex-row bg-black/60 border border-accent-neon/30 rounded-xl overflow-hidden group cursor-pointer"
         >
-            {/* Glitch Effect Overlay on Hover */}
             <div className="absolute inset-0 bg-accent-neon/5 opacity-0 group-hover:opacity-100 pointer-events-none mix-blend-overlay transition-opacity" />
 
             <div className="relative w-full md:w-1/2 aspect-square md:aspect-auto">
                 <Image
-                    src={getImageUrl(item.imageFileName)}
+                    src={item.image_url}
                     alt={item.title}
                     fill
                     className="object-cover"
