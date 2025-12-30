@@ -1,13 +1,13 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 import Image from 'next/image';
 import SeasonPassCard from '@/components/commerce/SeasonPassCard';
 import WeeklyChapterCard from '@/components/commerce/WeeklyChapterCard';
 import QuestBoard from '@/components/engagement/QuestBoard';
 import RewardsTrack from '@/components/engagement/RewardsTrack';
 
-const floatingVariant = {
+const floatingVariant: Variants = {
     initial: { y: 0 },
     animate: {
         y: [-10, 10, -10],
@@ -19,7 +19,7 @@ const floatingVariant = {
     }
 };
 
-const delayedFloat = {
+const delayedFloat: Variants = {
     initial: { y: 0 },
     animate: {
         y: [10, -10, 10],
