@@ -21,7 +21,7 @@ export default function WalletGatedButton({
 
     const handleConnect = () => {
         // Logic to open wallet modal would go here
-        const mockConnect = confirm("Simular conexión de wallet?");
+        const mockConnect = confirm("Simulate wallet connection?");
         if (mockConnect) setIsConnected(true);
     };
 
@@ -42,7 +42,7 @@ export default function WalletGatedButton({
                 onClick={handleConnect}
                 className={`bg-accent hover:bg-accent-light text-primary-dark font-bold py-2 px-4 rounded transition-colors ${className}`}
             >
-                Conectar Billetera
+                Connect Wallet
             </button>
         );
     }

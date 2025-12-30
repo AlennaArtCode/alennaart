@@ -20,56 +20,56 @@ const showcaseData: ShowcaseItem[] = [
     {
         "id": "001",
         "name": "KAISER",
-        "subtitle": "El Soberano de la Red Áurea",
+        "subtitle": "The Sovereign of the Golden Web",
         "image": "image_9867e8.jpg",
         "rarity": "LEGENDARY",
         "rarityColor": "#FFD700",
-        "description": "El Arquitecto silencioso."
+        "description": "The Silent Architect."
     },
     {
         "id": "002",
         "name": "ORIGO",
-        "subtitle": "La Semilla Cero",
+        "subtitle": "The Zero Seed",
         "image": "1 Sin Fondo.jpg",
         "rarity": "LEGENDARY",
         "rarityColor": "#FFD700",
-        "description": "Donde nace la eternidad."
+        "description": "Where eternity is born."
     },
     {
         "id": "003",
         "name": "LEGATUS",
-        "subtitle": "Diplomacia Digital",
+        "subtitle": "Digital Diplomacy",
         "image": "Mask Sin fondo.jpg",
         "rarity": "LEGENDARY",
         "rarityColor": "#FFD700",
-        "description": "Testigo de polígonos áureos."
+        "description": "Witness of golden polygons."
     },
     {
         "id": "004",
         "name": "AEGIS",
-        "subtitle": "Baluarte Impenetrable",
+        "subtitle": "Impenetrable Bulwark",
         "image": "7 Sin Fondo.jpg",
         "rarity": "EPIC",
         "rarityColor": "#cd7f32",
-        "description": "Geometría de protección absoluta."
+        "description": "Geometry of absolute protection."
     },
     {
         "id": "005",
         "name": "CHRONOS",
-        "subtitle": "Motor de los Ciclos",
+        "subtitle": "Engine of Cycles",
         "image": "5 Sin Fondo.jpg",
         "rarity": "EPIC",
         "rarityColor": "#cd7f32",
-        "description": "Mecanismo estelar del tiempo."
+        "description": "Stellar mechanism of time."
     },
     {
         "id": "006",
         "name": "VOID WALKER",
-        "subtitle": "Intrusión Astral",
+        "subtitle": "Astral Intrusion",
         "image": "3 Sin Fondo.jpg",
         "rarity": "ANOMALY",
         "rarityColor": "#9d00ff",
-        "description": "Falla en la Matrix detectada."
+        "description": "Matrix Glitch Detected."
     }
 ];
 
@@ -136,8 +136,11 @@ function NftCard({ item }: { item: ShowcaseItem }) {
                     className="object-cover transition-transform duration-700 ease-out group-hover:scale-105 opacity-90 group-hover:opacity-100"
                 />
 
-                {/* Subtle gradient overlay to make text pop if needed, though text is in separate panel */}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent opacity-60" />
+                {/* Seamless Gradient Overlay - Hides bottom cuts */}
+                <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#0A0510] via-[#0A0510]/60 to-transparent" />
+
+                {/* General subtle overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/40 via-transparent to-transparent opacity-60" />
             </div>
 
             {/* 2. INFO PANEL (Bottom) - Glassmorphism */}

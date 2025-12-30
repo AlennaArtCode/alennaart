@@ -7,6 +7,7 @@ import SeasonPassCard from '@/components/commerce/SeasonPassCard';
 import InnerCircle from '@/components/home/InnerCircle';
 import WeeklyChapterCard from '@/components/commerce/WeeklyChapterCard';
 import ArtistBio from '@/components/home/ArtistBio';
+import Codex from '@/components/home/Codex';
 
 export default function Home() {
   return (
@@ -103,6 +104,9 @@ export default function Home() {
 
         {/* 6. Artist */}
         <ArtistBio />
+
+        {/* 7. The Codex (Manifesto) */}
+        <Codex />
 
       </div>
     </main>

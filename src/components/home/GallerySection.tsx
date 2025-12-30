@@ -9,6 +9,8 @@ const getImageUrl = (fileName: string) => {
     // START: Temporary mapping for user uploaded images
     if (fileName.includes('1 Sin Fondo')) return '/art/geometry_sample_1.png'; // Mapped ORIGO to sample 1
     if (fileName.includes('7 Sin Fondo')) return '/art/geometry_sample_2.jpg'; // Mapped AEGIS to sample 2
+    if (fileName.includes('image_9867e8')) return '/art/lion-transparent.png'; // KAISER -> Lion
+    if (fileName.includes('Mask')) return '/art/lion-transparent.png'; // LEGATUS -> Lion (Fallback until Mask is uploaded)
     // END: Temporary mapping
 
     // Check if it's an absolute path (placeholder) already
@@ -120,7 +122,7 @@ function ArtDetailModal({ item, onClose }: { item: GalleryItem, onClose: () => v
 
                 {/* IMAGE SECTION */}
                 <div
-                    className={`relative cursor-zoom-in group flex items-center justify-center overflow-hidden ${isExpanded ? 'w-full md:w-2/3 h-[50vh] md:h-full bg-black/40' : 'w-full h-80'}`}
+                    className={`relative cursor-zoom-in group flex items-center justify-center overflow-hidden ${isExpanded ? 'w-full md:w-2/3 h-[30vh] md:h-full bg-black/40' : 'w-full h-80'}`}
                     onClick={() => setIsExpanded(!isExpanded)}
                 >
                     {/* Spotlight Effect - Behind Image - Softer and Larger */}
@@ -133,7 +135,8 @@ function ArtDetailModal({ item, onClose }: { item: GalleryItem, onClose: () => v
                         className={`object-contain transition-transform duration-700 z-10 drop-shadow-[0_0_15px_rgba(0,0,0,0.5)] ${isExpanded ? 'p-4 scale-100' : 'scale-90 group-hover:scale-100'}`}
                     />
 
-                    {/* Seamless Fade to Bottom - Hides the "cut" */}
+                    {/* Seamless Fade - Top and Bottom */}
+                    <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-[#0A0510] to-transparent z-20 pointer-events-none" />
                     <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-[#0A0510] to-transparent z-20 pointer-events-none" />
 
                     {/* Zoom Hint */}
@@ -143,25 +146,87 @@ function ArtDetailModal({ item, onClose }: { item: GalleryItem, onClose: () => v
                 </div>
 
                 {/* INFO SECTION */}
-                <div className={`relative p-8 space-y-6 flex flex-col justify-center ${isExpanded ? 'w-full md:w-1/3 border-t md:border-t-0 md:border-l border-white/10' : ''}`}>
+                <div className={`relative p-6 md:p-8 space-y-6 flex flex-col overflow-y-auto scrollbar-thin scrollbar-thumb-accent/20 scrollbar-track-transparent ${isExpanded ? 'w-full md:w-1/3 border-t md:border-t-0 md:border-l border-white/10 h-[calc(100%-30vh)] md:h-full' : 'justify-center'}`}>
 
-                    <div className="space-y-2">
-                        <span className="text-accent text-xs font-mono uppercase tracking-[0.2em] block">
-                            {item.rarity}
-                        </span>
-                        <h2 className="text-4xl font-serif font-bold text-white drop-shadow-lg">
-                            {item.title}
-                        </h2>
-                        <h3 className="text-white/60 font-light text-lg font-serif italic">
-                            {item.subtitle}
-                        </h3>
+                    <div className="space-y-6 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+                        <div>
+                            <h3 className="text-xs uppercase tracking-[0.2em] text-[#C5A059] mb-2 font-mono">Archive // 024-X</h3>
+                            <h2 className="text-4xl md:text-5xl font-serif text-white leading-none">{item.title}</h2>
+                            <p className="text-lg text-white/50 font-serif italic mt-2">{item.subtitle}</p>
+                        </div>
+
+                        {/* GOLDEN THREAD ANIMATION - Module 3 */}
+                        <div className="relative py-4">
+                            <svg width="100%" height="2" className="overflow-visible">
+                                <motion.line
+                                    x1="0" y1="1" x2="100%" y2="1"
+                                    stroke="#C5A059"
+                                    strokeWidth="1"
+                                    strokeOpacity="0.5"
+                                    initial={{ pathLength: 0 }}
+                                    animate={{ pathLength: 1 }}
+                                    transition={{ duration: 1.5, ease: "easeInOut", delay: 0.5 }}
+                                />
+                                {/* Optional: A shining particle at the tip */}
+                                <motion.circle
+                                    r="2" fill="#C5A059"
+                                    initial={{ cx: "0%", opacity: 0 }}
+                                    animate={{ cx: "100%", opacity: [0, 1, 0] }}
+                                    transition={{ duration: 1.5, ease: "easeInOut", delay: 0.5 }}
+                                    cy="1"
+                                />
+                            </svg>
+                        </div>
+
+                        {/* MEMORY LOG / BITÁCORA */}
+                        <div className="border border-[#C5A059]/30 bg-[#0A0510]/50 p-6 rounded-sm relative overflow-hidden group">
+                            {/* Decorative "Confidential" elements */}
+                            <div className="absolute top-0 right-0 p-2 opacity-20">
+                                <div className="border border-[#C5A059] px-2 text-[8px] font-mono text-[#C5A059] uppercase">Classified</div>
+                            </div>
+
+                            {item.memory_log ? (
+                                <div className="space-y-4 font-mono text-sm leading-relaxed">
+                                    <div className="grid grid-cols-2 gap-4 pb-4 border-b border-[#C5A059]/20">
+                                        <div>
+                                            <span className="text-[#C5A059] text-[10px] uppercase block mb-1 opacity-70">Date</span>
+                                            <span className="text-white/80">{item.memory_log.date_recorded}</span>
+                                        </div>
+                                        <div>
+                                            <span className="text-[#C5A059] text-[10px] uppercase block mb-1 opacity-70">Origin State</span>
+                                            <span className="text-white/80">{item.memory_log.origin_state}</span>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <span className="text-[#C5A059] text-[10px] uppercase block mb-1 opacity-70">Memory Fragment</span>
+                                        <p className="text-white/90 italic">"{item.memory_log.memory_fragment}"</p>
+                                    </div>
+
+                                    <div className="pt-2">
+                                        <span className="text-[#C5A059] text-[10px] uppercase block mb-1 opacity-70">Custodian Mission</span>
+                                        <p className="text-white/60">{item.memory_log.custodian_mission}</p>
+                                    </div>
+                                </div>
+                            ) : (
+                                // Fallback for items without specific memory log yet
+                                <div className="space-y-4 font-mono text-sm leading-relaxed opacity-60">
+                                    <div className="flex items-center gap-2 text-[#C5A059]">
+                                        <span className="animate-pulse">●</span>
+                                        <span>Accessing Memory Banks...</span>
+                                    </div>
+                                    <p className="text-white/60">{item.description}</p>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Action Area */}
+                        <div className="pt-4 flex items-center gap-4">
+                            <button className="flex-1 bg-gradient-to-r from-accent to-[#8a6e35] text-black font-bold py-4 px-8 rounded-sm hover:scale-[1.02] transition-transform uppercase tracking-widest text-sm shadow-[0_0_20px_rgba(197,160,89,0.3)]">
+                                Mint Artifact
+                            </button>
+                        </div>
                     </div>
-
-                    <div className="h-px w-full bg-gradient-to-r from-transparent via-accent/50 to-transparent" />
-
-                    <p className="text-content-secondary leading-relaxed font-light text-sm">
-                        {item.description}
-                    </p>
 
                     {/* Actions - Removed "Details", Kept "Mint" */}
                     <div className="pt-4">
@@ -200,22 +265,26 @@ function TrinityCard({ item, onSelect }: { item: GalleryItem, onSelect: () => vo
             className="group relative h-[600px] overflow-hidden rounded-2xl cursor-pointer"
             onClick={onSelect}
         >
-            <div className="absolute inset-0 bg-black/20 z-0" />
+            <div className="absolute inset-0 bg-[#0A0510] z-0" />
+
+            {/* Spotlight Glow - Behind Image */}
+            <div className="absolute inset-x-0 top-1/4 h-1/2 bg-accent/20 blur-[100px] opacity-60 rounded-full pointer-events-none mix-blend-screen" />
 
             {/* Image with Zoom Effect */}
             <Image
                 src={getImageUrl(item.imageFileName)}
                 alt={item.title}
                 fill
-                className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                className="object-cover transition-transform duration-700 ease-out group-hover:scale-110 z-10"
                 priority={false}
             />
 
-            {/* Gradient Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
+            {/* Gradient Overlay - Lighter and Bottom focused */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-40 group-hover:opacity-60 transition-opacity z-20" />
+            <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-black to-transparent opacity-80 z-20" />
 
             {/* Content - Glass Panel within Card */}
-            <div className="absolute bottom-0 left-0 w-full p-8 translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+            <div className="absolute bottom-0 left-0 w-full p-8 translate-y-4 group-hover:translate-y-0 transition-transform duration-500 z-30">
                 <div className="backdrop-blur-md bg-white/5 border border-white/10 p-6 rounded-xl border-l-4 border-l-accent">
                     <span className="text-accent text-xs font-mono uppercase tracking-widest block mb-2">
                         {item.rarity}
