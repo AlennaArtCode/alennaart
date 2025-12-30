@@ -2,6 +2,7 @@
 
 import CountdownTimer from '@/components/ui/CountdownTimer';
 import WalletGatedButton from '@/components/auth/WalletGatedButton';
+import Image from 'next/image';
 
 interface WeeklyChapterProps {
     chapterNumber: number;
@@ -22,7 +23,7 @@ export default function WeeklyChapterCard({ chapterNumber, title, image, dropDat
     return (
         <div className="card-premium flex flex-col md:flex-row overflow-hidden">
             <div className="relative md:w-1/2 h-64 md:h-auto">
-                <img src={image} alt={title} className="absolute inset-0 w-full h-full object-cover" />
+                <Image src={image} alt={title} fill className="object-cover" />
                 <div className="absolute top-4 left-4 bg-primary-dark/80 backdrop-blur text-content-primary text-xs px-2 py-1 rounded">
                     Week {chapterNumber}
                 </div>

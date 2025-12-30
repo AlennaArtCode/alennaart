@@ -22,7 +22,7 @@ const INITIAL_QUESTS: Quest[] = [
 ];
 
 export default function QuestBoard() {
-    const [quests, setQuests] = useState(INITIAL_QUESTS);
+    const [quests] = useState(INITIAL_QUESTS);
 
     const getDifficultyColor = (diff: Quest['difficulty']) => {
         switch (diff) {

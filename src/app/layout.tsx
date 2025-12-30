@@ -3,7 +3,7 @@ import { Outfit, Cormorant_Garamond, Pinyon_Script } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/context/Providers";
 import Navbar from "@/components/layout/Navbar";
-import MouseLight from "@/components/ui/MouseLight";
+import CustomCursor from "@/components/ui/CustomCursor";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -40,7 +40,7 @@ export default function RootLayout({
       >
         <div className="noise-overlay" />
         <Providers>
-          <MouseLight />
+          <CustomCursor />
           <Navbar />
           {children}
         </Providers>

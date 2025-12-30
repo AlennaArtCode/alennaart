@@ -1,7 +1,8 @@
 'use client';
 
 import Hero from '@/components/home/Hero';
-import SeasonMechanics from '@/components/home/SeasonMechanics';
+import Roadmap from '@/components/home/Roadmap';
+import GallerySection from '@/components/home/GallerySection';
 import SeasonPassCard from '@/components/commerce/SeasonPassCard';
 import InnerCircle from '@/components/home/InnerCircle';
 import WeeklyChapterCard from '@/components/commerce/WeeklyChapterCard';
@@ -11,17 +12,21 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-primary text-content-primary selection:bg-accent selection:text-primary-dark relative">
 
-      {/* GLOBAL FIXED BACKGROUND - The Canvas */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        {/* Base Gradient */}
-        <div className="absolute inset-0 bg-primary-dark" />
-        <div className="absolute inset-0 bg-gradient-to-b from-accent-mystic/10 via-primary to-primary opacity-80" />
+      {/* GLOBAL FIXED BACKGROUND - The Aurora */}
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        {/* Deep Space Base */}
+        <div className="absolute inset-0 bg-[#0A0510]" />
 
-        {/* Digital Starfield - Continuous */}
-        <div className="absolute inset-0 starfield opacity-40" />
+        {/* Floating Orbs - The "Auroras" */}
+        <div className="orb-glow w-[800px] h-[800px] bg-accent-mystic/20 top-[-20%] left-[-10%]" />
+        <div className="orb-glow w-[600px] h-[600px] bg-accent-neon/10 bottom-[-10%] right-[-10%] animate-float-delayed" />
+        <div className="orb-glow w-[500px] h-[500px] bg-accent/10 top-[40%] left-[30%]" style={{ animationDuration: '25s' }} />
 
-        {/* Da Vinci Grid - Lilac Tint - Continuous */}
-        <div className="absolute inset-0 davinci-grid opacity-30 mix-blend-screen" />
+        {/* Ambient Overlay for depth */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/50 to-primary" />
+
+        {/* Optional: Subtle Mesh Texture */}
+        <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }} />
       </div>
 
       {/* CONTENT LAYERS */}
@@ -29,10 +34,13 @@ export default function Home() {
 
         {/* 1. Hero Section (The Hook) */}
         {/* Passed prop for transparent background if needed, but Hero itself handles layout */}
-        <Hero isFluid={true} />
+        <Hero />
 
-        {/* 2. Mechanics (The Education) */}
-        <SeasonMechanics />
+        {/* 1.5. Portfolio Gallery (The Collection) */}
+        <GallerySection />
+
+        {/* 2. Roadmap (The Journey) */}
+        <Roadmap />
 
         {/* 3. The Prime Product (Sales Block) */}
         <section className="py-32 px-6">
@@ -74,13 +82,13 @@ export default function Home() {
                 chapterNumber={2}
                 title="Digital Echoes"
                 image="https://placehold.co/800x600/151827/E0B0FF/png?text=Digital+Echoes"
-                dropDate={new Date(Date.now() + 86400000).toISOString()}
+                dropDate="2025-01-20T12:00:00.000Z"
               />
               <WeeklyChapterCard
                 chapterNumber={1}
                 title="Origin of the Void"
                 image="https://placehold.co/800x600/151827/E5C09D/png?text=Origin+of+the+Void"
-                dropDate={new Date(Date.now() - 86400000 * 5).toISOString()}
+                dropDate="2025-01-05T12:00:00.000Z"
               />
             </div>
           </div>

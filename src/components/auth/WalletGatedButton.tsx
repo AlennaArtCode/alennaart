@@ -14,7 +14,7 @@ export default function WalletGatedButton({
     children,
     onClick,
     className = "",
-    requiredPolicyId
+    // requiredPolicyId
 }: WalletGatedButtonProps) {
     // Mock wallet state for now
     const [isConnected, setIsConnected] = useState(false);

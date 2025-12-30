@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { defaultPortfolioItems, PortfolioItem } from '@/data/portfolioData';
+import Image from 'next/image';
 
 type FilterType = 'All' | 'NFT Drop' | 'Logos' | 'Fine Art' | 'Concept';
 
@@ -26,8 +27,8 @@ export default function Portfolio() {
                                 key={cat}
                                 onClick={() => setFilter(cat)}
                                 className={`px-4 py-2 rounded-full text-sm transition-colors ${filter === cat
-                                        ? 'bg-white text-black font-medium'
-                                        : 'bg-zinc-900 text-zinc-400 hover:text-white'
+                                    ? 'bg-white text-black font-medium'
+                                    : 'bg-zinc-900 text-zinc-400 hover:text-white'
                                     }`}
                             >
                                 {cat}
@@ -69,10 +70,11 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
             className={`group relative overflow-hidden rounded-xl bg-zinc-900 border border-zinc-800 ${sizeClasses[item.size]}`}
         >
             {item.image ? (
-                <img
+                <Image
                     src={item.image}
                     alt={item.title}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
                 />
             ) : (
                 <div
