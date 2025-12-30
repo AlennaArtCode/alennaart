@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ALENNA.ART | Exemplaria
 
-## Getting Started
+> "Decipher the Glitch. Ascend the Hierarchy."
 
-First, run the development server:
+**Exemplaria** es una experiencia web inmersiva para la colección de arte NFT de Alenna. Fusiona estética de alta gama (High-Fashion, Misticismo, Cyberpunk) con tecnología web moderna (Next.js, Tailwind, Framer Motion).
+
+## 🌌 The Vision
+
+La plataforma está diseñada no solo como una galería, sino como un **universo interactivo** donde los coleccionistas (o "iniciados") pueden:
+- Explorar obras de arte jerárquicas: *The Trinity*, *Sacred Geometry*, *Chromatic Anomalies*.
+- Ascender en un sistema de **Season Pass** y Misiones.
+- Experimentar una interfaz "viva" que reacciona a la interacción.
+
+## 🛠 Tech Stack
+
+- **Framework**: Next.js 15 (App Router)
+- **Styling**: Tailwind CSS + Custom CSS Modules (Glassmorphism, Lights)
+- **Animation**: Framer Motion (Complex physics, scroll, hover effects)
+- **Typography**: Outfit (Sans), Cormorant Garamond (Serif), Pinyon Script (Handwriting)
+- **Icons**: Lucide React
+- **Mouse Experience**: Custom "Divine Architect" Cursor (Physics-based)
+
+## ✨ Key Features
+
+### 1. The Divine Architect Cursor
+Un puntero personalizado exclusivo diseñado para la precisión y la elegancia:
+- **Estado Base**: Una cruz dorada fina (`+`) para navegación precisa.
+- **Estado Hover**: Se expande y emite un "Aura Dorada" (`mix-blend-screen`), transformándose sutilmente sin perder su eje.
+- **Tecnología**: Implementado con físicas de resorte (`spring physics`) para un movimiento fluido y orgánico.
+
+### 2. The Aurora Background
+Un fondo vivo generado paramétricamente con orbes de luz que flotan y se fusionan, creando una atmósfera de "profundidad infinita" y lujo oscuro.
+
+### 3. Hierarchical Gallery
+Sistema de visualización de arte que categoriza las obras por rareza y temática, utilizando tarjetas de cristal (Glassmorphism) que reaccionan al pasar el mouse.
+
+## 🚀 Getting Started
 
 ```bash
+# Install dependencies
+npm install
+
+# Run development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Visit http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+© 2024 Alenna Art. All Rights Reserved.
