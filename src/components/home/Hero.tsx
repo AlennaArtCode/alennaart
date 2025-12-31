@@ -33,10 +33,7 @@ export default function Hero() {
 
                 {/* LEFT: TEXT CONTENT */}
                 <div className="flex-1 text-center md:text-left space-y-8 z-20 order-2 md:order-1">
-                    <motion.div
-                        initial={{ opacity: 1, y: 0 }}
-                        className="opacity-100"
-                    >
+                    <div className="opacity-100 flex flex-col items-center md:items-start">
                         <p className="text-xl md:text-2xl text-accent font-serif italic mb-4">
                             "Pain has no form. <br /> But the cure is geometric."
                         </p>
@@ -67,7 +64,7 @@ export default function Hero() {
                             </Link>
                             <span className="text-sm uppercase tracking-widest text-white/60 font-bold">Start Experience</span>
                         </div>
-                    </motion.div>
+                    </div>
                 </div>
 
                 {/* RIGHT: THE LION (HERO IMAGE) */}
