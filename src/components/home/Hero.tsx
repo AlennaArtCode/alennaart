@@ -28,16 +28,14 @@ export default function Hero() {
 
             {/* MAIN CONTENT - VISIBLE IMMEDIATELY */}
             <motion.div
-                style={{ opacity: opacityHero }}
                 className="relative z-10 w-full max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-center md:justify-between px-6 pt-20"
             >
 
                 {/* LEFT: TEXT CONTENT */}
                 <div className="flex-1 text-center md:text-left space-y-8 z-20 order-2 md:order-1">
                     <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 1, delay: 0.2 }}
+                        initial={{ opacity: 1, y: 0 }}
+                        className="opacity-100"
                     >
                         <p className="text-xl md:text-2xl text-accent font-serif italic mb-4">
                             "Pain has no form. <br /> But the cure is geometric."
