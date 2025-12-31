@@ -254,16 +254,29 @@ function Header({ title, subtitle, centered = false }: { title: string, subtitle
 }
 
 function TrinityCard({ item, onSelect }: { item: GalleryItem, onSelect: () => void }) {
+    const isLegendary = item.rarity === 'Legendary';
+
+    // Trinity-specific styling
+    const containerClasses = isLegendary
+        ? "border-[1px] border-[#FFD700]/40 shadow-[0_0_30px_rgba(255,215,0,0.15)]"
+        : "border-transparent shadow-premium";
+
+    const glowColor = isLegendary
+        ? "bg-[#FFD700]/20 mix-blend-screen"
+        : "bg-accent/20 mix-blend-screen";
+
     return (
         <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            className="group relative h-[600px] overflow-hidden rounded-2xl cursor-pointer"
+            className={`group relative h-[600px] overflow-hidden rounded-2xl cursor-pointer transition-all duration-500 hover:shadow-[0_20px_40px_rgba(0,0,0,0.8)] ${containerClasses}`}
             onClick={onSelect}
         >
             <div className="absolute inset-0 bg-[#0A0510] z-0" />
-            <div className="absolute inset-x-0 top-1/4 h-1/2 bg-accent/20 blur-[100px] opacity-60 rounded-full pointer-events-none mix-blend-screen" />
+
+            {/* Dynamic Glow Blob */}
+            <div className={`absolute inset-x-0 top-1/4 h-1/2 blur-[100px] opacity-60 rounded-full pointer-events-none ${glowColor}`} />
 
             <Image
                 src={item.image_url}
@@ -273,19 +286,26 @@ function TrinityCard({ item, onSelect }: { item: GalleryItem, onSelect: () => vo
                 priority={false}
             />
 
+            {/* Legendary Shine Overlay */}
+            {isLegendary && (
+                <div className="absolute inset-0 bg-gradient-to-tr from-[#FFD700]/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 z-20 pointer-events-none" />
+            )}
+
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-40 group-hover:opacity-60 transition-opacity z-20" />
             <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-black to-transparent opacity-80 z-20" />
 
             <div className="absolute bottom-0 left-0 w-full p-8 translate-y-4 group-hover:translate-y-0 transition-transform duration-500 z-30">
-                <div className="backdrop-blur-md bg-white/5 border border-white/10 p-6 rounded-xl border-l-4 border-l-accent">
-                    <span className="text-accent text-xs font-mono uppercase tracking-widest block mb-2">
-                        {item.rarity}
+                <div className={`backdrop-blur-md bg-white/5 border border-white/10 p-6 rounded-xl border-l-4 ${isLegendary ? 'border-l-[#FFD700]' : 'border-l-accent'}`}>
+                    <span className={`text-xs font-mono uppercase tracking-widest block mb-2 ${isLegendary ? 'text-[#FFD700] drop-shadow-[0_0_5px_rgba(255,215,0,0.5)]' : 'text-accent'}`}>
+                        {item.rarity} // {item.category}
                     </span>
-                    <h3 className="text-3xl font-serif font-bold text-white mb-2">{item.title}</h3>
+                    <h3 className={`text-3xl font-serif font-bold text-white mb-2 ${isLegendary ? 'text-transparent bg-clip-text bg-gradient-to-r from-[#FFD700] to-white' : ''}`}>
+                        {item.title}
+                    </h3>
                     <p className="text-white/80 font-light text-sm mb-4">{item.subtitle}</p>
 
                     <div className="h-0 overflow-hidden group-hover:h-auto transition-all duration-500 opacity-0 group-hover:opacity-100">
-                        <ActionButton onDetails={onSelect} />
+                        <ActionButton onDetails={onSelect} isLegendary={isLegendary} />
                     </div>
                 </div>
             </div>
@@ -401,7 +421,12 @@ function AnomalyCard({ item, onSelect }: { item: GalleryItem, onSelect: () => vo
     );
 }
 
-function ActionButton({ onDetails }: { onDetails?: () => void }) {
+function ActionButton({ onDetails, isLegendary = false }: { onDetails?: () => void, isLegendary?: boolean }) {
+
+    const btnStyle = isLegendary
+        ? "bg-[#FFD700]/10 border-[#FFD700]/50 text-[#FFD700] hover:bg-[#FFD700] hover:text-black shadow-[0_0_15px_rgba(255,215,0,0.2)]"
+        : "bg-accent/10 border-accent text-accent hover:bg-accent hover:text-black shadow-[0_0_10px_rgba(197,160,89,0.1)]";
+
     return (
         <div className="flex gap-3">
             <button
@@ -409,11 +434,11 @@ function ActionButton({ onDetails }: { onDetails?: () => void }) {
                     e.stopPropagation();
                     onDetails?.();
                 }}
-                className="flex-1 bg-accent/10 border border-accent text-accent hover:bg-accent hover:text-black px-4 py-2 rounded font-bold text-xs uppercase tracking-widest transition-all shadow-[0_0_10px_rgba(197,160,89,0.1)] hover:shadow-[0_0_20px_rgba(197,160,89,0.5)]"
+                className={`flex-1 border px-4 py-2 rounded font-bold text-xs uppercase tracking-widest transition-all hover:scale-105 ${btnStyle}`}
             >
                 Details
             </button>
-            <button className="flex-1 bg-white/5 border border-white/20 text-white hover:bg-white/10 px-4 py-2 rounded font-bold text-xs uppercase tracking-widest transition-all">
+            <button className="flex-1 bg-white/5 border border-white/20 text-white hover:bg-white/10 px-4 py-2 rounded font-bold text-xs uppercase tracking-widest transition-all hover:scale-105">
                 Mint
             </button>
         </div>
