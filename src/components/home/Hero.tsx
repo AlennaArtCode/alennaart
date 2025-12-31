@@ -68,11 +68,7 @@ export default function Hero() {
                 </div>
 
                 {/* RIGHT: THE LION (HERO IMAGE) */}
-                <motion.div
-                    style={{ y: yLion }}
-                    initial={{ opacity: 0, scale: 0.9, rotate: -2 }}
-                    animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                    transition={{ duration: 1.2, ease: "easeOut" }}
+                <div
                     className="flex-1 relative w-full h-[50vh] md:h-[80vh] flex items-center justify-center order-1 md:order-2"
                 >
                     <div className="relative w-[350px] h-[350px] md:w-[650px] md:h-[650px]">
@@ -86,21 +82,21 @@ export default function Hero() {
                         {/* Seamless Fade at bottom */}
                         <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-[#050505] to-transparent z-10" />
                     </div>
-                </motion.div>
-
             </motion.div>
 
-            {/* SCROLL INDICATOR */}
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 2, duration: 1 }}
-                onClick={() => document.getElementById('collection')?.scrollIntoView({ behavior: 'smooth' })}
-                className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/20 text-[10px] tracking-[0.4em] font-sans animate-bounce cursor-pointer hover:text-accent transition-colors"
-            >
-                SCROLL TO EXPLORE
-            </motion.div>
+        </motion.div>
 
-        </section>
+            {/* SCROLL INDICATOR */ }
+    <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 2, duration: 1 }}
+        onClick={() => document.getElementById('collection')?.scrollIntoView({ behavior: 'smooth' })}
+        className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/20 text-[10px] tracking-[0.4em] font-sans animate-bounce cursor-pointer hover:text-accent transition-colors"
+    >
+        SCROLL TO EXPLORE
+    </motion.div>
+
+        </section >
     );
 }
