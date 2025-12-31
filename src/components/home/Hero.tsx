@@ -82,20 +82,20 @@ export default function Hero() {
                         {/* Seamless Fade at bottom */}
                         <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-[#050505] to-transparent z-10" />
                     </div>
+                </div>
+
             </motion.div>
 
-        </motion.div>
-
-            {/* SCROLL INDICATOR */ }
-    <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 2, duration: 1 }}
-        onClick={() => document.getElementById('collection')?.scrollIntoView({ behavior: 'smooth' })}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/20 text-[10px] tracking-[0.4em] font-sans animate-bounce cursor-pointer hover:text-accent transition-colors"
-    >
-        SCROLL TO EXPLORE
-    </motion.div>
+            {/* SCROLL INDICATOR */}
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 2, duration: 1 }}
+                onClick={() => document.getElementById('collection')?.scrollIntoView({ behavior: 'smooth' })}
+                className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/20 text-[10px] tracking-[0.4em] font-sans animate-bounce cursor-pointer hover:text-accent transition-colors"
+            >
+                SCROLL TO EXPLORE
+            </motion.div>
 
         </section >
     );
