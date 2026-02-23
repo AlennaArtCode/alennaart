@@ -2,10 +2,16 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import WalletGatedButton from '@/components/auth/WalletGatedButton';
 
 export default function Navbar() {
     const [lang, setLang] = useState<'EN' | 'ES'>('EN');
+    const pathname = usePathname();
+
+    if (pathname === '/executive') {
+        return null;
+    }
 
     return (
         <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-primary/60 border-b border-white/5 supports-[backdrop-filter]:bg-primary/30">
