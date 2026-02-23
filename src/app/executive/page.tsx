@@ -12,7 +12,6 @@ export default function ExecutivePortfolio() {
                 src="/executive/index.html"
                 className="w-full h-full border-none m-0 p-0"
                 title="Executive Portfolio"
-                sandbox="allow-scripts allow-same-origin allow-modals allow-downloads"
             />
         </main>
     );
