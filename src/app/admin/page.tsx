@@ -218,7 +218,7 @@ export default function AdminPanel() {
                     <button
                         onClick={() => {
                             setActiveTab('music');
-                            if (!editingId) setNewItem({ ...newItem, category: 'Music', image_url: '' });
+                            if (!editingId) setNewItem({ ...newItem, category: 'Music', rarity: 'Experimental', image_url: '' });
                         }}
                         className={`text-sm uppercase tracking-wider px-4 py-2 rounded transition-colors ${activeTab === 'music' ? 'bg-accent/20 text-accent' : 'text-white/40 hover:text-accent'}`}
                     >
@@ -425,17 +425,25 @@ export default function AdminPanel() {
                                     {/* Category Select for Media */}
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className="text-[10px] uppercase tracking-widest text-white/40 mb-1 block">Rarity</label>
+                                            <label className="text-[10px] uppercase tracking-widest text-white/40 mb-1 block">Genre / Classification</label>
                                             <select
-                                                value={newItem.rarity || 'Common'}
+                                                value={newItem.rarity || 'Experimental'}
                                                 onChange={e => setNewItem({ ...newItem, rarity: e.target.value })}
                                                 className="w-full bg-[#111] border border-white/10 rounded px-2 py-2 text-sm focus:border-accent outline-none"
                                             >
-                                                <option value="Common">Common</option>
-                                                <option value="Rare">Rare</option>
-                                                <option value="Epic">Epic</option>
-                                                <option value="Legendary">Legendary</option>
-                                                <option value="Anomaly">Anomaly</option>
+                                                <optgroup label="Audio Genres">
+                                                    <option value="Experimental">Experimental</option>
+                                                    <option value="Baladas">Baladas</option>
+                                                    <option value="Rock">Rock</option>
+                                                    <option value="Techno">Techno</option>
+                                                    <option value="Ambient">Ambient</option>
+                                                </optgroup>
+                                                <optgroup label="Video Classifications">
+                                                    <option value="Cinematic">Cinematic</option>
+                                                    <option value="Live Performance">Live Performance</option>
+                                                    <option value="Visualizer">Visualizer</option>
+                                                    <option value="Legendary">Legendary</option>
+                                                </optgroup>
                                             </select>
                                         </div>
                                         <div>

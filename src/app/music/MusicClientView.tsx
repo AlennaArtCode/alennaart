@@ -10,6 +10,7 @@ type MusicItem = {
     title: string;
     description: string;
     image_url: string; // Used for audio file OR youtube url here
+    rarity: string;    // Used for Genre
     created_at: string;
 };
 
@@ -136,6 +137,11 @@ export default function MusicClientView() {
                                                             ></iframe>
                                                         </div>
                                                         <div className="p-6">
+                                                            <div className="mb-2">
+                                                                <span className="text-[10px] font-mono uppercase tracking-widest text-accent border border-accent/30 bg-accent/5 px-2 py-0.5 rounded-full">
+                                                                    {video.rarity}
+                                                                </span>
+                                                            </div>
                                                             <h3 className="font-serif text-xl font-bold text-white group-hover:text-accent transition-colors">{video.title}</h3>
                                                             {video.description && <p className="text-sm text-content-muted mt-2 font-mono leading-relaxed truncate">{video.description}</p>}
                                                         </div>
@@ -172,6 +178,11 @@ export default function MusicClientView() {
 
                                                             {/* Track Info */}
                                                             <div className="flex-1 text-center md:text-left">
+                                                                <div className="flex items-center justify-center md:justify-start mb-1.5">
+                                                                    <span className="text-[9px] font-mono uppercase tracking-widest text-accent/80 border border-accent/20 bg-accent/5 px-2 py-0.5 rounded-full">
+                                                                        {track.rarity}
+                                                                    </span>
+                                                                </div>
                                                                 <h3 className={`text-xl font-serif font-bold transition-colors ${playingId === track.id ? 'text-accent' : 'text-content-primary group-hover:text-white'}`}>
                                                                     {track.title}
                                                                 </h3>
