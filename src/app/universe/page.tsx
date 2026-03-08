@@ -3,7 +3,6 @@
 import { motion, Variants } from 'framer-motion';
 import Image from 'next/image';
 import SeasonPassCard from '@/components/commerce/SeasonPassCard';
-import WeeklyChapterCard from '@/components/commerce/WeeklyChapterCard';
 import QuestBoard from '@/components/engagement/QuestBoard';
 import RewardsTrack from '@/components/engagement/RewardsTrack';
 
@@ -59,7 +58,6 @@ export default function UniversePage() {
                         transition={{ duration: 0.8 }}
                         className="inline-block border border-accent/30 px-6 py-2 rounded-full backdrop-blur-md bg-white/5"
                     >
-                        {/* eslint-disable-next-line react/jsx-no-comment-textnodes */}
                         <span className="text-accent font-mono tracking-[0.3em] text-xs uppercase glow-text">
                             Alennaverse System | Hub
                         </span>

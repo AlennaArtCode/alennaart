@@ -9,9 +9,21 @@ type MusicItem = {
     id: string;
     title: string;
     description: string;
-    image_url: string; // Used for audio file here
+    image_url: string; // Used for audio file OR youtube url here
     created_at: string;
 };
+
+// YOUTUBE HELPER
+function getYouTubeEmbedUrl(url: string) {
+    let videoId = '';
+    if (url.includes('youtu.be/')) {
+        videoId = url.split('youtu.be/')[1]?.split('?')[0];
+    } else if (url.includes('youtube.com/watch')) {
+        const urlObj = new URL(url);
+        videoId = urlObj.searchParams.get('v') || '';
+    }
+    return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0&modestbranding=1` : url;
+}
 
 export default function MusicClientView() {
     const [tracks, setTracks] = useState<MusicItem[]>([]);
@@ -35,7 +47,7 @@ export default function MusicClientView() {
         fetchMusic();
     }, []);
 
-    const togglePlay = (id: string, audioUrl: string) => {
+    const togglePlay = (id: string) => {
         const audioEl = document.getElementById(`audio-${id}`) as HTMLAudioElement;
 
         if (playingId === id) {
@@ -102,57 +114,98 @@ export default function MusicClientView() {
                                     <p className="font-mono text-accent text-sm tracking-widest uppercase animate-pulse">Scanning Frequencies...</p>
                                 </div>
                             ) : tracks.length > 0 ? (
-                                <div className="space-y-4">
-                                    <AnimatePresence>
-                                        {tracks.map((track, i) => (
-                                            <motion.div
-                                                key={track.id}
-                                                initial={{ opacity: 0, y: 20 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                transition={{ delay: i * 0.1 }}
-                                                className={`group flex flex-col md:flex-row items-center gap-6 p-4 md:p-6 rounded-xl border transition-all duration-500 ${playingId === track.id ? 'bg-accent/5 border-accent shadow-[0_0_30px_rgba(197,160,89,0.15)] scale-[1.02]' : 'bg-primary-dark/50 border-white/5 hover:border-white/20'}`}
-                                            >
-                                                {/* Play Button */}
-                                                <button
-                                                    onClick={() => togglePlay(track.id, track.image_url)}
-                                                    className={`w-14 h-14 flex items-center justify-center shrink-0 rounded-full border transition-all ${playingId === track.id ? 'bg-accent border-accent text-primary-dark shadow-[0_0_15px_rgba(197,160,89,0.5)]' : 'bg-transparent border-white/10 text-white/70 hover:border-accent hover:text-accent group-hover:bg-accent/10'}`}
-                                                >
-                                                    {playingId === track.id ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" className="ml-1" />}
-                                                </button>
+                                <div className="space-y-16">
 
-                                                {/* Track Info */}
-                                                <div className="flex-1 text-center md:text-left">
-                                                    <h3 className={`text-xl font-serif font-bold transition-colors ${playingId === track.id ? 'text-accent' : 'text-content-primary group-hover:text-white'}`}>
-                                                        {track.title}
-                                                    </h3>
-                                                    {track.description && (
-                                                        <p className="text-content-muted text-sm mt-1 max-w-xl hidden md:block">{track.description}</p>
-                                                    )}
-                                                </div>
+                                    {/* 1. YOUTUBE VISUALIZERS */}
+                                    {tracks.filter(t => t.image_url.includes('youtu')).length > 0 && (
+                                        <div className="space-y-6">
+                                            <h2 className="text-2xl font-serif text-white flex items-center gap-3">
+                                                <span className="w-2 h-2 rounded-full bg-accent animate-pulse shadow-[0_0_10px_rgba(197,160,89,0.5)]" />
+                                                Audiovisual Transmissions
+                                            </h2>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                                {tracks.filter(t => t.image_url.includes('youtu')).map(video => (
+                                                    <div key={video.id} className="bg-[#0A0B0E]/80 border border-white/5 rounded-2xl overflow-hidden shadow-[0_0_20px_rgba(0,0,0,0.5)] group hover:border-accent/40 transition-all duration-500 hover:-translate-y-1">
+                                                        <div className="aspect-video w-full relative bg-black">
+                                                            <iframe
+                                                                src={getYouTubeEmbedUrl(video.image_url)}
+                                                                title={video.title}
+                                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                                                allowFullScreen
+                                                                className="absolute inset-0 w-full h-full border-0"
+                                                            ></iframe>
+                                                        </div>
+                                                        <div className="p-6">
+                                                            <h3 className="font-serif text-xl font-bold text-white group-hover:text-accent transition-colors">{video.title}</h3>
+                                                            {video.description && <p className="text-sm text-content-muted mt-2 font-mono leading-relaxed truncate">{video.description}</p>}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
 
-                                                {/* Hidden Audio Element */}
-                                                <audio
-                                                    id={`audio-${track.id}`}
-                                                    src={track.image_url}
-                                                    onEnded={() => setPlayingId(null)}
-                                                    preload="none"
-                                                />
-
-                                                {/* Visualizer (Fake/Aesthetic) */}
-                                                <div className="flex items-center gap-1 h-8 opacity-0 group-hover:opacity-100 md:opacity-100 transition-opacity hidden sm:flex">
-                                                    {[...Array(6)].map((_, idx) => (
+                                    {/* 2. AUDIO TRACKS */}
+                                    {tracks.filter(t => !t.image_url.includes('youtu')).length > 0 && (
+                                        <div className="space-y-6">
+                                            <h2 className="text-2xl font-serif text-white flex items-center gap-3">
+                                                <span className="w-2 h-2 rounded-full bg-white/30" />
+                                                Sonic Archives
+                                            </h2>
+                                            <div className="space-y-4">
+                                                <AnimatePresence>
+                                                    {tracks.filter(t => !t.image_url.includes('youtu')).map((track, i) => (
                                                         <motion.div
-                                                            key={idx}
-                                                            className={`w-1 rounded-full ${playingId === track.id ? 'bg-accent' : 'bg-white/20'}`}
-                                                            animate={playingId === track.id ? { height: ["20%", "100%", "40%", "80%", "20%"] } : { height: "20%" }}
-                                                            transition={{ repeat: Infinity, duration: 1 + Math.random(), ease: "easeInOut" }}
-                                                            style={{ height: '4px' }}
-                                                        />
+                                                            key={track.id}
+                                                            initial={{ opacity: 0, y: 20 }}
+                                                            animate={{ opacity: 1, y: 0 }}
+                                                            transition={{ delay: i * 0.1 }}
+                                                            className={`group flex flex-col md:flex-row items-center gap-6 p-4 md:p-6 rounded-xl border transition-all duration-500 ${playingId === track.id ? 'bg-accent/5 border-accent shadow-[0_0_30px_rgba(197,160,89,0.15)] scale-[1.02]' : 'bg-primary-dark/50 border-white/5 hover:border-white/20'}`}
+                                                        >
+                                                            {/* Play Button */}
+                                                            <button
+                                                                onClick={() => togglePlay(track.id)}
+                                                                className={`w-14 h-14 flex items-center justify-center shrink-0 rounded-full border transition-all ${playingId === track.id ? 'bg-accent border-accent text-primary-dark shadow-[0_0_15px_rgba(197,160,89,0.5)]' : 'bg-transparent border-white/10 text-white/70 hover:border-accent hover:text-accent group-hover:bg-accent/10'}`}
+                                                            >
+                                                                {playingId === track.id ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" className="ml-1" />}
+                                                            </button>
+
+                                                            {/* Track Info */}
+                                                            <div className="flex-1 text-center md:text-left">
+                                                                <h3 className={`text-xl font-serif font-bold transition-colors ${playingId === track.id ? 'text-accent' : 'text-content-primary group-hover:text-white'}`}>
+                                                                    {track.title}
+                                                                </h3>
+                                                                {track.description && (
+                                                                    <p className="text-content-muted text-sm mt-1 max-w-xl hidden md:block">{track.description}</p>
+                                                                )}
+                                                            </div>
+
+                                                            {/* Hidden Audio Element */}
+                                                            <audio
+                                                                id={`audio-${track.id}`}
+                                                                src={track.image_url}
+                                                                onEnded={() => setPlayingId(null)}
+                                                                preload="none"
+                                                            />
+
+                                                            {/* Visualizer (Fake/Aesthetic) */}
+                                                            <div className="flex items-center gap-1 h-8 opacity-0 group-hover:opacity-100 md:opacity-100 transition-opacity hidden sm:flex">
+                                                                {[...Array(6)].map((_, idx) => (
+                                                                    <motion.div
+                                                                        key={idx}
+                                                                        className={`w-1 rounded-full ${playingId === track.id ? 'bg-accent' : 'bg-white/20'}`}
+                                                                        animate={playingId === track.id ? { height: ["20%", "100%", "40%", "80%", "20%"] } : { height: "20%" }}
+                                                                        transition={{ repeat: Infinity, duration: 1 + Math.random(), ease: "easeInOut" }}
+                                                                        style={{ height: '4px' }}
+                                                                    />
+                                                                ))}
+                                                            </div>
+                                                        </motion.div>
                                                     ))}
-                                                </div>
-                                            </motion.div>
-                                        ))}
-                                    </AnimatePresence>
+                                                </AnimatePresence>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             ) : (
                                 <div className="flex flex-col items-center justify-center py-16 text-center border border-dashed border-white/10 rounded-xl bg-white/[0.02]">

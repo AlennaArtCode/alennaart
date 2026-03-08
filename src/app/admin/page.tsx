@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { motion, Reorder, AnimatePresence } from 'framer-motion';
-import { Upload, Trash2, Edit2, Eye, EyeOff, GripVertical, Plus, Wand2, Image as ImageIcon, Save } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Upload, Trash2, Eye, EyeOff, Wand2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 // --- TYPES ---
@@ -108,8 +108,10 @@ export default function AdminPanel() {
                 .getPublicUrl(filePath);
 
             setNewItem({ ...newItem, image_url: publicUrl, category: isAudio ? 'Music' : newItem.category });
-        } catch (error: any) {
-            alert('Error uploading file: ' + error.message);
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                alert('Error uploading file: ' + error.message);
+            }
         } finally {
             setUploading(false);
         }
@@ -138,7 +140,7 @@ export default function AdminPanel() {
         }
     };
 
-    const deleteItem = async (id: string, imageUrl: string) => {
+    const deleteItem = async (id: string) => {
         if (!confirm("¿Eliminar obra de la colección permanentemente?")) return;
 
         // 1. Delete DB Record
@@ -322,7 +324,7 @@ export default function AdminPanel() {
                             <div className="space-y-4">
                                 <AnimatePresence>
                                     {galleryItems.map((item) => (
-                                        <InventoryCard key={item.id} item={item} onDelete={() => deleteItem(item.id, item.image_url)} onToggle={() => toggleVisibility(item.id, item.is_public)} />
+                                        <InventoryCard key={item.id} item={item} onDelete={() => deleteItem(item.id)} onToggle={() => toggleVisibility(item.id, item.is_public)} />
                                     ))}
                                     {galleryItems.length === 0 && (
                                         <div className="text-center py-20 text-white/20 font-mono">
@@ -368,35 +370,51 @@ export default function AdminPanel() {
                                         />
                                     </div>
 
-                                    {/* DROPZONE (AUDIO) */}
-                                    <div>
-                                        <label className="text-[10px] uppercase tracking-widest text-white/40 mb-1 block">Audio File (MP3/WAV)</label>
-                                        <div
-                                            className={`border-2 border-dashed rounded-lg p-6 text-center transition-all cursor-pointer relative ${newItem.image_url ? 'border-accent bg-accent/5' : 'border-white/10 hover:border-white/30'
-                                                }`}
-                                        >
+                                    {/* SOURCE (AUDIO OR YOUTUBE) */}
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="text-[10px] uppercase tracking-widest text-white/40 mb-1 block">YouTube URL (Video Visualizer)</label>
                                             <input
-                                                type="file"
-                                                accept="audio/mpeg, audio/wav, audio/mp3"
-                                                onChange={(e) => handleFileUpload(e, true)}
-                                                disabled={uploading}
-                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+                                                value={newItem.image_url?.includes('youtu') ? newItem.image_url : ''}
+                                                onChange={e => setNewItem({ ...newItem, image_url: e.target.value })}
+                                                className="w-full bg-white/5 border-b border-white/10 focus:border-accent outline-none py-2 px-3 text-sm font-mono placeholder:text-white/20 transition-colors"
+                                                placeholder="https://youtu.be/..."
                                             />
+                                        </div>
+                                        <div className="flex items-center gap-4">
+                                            <div className="h-px bg-white/10 flex-1" />
+                                            <span className="text-[10px] uppercase tracking-widest text-white/30">OR</span>
+                                            <div className="h-px bg-white/10 flex-1" />
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] uppercase tracking-widest text-white/40 mb-1 block">Audio File (MP3/WAV)</label>
+                                            <div
+                                                className={`border-2 border-dashed rounded-lg p-6 text-center transition-all cursor-pointer relative ${newItem.image_url && !newItem.image_url.includes('youtu') ? 'border-accent bg-accent/5' : 'border-white/10 hover:border-white/30'
+                                                    }`}
+                                            >
+                                                <input
+                                                    type="file"
+                                                    accept="audio/mpeg, audio/wav, audio/mp3"
+                                                    onChange={(e) => handleFileUpload(e, true)}
+                                                    disabled={uploading}
+                                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+                                                />
 
-                                            <div className="flex flex-col items-center gap-2 relative z-10">
-                                                {uploading ? (
-                                                    <div className="animate-spin w-6 h-6 border-2 border-accent border-t-transparent rounded-full" />
-                                                ) : newItem.image_url ? (
-                                                    <div className="relative w-full rounded overflow-hidden mb-2 py-4 bg-white/5 border border-white/10 text-accent font-mono text-xs break-all px-2">
-                                                        Audio Selected ✓
-                                                    </div>
-                                                ) : (
-                                                    <Upload size={24} className="text-white/30" />
-                                                )}
+                                                <div className="flex flex-col items-center gap-2 relative z-10">
+                                                    {uploading ? (
+                                                        <div className="animate-spin w-6 h-6 border-2 border-accent border-t-transparent rounded-full" />
+                                                    ) : newItem.image_url && !newItem.image_url.includes('youtu') ? (
+                                                        <div className="relative w-full rounded overflow-hidden mb-2 py-4 bg-white/5 border border-white/10 text-accent font-mono text-xs break-all px-2">
+                                                            Audio Selected ✓
+                                                        </div>
+                                                    ) : (
+                                                        <Upload size={24} className="text-white/30" />
+                                                    )}
 
-                                                <span className="text-xs text-accent placeholder:text-white/20">
-                                                    {uploading ? 'Uploading Audio...' : newItem.image_url ? 'Click to Change File' : 'Click or Drag Audio here'}
-                                                </span>
+                                                    <span className="text-xs text-accent placeholder:text-white/20">
+                                                        {uploading ? 'Uploading Audio...' : newItem.image_url && !newItem.image_url.includes('youtu') ? 'Click to Change File' : 'Click or Drag Audio here'}
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -435,7 +453,7 @@ export default function AdminPanel() {
                             <div className="space-y-4">
                                 <AnimatePresence>
                                     {galleryItems.filter(item => item.category === 'Music').map((item) => (
-                                        <InventoryCard key={item.id} item={item} onDelete={() => deleteItem(item.id, item.image_url)} onToggle={() => toggleVisibility(item.id, item.is_public)} />
+                                        <InventoryCard key={item.id} item={item} onDelete={() => deleteItem(item.id)} onToggle={() => toggleVisibility(item.id, item.is_public)} />
                                     ))}
                                     {galleryItems.filter(item => item.category === 'Music').length === 0 && (
                                         <div className="text-center py-20 text-white/20 font-mono">
@@ -539,7 +557,7 @@ function InventoryCard({ item, onDelete, onToggle }: { item: GalleryItem, onDele
     );
 }
 
-function LoginScreen({ email, setEmail, password, setPassword, handleLogin, loading, error }: any) {
+function LoginScreen({ email, setEmail, password, setPassword, handleLogin, loading, error }: { email: string, setEmail: (val: string) => void, password: string, setPassword: (val: string) => void, handleLogin: (e: React.FormEvent) => void, loading: boolean, error: string | null }) {
     return (
         <div className="min-h-screen bg-black flex items-center justify-center p-6 relative overflow-hidden">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#1a1005] via-black to-black opacity-50" />

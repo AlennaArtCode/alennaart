@@ -15,7 +15,7 @@ type GalleryItem = {
     image_url: string;
     description?: string;
     subtitle?: string; // Mapped from DB description or type
-    memory_log?: any; // kept for compatibility if we add complex json later
+    memory_log?: unknown; // kept for compatibility if we add complex json later
 };
 
 export default function GallerySection() {
@@ -25,7 +25,7 @@ export default function GallerySection() {
 
     useEffect(() => {
         const fetchGallery = async () => {
-            const { data, error } = await supabase
+            const { data } = await supabase
                 .from('artworks')
                 .select('*')
                 .eq('is_public', true)
@@ -33,14 +33,14 @@ export default function GallerySection() {
 
             if (data) {
                 // Map DB fields to UI expected structure
-                const mappedItems = data.map((d: any) => ({
-                    id: d.id,
-                    title: d.title,
-                    category: d.category,
-                    rarity: d.rarity || 'Common',
-                    image_url: d.image_url || d.image_path, // Fallback
-                    description: d.description,
-                    subtitle: d.description ? d.description.substring(0, 50) + "..." : "Artifact from the Void",
+                const mappedItems = data.map((d: Record<string, unknown>) => ({
+                    id: d.id as string,
+                    title: d.title as string,
+                    category: d.category as string,
+                    rarity: (d.rarity as string) || 'Common',
+                    image_url: (d.image_url as string) || (d.image_path as string), // Fallback
+                    description: d.description as string,
+                    subtitle: d.description ? (d.description as string).substring(0, 50) + "..." : "Artifact from the Void",
                     memory_log: null // DB doesn't have this JSON yet, can be added later
                 }));
                 setItems(mappedItems);
@@ -96,7 +96,7 @@ export default function GallerySection() {
                                 CHROMATIC ANOMALIES
                             </h2>
                             <p className="text-accent-neon/60 font-mono text-sm tracking-widest mt-2 uppercase">
-                            // System Warning: Foreign Frequency Detected
+                                {`// System Warning: Foreign Frequency Detected`}
                             </p>
                         </div>
 
@@ -297,7 +297,7 @@ function TrinityCard({ item, onSelect }: { item: GalleryItem, onSelect: () => vo
             <div className="absolute bottom-0 left-0 w-full p-8 translate-y-4 group-hover:translate-y-0 transition-transform duration-500 z-30">
                 <div className={`backdrop-blur-md bg-white/5 border border-white/10 p-6 rounded-xl border-l-4 ${isLegendary ? 'border-l-[#FFD700]' : 'border-l-accent'}`}>
                     <span className={`text-xs font-mono uppercase tracking-widest block mb-2 ${isLegendary ? 'text-[#FFD700] drop-shadow-[0_0_5px_rgba(255,215,0,0.5)]' : 'text-accent'}`}>
-                        {item.rarity} // {item.category}
+                        {item.rarity} {`//`} {item.category}
                     </span>
                     <h3 className={`text-3xl font-serif font-bold text-white mb-2 ${isLegendary ? 'text-transparent bg-clip-text bg-gradient-to-r from-[#FFD700] to-white' : ''}`}>
                         {item.title}

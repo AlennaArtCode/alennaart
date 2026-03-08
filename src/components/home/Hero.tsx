@@ -12,11 +12,6 @@ export default function Hero() {
         offset: ["start start", "end start"]
     });
 
-    // Parallax for Lion
-    const yLion = useTransform(scrollYProgress, [0, 1], [0, 200]);
-    // Fade out hero content on scroll
-    const opacityHero = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
-
     return (
         <section ref={containerRef} className="relative h-screen min-h-[800px] flex flex-col justify-center overflow-hidden">
 
@@ -35,7 +30,7 @@ export default function Hero() {
                 <div className="flex-1 text-center md:text-left space-y-8 z-20 order-2 md:order-1">
                     <div className="opacity-100 flex flex-col items-center md:items-start">
                         <p className="text-xl md:text-2xl text-accent font-serif italic mb-4">
-                            "Pain has no form. <br /> But the cure is geometric."
+                            &quot;Pain has no form. <br /> But the cure is geometric.&quot;
                         </p>
 
                         <h1 className="text-5xl md:text-7xl lg:text-8xl font-serif font-medium leading-[0.9] text-white tracking-tight mb-6">
