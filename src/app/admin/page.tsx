@@ -39,7 +39,7 @@ export default function AdminPanel() {
     });
 
     // NFT Decorator State (New Request)
-    const [activeTab, setActiveTab] = useState<'upload' | 'decorator'>('upload');
+    const [activeTab, setActiveTab] = useState<'upload' | 'music' | 'decorator'>('upload');
 
     // --- EFFECT: CHECK AUTH & LOAD DATA ---
     useEffect(() => {
@@ -87,7 +87,7 @@ export default function AdminPanel() {
         else setGalleryItems(data || []);
     };
 
-    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, isAudio: boolean = false) => {
         if (!e.target.files || e.target.files.length === 0) return;
 
         setUploading(true);
@@ -107,9 +107,9 @@ export default function AdminPanel() {
                 .from(STORAGE_BUCKET)
                 .getPublicUrl(filePath);
 
-            setNewItem({ ...newItem, image_url: publicUrl });
+            setNewItem({ ...newItem, image_url: publicUrl, category: isAudio ? 'Music' : newItem.category });
         } catch (error: any) {
-            alert('Error uploading image: ' + error.message);
+            alert('Error uploading file: ' + error.message);
         } finally {
             setUploading(false);
         }
@@ -171,7 +171,16 @@ export default function AdminPanel() {
                         onClick={() => setActiveTab('upload')}
                         className={`text-sm uppercase tracking-wider px-4 py-2 rounded transition-colors ${activeTab === 'upload' ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white'}`}
                     >
-                        Upload Studio
+                        Upload Art
+                    </button>
+                    <button
+                        onClick={() => {
+                            setActiveTab('music');
+                            setNewItem({ ...newItem, category: 'Music', image_url: '' });
+                        }}
+                        className={`text-sm uppercase tracking-wider px-4 py-2 rounded transition-colors ${activeTab === 'music' ? 'bg-accent/20 text-accent' : 'text-white/40 hover:text-accent'}`}
+                    >
+                        Upload Music
                     </button>
                     <button
                         onClick={() => setActiveTab('decorator')}
@@ -261,8 +270,12 @@ export default function AdminPanel() {
                                                     <div className="animate-spin w-6 h-6 border-2 border-accent border-t-transparent rounded-full" />
                                                 ) : newItem.image_url ? (
                                                     <div className="relative w-full aspect-video rounded overflow-hidden mb-2">
-                                                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                        <img src={newItem.image_url} alt="Preview" className="w-full h-full object-cover" />
+                                                        {newItem.category === 'Music' ? (
+                                                            <div className="flex px-4 items-center justify-center w-full h-full bg-white/5 border border-white/10 text-accent">Audio Selected ✓</div>
+                                                        ) : (
+                                                            /* eslint-disable-next-line @next/next/no-img-element */
+                                                            <img src={newItem.image_url} alt="Preview" className="w-full h-full object-cover" />
+                                                        )}
                                                     </div>
                                                 ) : (
                                                     <Upload size={24} className="text-white/30" />
@@ -322,6 +335,119 @@ export default function AdminPanel() {
                     </div>
                 )}
 
+                {/* --- TAB: UPLOAD MUSIC --- */}
+                {activeTab === 'music' && (
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+
+                        {/* LEFT COL: MUSIC STUDIO */}
+                        <div className="lg:col-span-1 space-y-6">
+                            <div className="bg-[#0A0510] border-l-4 border-accent p-6 rounded-r-xl shadow-2xl relative overflow-hidden group">
+
+                                <h2 className="text-2xl font-serif text-white mb-6">Upload Sonic Artifact</h2>
+
+                                <div className="space-y-4 relative z-10">
+                                    {/* Title */}
+                                    <div>
+                                        <label className="text-[10px] uppercase tracking-widest text-white/40 mb-1 block">Track Name</label>
+                                        <input
+                                            value={newItem.title}
+                                            onChange={e => setNewItem({ ...newItem, title: e.target.value })}
+                                            className="w-full bg-white/5 border-b border-white/10 focus:border-accent outline-none py-2 px-3 text-lg font-serif placeholder:text-white/20 transition-colors"
+                                            placeholder="Frequency Title..."
+                                        />
+                                    </div>
+
+                                    {/* Description */}
+                                    <div>
+                                        <label className="text-[10px] uppercase tracking-widest text-white/40 mb-1 block">Description (Optional)</label>
+                                        <textarea
+                                            value={newItem.description || ''}
+                                            onChange={e => setNewItem({ ...newItem, description: e.target.value })}
+                                            className="w-full bg-white/5 border-b border-white/10 focus:border-accent outline-none py-2 px-3 text-sm font-mono placeholder:text-white/20 transition-colors h-20 resize-none"
+                                            placeholder="Notes about this soundscape..."
+                                        />
+                                    </div>
+
+                                    {/* DROPZONE (AUDIO) */}
+                                    <div>
+                                        <label className="text-[10px] uppercase tracking-widest text-white/40 mb-1 block">Audio File (MP3/WAV)</label>
+                                        <div
+                                            className={`border-2 border-dashed rounded-lg p-6 text-center transition-all cursor-pointer relative ${newItem.image_url ? 'border-accent bg-accent/5' : 'border-white/10 hover:border-white/30'
+                                                }`}
+                                        >
+                                            <input
+                                                type="file"
+                                                accept="audio/mpeg, audio/wav, audio/mp3"
+                                                onChange={(e) => handleFileUpload(e, true)}
+                                                disabled={uploading}
+                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+                                            />
+
+                                            <div className="flex flex-col items-center gap-2 relative z-10">
+                                                {uploading ? (
+                                                    <div className="animate-spin w-6 h-6 border-2 border-accent border-t-transparent rounded-full" />
+                                                ) : newItem.image_url ? (
+                                                    <div className="relative w-full rounded overflow-hidden mb-2 py-4 bg-white/5 border border-white/10 text-accent font-mono text-xs break-all px-2">
+                                                        Audio Selected ✓
+                                                    </div>
+                                                ) : (
+                                                    <Upload size={24} className="text-white/30" />
+                                                )}
+
+                                                <span className="text-xs text-accent placeholder:text-white/20">
+                                                    {uploading ? 'Uploading Audio...' : newItem.image_url ? 'Click to Change File' : 'Click or Drag Audio here'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Visibility Toggle */}
+                                    <div className="flex items-center justify-between bg-white/5 p-3 rounded">
+                                        <span className="text-sm text-white/70">Public Visibility</span>
+                                        <button
+                                            onClick={() => setNewItem({ ...newItem, is_public: !newItem.is_public })}
+                                            className={`w-10 h-5 rounded-full relative transition-colors ${newItem.is_public ? 'bg-accent' : 'bg-white/20'}`}
+                                        >
+                                            <div className={`absolute top-1 w-3 h-3 bg-black rounded-full transition-transform ${newItem.is_public ? 'left-6' : 'left-1'}`} />
+                                        </button>
+                                    </div>
+
+                                    {/* SUBMIT */}
+                                    <button
+                                        onClick={addItem}
+                                        disabled={uploading || !newItem.image_url}
+                                        className="w-full py-4 bg-gradient-to-r from-accent to-[#8a6e35] text-black font-bold uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-95 transition-all shadow-[0_0_20px_rgba(197,160,89,0.3)] rounded-sm disabled:opacity-50"
+                                    >
+                                        Mint Audio to Database
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* RIGHT COL: CURATOR INVENTORY */}
+                        <div className="lg:col-span-2">
+                            <div className="flex justify-between items-center mb-6">
+                                <h2 className="text-2xl font-serif text-white">Music Inventory (Realtime)</h2>
+                                <p className="text-xs text-white/30 font-mono">SYNCED WITH SUPABASE</p>
+                            </div>
+
+                            {/* LIST */}
+                            <div className="space-y-4">
+                                <AnimatePresence>
+                                    {galleryItems.filter(item => item.category === 'Music').map((item) => (
+                                        <InventoryCard key={item.id} item={item} onDelete={() => deleteItem(item.id, item.image_url)} onToggle={() => toggleVisibility(item.id, item.is_public)} />
+                                    ))}
+                                    {galleryItems.filter(item => item.category === 'Music').length === 0 && (
+                                        <div className="text-center py-20 text-white/20 font-mono">
+                                            NO AUDIO FILES FOUND IN DATABASE
+                                        </div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* --- TAB: DECORATOR STUDIO (PLACEHOLDER) --- */}
                 {activeTab === 'decorator' && (
                     <div className="w-full h-[600px] border border-dashed border-white/20 rounded-2xl flex flex-col items-center justify-center text-center p-8 bg-white/5 relative overflow-hidden">
@@ -360,15 +486,23 @@ function InventoryCard({ item, onDelete, onToggle }: { item: GalleryItem, onDele
                 hover:border-accent hover:shadow-[0_4px_20px_rgba(0,0,0,0.5)] transition-all
             `}
         >
-            {/* IMAGE */}
-            <div className="relative w-16 h-16 rounded overflow-hidden flex-shrink-0 bg-black">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                    src={item.image_url}
-                    alt={item.title}
-                    className="w-full h-full object-cover"
-                    onError={(e) => (e.currentTarget.src = 'https://placehold.co/100?text=?')}
-                />
+            {/* IMAGE OR AUDIO ICON */}
+            <div className="relative w-16 h-16 rounded overflow-hidden flex-shrink-0 bg-black flex items-center justify-center">
+                {item.category === 'Music' ? (
+                    <div className="text-accent">
+                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                        </svg>
+                    </div>
+                ) : (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                        src={item.image_url}
+                        alt={item.title}
+                        className="w-full h-full object-cover"
+                        onError={(e) => (e.currentTarget.src = 'https://placehold.co/100?text=?')}
+                    />
+                )}
             </div>
 
             {/* INFO */}

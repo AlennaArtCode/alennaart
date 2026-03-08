@@ -58,6 +58,8 @@ export default function Navbar() {
                         <WalletGatedButton onClick={() => { }} className="btn-primary text-xs py-2 px-6 !rounded-md">
                             Connect
                         </WalletGatedButton>
+
+
                     </div>
                 </div>
             </div>
