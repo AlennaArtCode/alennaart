@@ -4,6 +4,7 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRef } from 'react';
+import { Music } from 'lucide-react';
 
 export default function Hero() {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -44,20 +45,32 @@ export default function Hero() {
                         </p>
 
                         {/* PLAY / START INTERACTION */}
-                        <div className="flex items-center justify-center md:justify-start gap-6">
-                            <Link
-                                href="#collection"
-                                className="group flex items-center justify-center w-16 h-16 rounded-full bg-accent/10 border border-accent hover:bg-accent hover:scale-110 transition-all duration-300 shadow-[0_0_20px_rgba(197,160,89,0.2)] hover:shadow-[0_0_40px_rgba(197,160,89,0.5)] cursor-pointer"
-                            >
-                                <svg
-                                    className="w-6 h-6 text-accent group-hover:text-black ml-1 transition-colors"
-                                    fill="currentColor"
-                                    viewBox="0 0 24 24"
+                        <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-6 pt-4">
+                            <div className="flex items-center gap-4">
+                                <Link
+                                    href="#collection"
+                                    className="group flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-accent/10 border border-accent hover:bg-accent hover:scale-110 transition-all duration-300 shadow-[0_0_20px_rgba(197,160,89,0.2)] hover:shadow-[0_0_40px_rgba(197,160,89,0.5)] cursor-pointer"
                                 >
-                                    <path d="M8 5v14l11-7z" />
-                                </svg>
+                                    <svg
+                                        className="w-5 h-5 sm:w-6 sm:h-6 text-accent group-hover:text-black ml-1 transition-colors"
+                                        fill="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path d="M8 5v14l11-7z" />
+                                    </svg>
+                                </Link>
+                                <span className="text-xs sm:text-sm uppercase tracking-widest text-white/60 font-bold hidden sm:block">Explore</span>
+                            </div>
+
+                            <div className="w-px h-8 bg-white/20 hidden sm:block" />
+
+                            <Link
+                                href="/music"
+                                className="group flex items-center gap-3 px-6 py-3 sm:py-4 rounded-full bg-white/5 border border-white/20 hover:border-accent hover:bg-accent/10 transition-all duration-300 hover:shadow-[0_0_20px_rgba(197,160,89,0.3)]"
+                            >
+                                <Music size={18} className="text-accent group-hover:scale-110 transition-transform" />
+                                <span className="text-xs sm:text-sm uppercase tracking-widest text-white font-bold group-hover:text-accent transition-colors">Listen to Music</span>
                             </Link>
-                            <span className="text-sm uppercase tracking-widest text-white/60 font-bold">Start Experience</span>
                         </div>
                     </div>
                 </div>
