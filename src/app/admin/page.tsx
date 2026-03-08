@@ -11,7 +11,8 @@ type GalleryItem = {
     title: string;
     category: string;
     rarity: string;
-    image_url: string;
+    image_url: string; // Media URL (audio or video or main image)
+    image_path?: string; // Cover URL for Media (also used as DB fallback)
     description?: string;
     is_public: boolean;
     created_at?: string;
@@ -35,7 +36,7 @@ export default function AdminPanel() {
 
     // Form State
     const [newItem, setNewItem] = useState<Partial<GalleryItem>>({
-        title: '', category: 'Geometry', rarity: 'Common', image_url: '', is_public: false, description: ''
+        title: '', category: 'Geometry', rarity: 'Common', image_url: '', image_path: '', is_public: false, description: ''
     });
 
     const [editingId, setEditingId] = useState<string | null>(null);
@@ -89,13 +90,13 @@ export default function AdminPanel() {
         else setGalleryItems(data || []);
     };
 
-    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, isAudio: boolean = false) => {
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, isAudio: boolean = false, isCover: boolean = false) => {
         if (!e.target.files || e.target.files.length === 0) return;
 
         setUploading(true);
         const file = e.target.files[0];
         const fileExt = file.name.split('.').pop();
-        const fileName = `${Date.now()}.${fileExt}`;
+        const fileName = `${Date.now()}_${isCover ? 'cover' : 'media'}.${fileExt}`;
         const filePath = `${fileName}`;
 
         try {
@@ -109,7 +110,11 @@ export default function AdminPanel() {
                 .from(STORAGE_BUCKET)
                 .getPublicUrl(filePath);
 
-            setNewItem({ ...newItem, image_url: publicUrl, category: isAudio ? 'Music' : newItem.category });
+            if (isCover) {
+                setNewItem({ ...newItem, image_path: publicUrl });
+            } else {
+                setNewItem({ ...newItem, image_url: publicUrl, category: isAudio ? 'Music' : newItem.category });
+            }
         } catch (error: unknown) {
             if (error instanceof Error) {
                 alert('Error uploading file: ' + error.message);
@@ -128,7 +133,7 @@ export default function AdminPanel() {
                 category: newItem.category || 'Geometry',
                 rarity: newItem.rarity || 'Common',
                 image_url: newItem.image_url,
-                image_path: newItem.image_url,
+                image_path: newItem.image_path || newItem.image_url,
                 is_public: newItem.is_public,
                 description: newItem.description
             }).eq('id', editingId);
@@ -146,7 +151,7 @@ export default function AdminPanel() {
                 category: newItem.category,
                 rarity: newItem.rarity,
                 image_url: newItem.image_url,
-                image_path: newItem.image_url, // Fallback
+                image_path: newItem.image_path || newItem.image_url, // Fallback
                 is_public: newItem.is_public,
                 description: newItem.description
             }]);
@@ -177,7 +182,7 @@ export default function AdminPanel() {
 
     const cancelEdit = () => {
         setEditingId(null);
-        setNewItem({ title: '', category: 'Geometry', rarity: 'Common', image_url: '', is_public: false, description: '' });
+        setNewItem({ title: '', category: 'Geometry', rarity: 'Common', image_url: '', image_path: '', is_public: false, description: '' });
     };
 
     const deleteItem = async (id: string) => {
@@ -472,6 +477,38 @@ export default function AdminPanel() {
                                         />
                                     </div>
 
+                                    {/* Cover Art Upload (Optional) */}
+                                    <div className="bg-white/5 border border-dashed border-white/20 p-4 rounded text-center">
+                                        <label className="text-[10px] uppercase tracking-widest text-white/40 mb-2 block">Cover Art / Thumbnail (Optional)</label>
+
+                                        {newItem.image_path && newItem.image_path !== newItem.image_url ? (
+                                            <div className="mt-2 mb-4 relative aspect-square w-32 mx-auto rounded overflow-hidden border border-white/20">
+                                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                <img src={newItem.image_path} alt="Cover Preview" className="w-full h-full object-cover" />
+                                                <button onClick={() => setNewItem({ ...newItem, image_path: '' })} className="absolute top-1 right-1 bg-black/50 rounded-full p-1 hover:bg-red-500/50 text-white transition-colors">
+                                                    <X size={12} />
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <div>
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={e => handleFileUpload(e, false, true)}
+                                                    className="hidden"
+                                                    id="cover-upload"
+                                                />
+                                                <label htmlFor="cover-upload" className="cursor-pointer flex flex-col items-center gap-2 group">
+                                                    <div className="w-12 h-12 rounded-full border border-white/20 bg-black flex items-center justify-center group-hover:border-accent transition-colors">
+                                                        <Upload size={16} className="text-white/40 group-hover:text-accent transition-colors" />
+                                                    </div>
+                                                    <span className="text-xs text-white/60 group-hover:text-white transition-colors">Upload Cover Image</span>
+                                                </label>
+                                            </div>
+                                        )}
+                                        <p className="text-[10px] text-white/30 mt-2 font-mono">JPG, PNG, WEBP (Square format recommended)</p>
+                                    </div>
+
                                     {/* SOURCE (AUDIO OR YOUTUBE) */}
                                     <div className="space-y-4">
                                         <div>
@@ -609,8 +646,15 @@ function InventoryCard({ item, onEdit, onDelete, onToggle, editingId }: { item: 
             `}
         >
             {/* IMAGE OR AUDIO ICON */}
-            <div className="relative w-16 h-16 rounded overflow-hidden flex-shrink-0 bg-black flex items-center justify-center">
-                {item.category === 'Music' || item.image_url?.includes('.mp3') ? (
+            <div className="relative w-16 h-16 rounded overflow-hidden flex-shrink-0 bg-black flex items-center justify-center border border-white/5">
+                {item.image_path && item.image_path !== item.image_url && !item.image_path.includes('youtu') ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                        src={item.image_path}
+                        alt="Cover"
+                        className={`w-full h-full object-cover transition-all ${item.is_public ? 'opacity-100' : 'opacity-40 grayscale'}`}
+                    />
+                ) : item.category === 'Music' || item.image_url?.includes('.mp3') ? (
                     <div className="text-accent">
                         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />

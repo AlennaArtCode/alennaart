@@ -10,6 +10,7 @@ type MusicItem = {
     title: string;
     description: string;
     image_url: string; // Used for audio file OR youtube url here
+    image_path: string; // Used for cover art
     rarity: string;    // Used for Genre
     created_at: string;
 };
@@ -168,6 +169,14 @@ export default function MusicClientView() {
                                                             transition={{ delay: i * 0.1 }}
                                                             className={`group flex flex-col md:flex-row items-center gap-6 p-4 md:p-6 rounded-xl border transition-all duration-500 ${playingId === track.id ? 'bg-accent/5 border-accent shadow-[0_0_30px_rgba(197,160,89,0.15)] scale-[1.02]' : 'bg-primary-dark/50 border-white/5 hover:border-white/20'}`}
                                                         >
+                                                            {/* Cover Art (Optional) */}
+                                                            {track.image_path && track.image_path !== track.image_url && !track.image_path.includes('youtu') && (
+                                                                <div className="w-16 h-16 rounded-md overflow-hidden shrink-0 border border-white/10 relative shadow-[0_0_15px_rgba(0,0,0,0.5)]">
+                                                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                                    <img src={track.image_path} alt={track.title} className="w-full h-full object-cover" />
+                                                                </div>
+                                                            )}
+
                                                             {/* Play Button */}
                                                             <button
                                                                 onClick={() => togglePlay(track.id)}
