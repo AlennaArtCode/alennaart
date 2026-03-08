@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, Trash2, Eye, EyeOff, Wand2 } from 'lucide-react';
+import { Upload, Trash2, Eye, EyeOff, Wand2, Edit2, X, Save } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 // --- TYPES ---
@@ -37,6 +37,8 @@ export default function AdminPanel() {
     const [newItem, setNewItem] = useState<Partial<GalleryItem>>({
         title: '', category: 'Geometry', rarity: 'Common', image_url: '', is_public: false, description: ''
     });
+
+    const [editingId, setEditingId] = useState<string | null>(null);
 
     // NFT Decorator State (New Request)
     const [activeTab, setActiveTab] = useState<'upload' | 'music' | 'decorator'>('upload');
@@ -117,27 +119,65 @@ export default function AdminPanel() {
         }
     };
 
-    const addItem = async () => {
-        if (!newItem.title || !newItem.image_url) return alert("Faltan datos (Título o Imagen)");
+    const saveItem = async () => {
+        if (!newItem.title || !newItem.image_url) return alert("Faltan datos (Título o Imagen/Media)");
 
-        const { error } = await supabase.from('artworks').insert([{
-            title: newItem.title,
-            category: newItem.category,
-            rarity: newItem.rarity,
-            image_url: newItem.image_url,
-            // image_path: '', // Not strictly needed if we use URL, or can store path too
-            image_path: newItem.image_url, // Fallback
-            is_public: newItem.is_public,
-            description: newItem.description
-        }]);
+        if (editingId) {
+            const { error } = await supabase.from('artworks').update({
+                title: newItem.title,
+                category: newItem.category || 'Geometry',
+                rarity: newItem.rarity || 'Common',
+                image_url: newItem.image_url,
+                image_path: newItem.image_url,
+                is_public: newItem.is_public,
+                description: newItem.description
+            }).eq('id', editingId);
 
-        if (error) {
-            alert("Error saving: " + error.message);
+            if (error) {
+                alert("Error updating: " + error.message);
+            } else {
+                fetchItems();
+                cancelEdit();
+                alert("Modificación guardada éxitosamente.");
+            }
         } else {
-            fetchItems();
-            setNewItem({ title: '', category: 'Geometry', rarity: 'Common', image_url: '', is_public: false, description: '' });
-            alert("Arte minteado en la base de datos.");
+            const { error } = await supabase.from('artworks').insert([{
+                title: newItem.title,
+                category: newItem.category,
+                rarity: newItem.rarity,
+                image_url: newItem.image_url,
+                image_path: newItem.image_url, // Fallback
+                is_public: newItem.is_public,
+                description: newItem.description
+            }]);
+
+            if (error) {
+                alert("Error saving: " + error.message);
+            } else {
+                fetchItems();
+                setNewItem({ title: '', category: 'Geometry', rarity: 'Common', image_url: '', is_public: false, description: '' });
+                alert("Arte minteado en la base de datos.");
+            }
         }
+    };
+
+    const handleEditItem = (item: GalleryItem) => {
+        setNewItem(item);
+        setEditingId(item.id);
+
+        // Auto-switch tabs based on category if needed
+        if (item.category === 'Music' || item.category === 'Videos' || item.image_url.includes('youtu') || item.image_url.includes('.mp3')) {
+            setActiveTab('music');
+        } else {
+            setActiveTab('upload');
+        }
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const cancelEdit = () => {
+        setEditingId(null);
+        setNewItem({ title: '', category: 'Geometry', rarity: 'Common', image_url: '', is_public: false, description: '' });
     };
 
     const deleteItem = async (id: string) => {
@@ -178,11 +218,11 @@ export default function AdminPanel() {
                     <button
                         onClick={() => {
                             setActiveTab('music');
-                            setNewItem({ ...newItem, category: 'Music', image_url: '' });
+                            if (!editingId) setNewItem({ ...newItem, category: 'Music', image_url: '' });
                         }}
                         className={`text-sm uppercase tracking-wider px-4 py-2 rounded transition-colors ${activeTab === 'music' ? 'bg-accent/20 text-accent' : 'text-white/40 hover:text-accent'}`}
                     >
-                        Upload Music
+                        Media / Audio / Videos
                     </button>
                     <button
                         onClick={() => setActiveTab('decorator')}
@@ -205,9 +245,19 @@ export default function AdminPanel() {
 
                         {/* LEFT COL: CREATION STUDIO */}
                         <div className="lg:col-span-1 space-y-6">
-                            <div className="bg-[#0A0510] border-l-4 border-accent p-6 rounded-r-xl shadow-2xl relative overflow-hidden group">
+                            <div className={`bg-[#0A0510] border-l-4 ${editingId ? 'border-primary' : 'border-accent'} p-6 rounded-r-xl shadow-2xl relative overflow-hidden group transition-all duration-300`}>
 
-                                <h2 className="text-2xl font-serif text-white mb-6">Mint New Artifact</h2>
+                                <div className="flex justify-between items-center mb-6 relative z-10">
+                                    <h2 className="text-2xl font-serif text-white flex items-center gap-2">
+                                        {editingId ? <Edit2 size={24} className="text-primary" /> : <Upload size={24} className="text-accent" />}
+                                        {editingId ? 'Edit Artifact' : 'Mint New Artifact'}
+                                    </h2>
+                                    {editingId && (
+                                        <button onClick={cancelEdit} className="text-white/40 hover:text-white transition-colors cursor-pointer flex items-center gap-1 text-xs">
+                                            <X size={14} /> Cancel
+                                        </button>
+                                    )}
+                                </div>
 
                                 <div className="space-y-4 relative z-10">
                                     {/* Title */}
@@ -248,6 +298,8 @@ export default function AdminPanel() {
                                                 <option value="Geometry">Geometry</option>
                                                 <option value="Fine Art">Fine Art</option>
                                                 <option value="Concept">Concept</option>
+                                                <option value="Videos">Videos</option>
+                                                <option value="Music">Music</option>
                                             </select>
                                         </div>
                                     </div>
@@ -303,11 +355,12 @@ export default function AdminPanel() {
 
                                     {/* SUBMIT */}
                                     <button
-                                        onClick={addItem}
+                                        onClick={saveItem}
                                         disabled={uploading || !newItem.image_url}
-                                        className="w-full py-4 bg-gradient-to-r from-accent to-[#8a6e35] text-black font-bold uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-95 transition-all shadow-[0_0_20px_rgba(197,160,89,0.3)] rounded-sm disabled:opacity-50"
+                                        className={`w-full py-4 text-black font-bold uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-95 transition-all rounded-sm disabled:opacity-50 flex items-center justify-center gap-2 ${editingId ? 'bg-gradient-to-r from-primary to-primary-light shadow-[0_0_20px_rgba(255,255,255,0.3)]' : 'bg-gradient-to-r from-accent to-[#8a6e35] shadow-[0_0_20px_rgba(197,160,89,0.3)]'}`}
                                     >
-                                        Mint to Database
+                                        {editingId ? <Save size={18} /> : null}
+                                        {editingId ? 'Update Database' : 'Mint to Database'}
                                     </button>
                                 </div>
                             </div>
@@ -324,7 +377,7 @@ export default function AdminPanel() {
                             <div className="space-y-4">
                                 <AnimatePresence>
                                     {galleryItems.map((item) => (
-                                        <InventoryCard key={item.id} item={item} onDelete={() => deleteItem(item.id)} onToggle={() => toggleVisibility(item.id, item.is_public)} />
+                                        <InventoryCard key={item.id} item={item} onEdit={() => handleEditItem(item)} onDelete={() => deleteItem(item.id)} onToggle={() => toggleVisibility(item.id, item.is_public)} editingId={editingId} />
                                     ))}
                                     {galleryItems.length === 0 && (
                                         <div className="text-center py-20 text-white/20 font-mono">
@@ -343,20 +396,61 @@ export default function AdminPanel() {
 
                         {/* LEFT COL: MUSIC STUDIO */}
                         <div className="lg:col-span-1 space-y-6">
-                            <div className="bg-[#0A0510] border-l-4 border-accent p-6 rounded-r-xl shadow-2xl relative overflow-hidden group">
+                            <div className={`bg-[#0A0510] border-l-4 ${editingId ? 'border-primary' : 'border-accent'} p-6 rounded-r-xl shadow-2xl relative overflow-hidden group transition-all duration-300`}>
 
-                                <h2 className="text-2xl font-serif text-white mb-6">Upload Sonic Artifact</h2>
+                                <div className="flex justify-between items-center mb-6 relative z-10">
+                                    <h2 className="text-2xl font-serif text-white flex items-center gap-2">
+                                        {editingId ? <Edit2 size={24} className="text-primary" /> : <Upload size={24} className="text-accent" />}
+                                        {editingId ? 'Edit Media/Audio' : 'Upload Media/Audio'}
+                                    </h2>
+                                    {editingId && (
+                                        <button onClick={cancelEdit} className="text-white/40 hover:text-white transition-colors cursor-pointer flex items-center gap-1 text-xs">
+                                            <X size={14} /> Cancel
+                                        </button>
+                                    )}
+                                </div>
 
                                 <div className="space-y-4 relative z-10">
                                     {/* Title */}
                                     <div>
-                                        <label className="text-[10px] uppercase tracking-widest text-white/40 mb-1 block">Track Name</label>
+                                        <label className="text-[10px] uppercase tracking-widest text-white/40 mb-1 block">Title / Track Name</label>
                                         <input
                                             value={newItem.title}
                                             onChange={e => setNewItem({ ...newItem, title: e.target.value })}
                                             className="w-full bg-white/5 border-b border-white/10 focus:border-accent outline-none py-2 px-3 text-lg font-serif placeholder:text-white/20 transition-colors"
                                             placeholder="Frequency Title..."
                                         />
+                                    </div>
+
+                                    {/* Category Select for Media */}
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="text-[10px] uppercase tracking-widest text-white/40 mb-1 block">Rarity</label>
+                                            <select
+                                                value={newItem.rarity || 'Common'}
+                                                onChange={e => setNewItem({ ...newItem, rarity: e.target.value })}
+                                                className="w-full bg-[#111] border border-white/10 rounded px-2 py-2 text-sm focus:border-accent outline-none"
+                                            >
+                                                <option value="Common">Common</option>
+                                                <option value="Rare">Rare</option>
+                                                <option value="Epic">Epic</option>
+                                                <option value="Legendary">Legendary</option>
+                                                <option value="Anomaly">Anomaly</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] uppercase tracking-widest text-white/40 mb-1 block">Media Type (Category)</label>
+                                            <select
+                                                value={newItem.category || 'Music'}
+                                                onChange={e => setNewItem({ ...newItem, category: e.target.value })}
+                                                className="w-full bg-[#111] border border-white/10 rounded px-2 py-2 text-sm focus:border-accent outline-none"
+                                            >
+                                                <option value="Music">Music (Audio)</option>
+                                                <option value="Videos">Videos</option>
+                                                <option value="Geometry">Geometry</option>
+                                                <option value="Fine Art">Fine Art</option>
+                                            </select>
+                                        </div>
                                     </div>
 
                                     {/* Description */}
@@ -432,11 +526,12 @@ export default function AdminPanel() {
 
                                     {/* SUBMIT */}
                                     <button
-                                        onClick={addItem}
+                                        onClick={saveItem}
                                         disabled={uploading || !newItem.image_url}
-                                        className="w-full py-4 bg-gradient-to-r from-accent to-[#8a6e35] text-black font-bold uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-95 transition-all shadow-[0_0_20px_rgba(197,160,89,0.3)] rounded-sm disabled:opacity-50"
+                                        className={`w-full py-4 text-black font-bold uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-95 transition-all rounded-sm disabled:opacity-50 flex items-center justify-center gap-2 ${editingId ? 'bg-gradient-to-r from-primary to-primary-light shadow-[0_0_20px_rgba(255,255,255,0.3)]' : 'bg-gradient-to-r from-accent to-[#8a6e35] shadow-[0_0_20px_rgba(197,160,89,0.3)]'}`}
                                     >
-                                        Mint Audio to Database
+                                        {editingId ? <Save size={18} /> : null}
+                                        {editingId ? 'Update Record' : 'Mint Audio/Video to DB'}
                                     </button>
                                 </div>
                             </div>
@@ -445,19 +540,19 @@ export default function AdminPanel() {
                         {/* RIGHT COL: CURATOR INVENTORY */}
                         <div className="lg:col-span-2">
                             <div className="flex justify-between items-center mb-6">
-                                <h2 className="text-2xl font-serif text-white">Music Inventory (Realtime)</h2>
+                                <h2 className="text-2xl font-serif text-white">Media Inventory (Realtime)</h2>
                                 <p className="text-xs text-white/30 font-mono">SYNCED WITH SUPABASE</p>
                             </div>
 
                             {/* LIST */}
                             <div className="space-y-4">
                                 <AnimatePresence>
-                                    {galleryItems.filter(item => item.category === 'Music').map((item) => (
-                                        <InventoryCard key={item.id} item={item} onDelete={() => deleteItem(item.id)} onToggle={() => toggleVisibility(item.id, item.is_public)} />
+                                    {galleryItems.filter(item => item.category === 'Music' || item.category === 'Videos' || item.image_url.includes('youtu')).map((item) => (
+                                        <InventoryCard key={item.id} item={item} onEdit={() => handleEditItem(item)} onDelete={() => deleteItem(item.id)} onToggle={() => toggleVisibility(item.id, item.is_public)} editingId={editingId} />
                                     ))}
-                                    {galleryItems.filter(item => item.category === 'Music').length === 0 && (
+                                    {galleryItems.filter(item => item.category === 'Music' || item.category === 'Videos' || item.image_url.includes('youtu')).length === 0 && (
                                         <div className="text-center py-20 text-white/20 font-mono">
-                                            NO AUDIO FILES FOUND IN DATABASE
+                                            NO MEDIA FILES FOUND IN DATABASE
                                         </div>
                                     )}
                                 </AnimatePresence>
@@ -491,7 +586,7 @@ export default function AdminPanel() {
 
 // --- SUB-COMPONENTS ---
 
-function InventoryCard({ item, onDelete, onToggle }: { item: GalleryItem, onDelete: () => void, onToggle: () => void }) {
+function InventoryCard({ item, onEdit, onDelete, onToggle, editingId }: { item: GalleryItem, onEdit: () => void, onDelete: () => void, onToggle: () => void, editingId?: string | null }) {
     return (
         <motion.div
             layout
@@ -501,15 +596,23 @@ function InventoryCard({ item, onDelete, onToggle }: { item: GalleryItem, onDele
             className={`
                 group relative flex items-center gap-4 bg-[#0A0510] border rounded-lg p-2 overflow-hidden
                 ${item.is_public ? 'border-white/10' : 'border-dashed border-white/10 opacity-60'}
+                ${editingId === item.id ? 'border-primary bg-primary/10 shadow-[0_0_15px_rgba(255,255,255,0.2)]' : ''}
                 hover:border-accent hover:shadow-[0_4px_20px_rgba(0,0,0,0.5)] transition-all
             `}
         >
             {/* IMAGE OR AUDIO ICON */}
             <div className="relative w-16 h-16 rounded overflow-hidden flex-shrink-0 bg-black flex items-center justify-center">
-                {item.category === 'Music' ? (
+                {item.category === 'Music' || item.image_url?.includes('.mp3') ? (
                     <div className="text-accent">
                         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                        </svg>
+                    </div>
+                ) : item.image_url?.includes('youtu') ? (
+                    <div className="text-red-500">
+                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
                 ) : (
@@ -537,7 +640,14 @@ function InventoryCard({ item, onDelete, onToggle }: { item: GalleryItem, onDele
             </div>
 
             {/* ACTIONS (Hover reveal) */}
-            <div className="flex items-center gap-2 pr-4 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="flex items-center gap-1 pr-4 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                <button
+                    onClick={onEdit}
+                    className="p-2 hover:bg-white/10 rounded-full text-white/50 hover:text-white transition-colors"
+                    title="Edit Artifact"
+                >
+                    <Edit2 size={16} />
+                </button>
                 <button
                     onClick={onToggle}
                     className="p-2 hover:bg-white/10 rounded-full text-white/50 hover:text-white transition-colors"
