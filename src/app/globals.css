@@ -61,6 +61,12 @@ body {
   min-height: 100vh;
   background-color: #0F1116;
   overflow-x: hidden;
+  cursor: url('/cursor-default.svg') 12 12, auto;
+}
+
+/* --- CURSOR PERSONALIZADO --- */
+a, button, [role="button"], input[type="submit"], input[type="button"], input[type="file"], label, select, .cursor-pointer {
+  cursor: url('/cursor-pointer.svg') 12 12, pointer !important;
 }
 
 /* --- REGLAS DE TIPOGRAFÍA EDITORIAL --- */
