@@ -1,8 +1,6 @@
 'use client';
 
 import Hero from '@/components/home/Hero';
-import Roadmap from '@/components/home/Roadmap';
-import GallerySection from '@/components/home/GallerySection';
 import SeasonPassCard from '@/components/commerce/SeasonPassCard';
 import InnerCircle from '@/components/home/InnerCircle';
 import WeeklyChapterCard from '@/components/commerce/WeeklyChapterCard';
@@ -36,16 +34,6 @@ export default function Home() {
         {/* 1. Hero Section (The Hook) */}
         {/* Passed prop for transparent background if needed, but Hero itself handles layout */}
         <Hero />
-
-        {/* 1.5. Portfolio Gallery (The Collection) */}
-        <div id="collection">
-          <GallerySection />
-        </div>
-
-        {/* 2. Roadmap (The Journey) */}
-        <div id="roadmap">
-          <Roadmap />
-        </div>
 
         {/* 3. The Prime Product (Sales Block) */}
         <section className="py-32 px-6">

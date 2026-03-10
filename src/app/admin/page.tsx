@@ -231,7 +231,11 @@ export default function AdminPanel() {
                 alert("Error saving: " + error.message);
             } else {
                 fetchItems();
-                setNewItem({ title: '', category: 'Geometry', rarity: 'Common', image_url: '', is_public: false, description: '' });
+                if (activeTab === 'music') {
+                    setNewItem({ title: '', category: 'Music', rarity: 'Experimental', image_url: '', image_path: '', is_public: false, description: '' });
+                } else {
+                    setNewItem({ title: '', category: 'Geometry', rarity: 'Common', image_url: '', image_path: '', is_public: false, description: '' });
+                }
                 alert("Arte minteado en la base de datos.");
             }
         }
@@ -253,7 +257,11 @@ export default function AdminPanel() {
 
     const cancelEdit = () => {
         setEditingId(null);
-        setNewItem({ title: '', category: 'Geometry', rarity: 'Common', image_url: '', image_path: '', is_public: false, description: '' });
+        if (activeTab === 'music') {
+            setNewItem({ title: '', category: 'Music', rarity: 'Experimental', image_url: '', image_path: '', is_public: false, description: '' });
+        } else {
+            setNewItem({ title: '', category: 'Geometry', rarity: 'Common', image_url: '', image_path: '', is_public: false, description: '' });
+        }
     };
 
     const deleteItem = async (id: string) => {
@@ -286,7 +294,10 @@ export default function AdminPanel() {
 
                 <div className="flex gap-4">
                     <button
-                        onClick={() => setActiveTab('upload')}
+                        onClick={() => {
+                            setActiveTab('upload');
+                            if (!editingId) setNewItem({ ...newItem, category: 'Geometry', rarity: 'Common', image_url: '' });
+                        }}
                         className={`text-sm uppercase tracking-wider px-4 py-2 rounded transition-colors ${activeTab === 'upload' ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white'}`}
                     >
                         Upload Art

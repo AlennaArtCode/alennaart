@@ -39,12 +39,6 @@ export default function Navbar() {
                     <Link href="/music" className="text-xs font-bold uppercase tracking-widest text-content-secondary hover:text-content-primary transition-colors">
                         Music
                     </Link>
-                    <Link href="/#collection" className="text-xs font-bold uppercase tracking-widest text-content-secondary hover:text-content-primary transition-colors">
-                        Portfolio
-                    </Link>
-                    <Link href="/#roadmap" className="hidden lg:block text-xs font-bold uppercase tracking-widest text-content-secondary hover:text-content-primary transition-colors">
-                        Roadmap
-                    </Link>
                     <Link href="/contact" className="text-xs font-bold uppercase tracking-widest text-content-secondary hover:text-content-primary transition-colors">
                         Contact
                     </Link>
