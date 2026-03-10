@@ -987,15 +987,18 @@ function InventoryCard({ item, onEdit, onDelete, onToggle, editingId }: { item: 
         >
             {/* IMAGE OR AUDIO ICON */}
             <div className="relative w-16 h-16 rounded overflow-hidden flex-shrink-0 bg-black flex items-center justify-center border border-white/5">
-                {item.image_path && item.image_path !== item.image_url && !item.image_path.includes('youtu') ? (
+                {item.image_url?.includes('.mp4') ? (
+                    <video src={item.image_url} autoPlay loop muted className="w-full h-full object-cover" />
+                ) : item.image_path && item.image_path !== item.image_url && !item.image_path.includes('youtu') ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                         src={item.image_path}
-                        alt="Cover"
+                        alt={item.title}
                         className={`w-full h-full object-cover transition-all ${item.is_public ? 'opacity-100' : 'opacity-40 grayscale'}`}
+                        onError={(e) => (e.currentTarget.src = 'https://placehold.co/100?text=?')}
                     />
-                ) : item.category === 'Music' || item.image_url?.includes('.mp3') ? (
-                    <div className="text-accent">
+                ) : item.category === 'Music' && !item.image_url?.includes('youtu') ? (
+                    <div className="text-accent animate-pulse">
                         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                         </svg>
