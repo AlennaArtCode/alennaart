@@ -1,0 +1,38 @@
+[
+  {
+    "id": "773a83e3-708d-4087-bfd9-976c74515f41",
+    "title": "El Hilo Carmesí",
+    "rarity": "Common",
+    "category": "Music"
+  },
+  {
+    "id": "0d4cdda2-8d67-415f-b731-d838ff03d216",
+    "title": "La Voz del Polvo",
+    "rarity": "Common",
+    "category": "Music"
+  },
+  {
+    "id": "71669643-f7eb-4702-9f04-e2e00abe2f1d",
+    "title": "Botas de Gato",
+    "rarity": "Techno",
+    "category": "Music"
+  },
+  {
+    "id": "bfaa61ca-94a1-4958-b854-34b35c55f0f5",
+    "title": "Magnetica (Colaboracion)",
+    "rarity": "Techno",
+    "category": "Music"
+  },
+  {
+    "id": "7c32c74a-c230-4845-9973-090a4f44dd32",
+    "title": "Tu Luz, Mi glitch",
+    "rarity": "Experimental",
+    "category": "Music"
+  },
+  {
+    "id": "a7610661-3bed-4f94-9869-fc86aefdd6d5",
+    "title": "Muestra 1 ",
+    "rarity": "Experimental",
+    "category": "Music"
+  }
+]

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, Trash2, Eye, EyeOff, Wand2, Edit2, X, Save } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import ImageCropperModal from '@/components/admin/ImageCropperModal';
 
 // --- TYPES ---
 type GalleryItem = {
@@ -43,6 +44,11 @@ export default function AdminPanel() {
 
     // NFT Decorator State (New Request)
     const [activeTab, setActiveTab] = useState<'upload' | 'music' | 'decorator'>('upload');
+
+    // Cropper State
+    const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
+    const [cropIsCover, setCropIsCover] = useState(false);
+    const [cropFileName, setCropFileName] = useState<string>('');
 
     // --- EFFECT: CHECK AUTH & LOAD DATA ---
     useEffect(() => {
@@ -93,16 +99,36 @@ export default function AdminPanel() {
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, isAudio: boolean = false, isCover: boolean = false) => {
         if (!e.target.files || e.target.files.length === 0) return;
 
-        setUploading(true);
         const file = e.target.files[0];
-        const fileExt = file.name.split('.').pop();
+
+        // Intercept images for cropping
+        if (!isAudio && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => {
+                setCropImageSrc(reader.result as string);
+                setCropIsCover(isCover);
+                setCropFileName(file.name);
+            };
+            // Clear input so same file can be selected again if canceled
+            e.target.value = '';
+            return;
+        }
+
+        // Proceed directly for audio files
+        await executeUpload(file, isAudio, isCover, file.name);
+    };
+
+    const executeUpload = async (fileOrBlob: File | Blob, isAudio: boolean, isCover: boolean, originalName: string) => {
+        setUploading(true);
+        const fileExt = originalName.split('.').pop() || 'png';
         const fileName = `${Date.now()}_${isCover ? 'cover' : 'media'}.${fileExt}`;
         const filePath = `${fileName}`;
 
         try {
             const { error: uploadError } = await supabase.storage
                 .from(STORAGE_BUCKET)
-                .upload(filePath, file);
+                .upload(filePath, fileOrBlob);
 
             if (uploadError) throw uploadError;
 
@@ -111,9 +137,9 @@ export default function AdminPanel() {
                 .getPublicUrl(filePath);
 
             if (isCover) {
-                setNewItem({ ...newItem, image_path: publicUrl });
+                setNewItem(prev => ({ ...prev, image_path: publicUrl }));
             } else {
-                setNewItem({ ...newItem, image_url: publicUrl, category: isAudio ? 'Music' : newItem.category });
+                setNewItem(prev => ({ ...prev, image_url: publicUrl, category: isAudio ? 'Music' : prev.category }));
             }
         } catch (error: unknown) {
             if (error instanceof Error) {
@@ -122,6 +148,15 @@ export default function AdminPanel() {
         } finally {
             setUploading(false);
         }
+    };
+
+    const handleCropComplete = async (croppedBlob: Blob) => {
+        setCropImageSrc(null); // Close modal
+        await executeUpload(croppedBlob, false, cropIsCover, cropFileName);
+    };
+
+    const handleCropCancel = () => {
+        setCropImageSrc(null);
     };
 
     const saveItem = async () => {
@@ -625,6 +660,16 @@ export default function AdminPanel() {
                 )}
 
             </main>
+
+            {/* Image Cropper Modal */}
+            {cropImageSrc && (
+                <ImageCropperModal
+                    imageSrc={cropImageSrc}
+                    isCover={cropIsCover}
+                    onCropComplete={handleCropComplete}
+                    onCancel={handleCropCancel}
+                />
+            )}
         </div>
     );
 }
