@@ -102,15 +102,19 @@ export default function AdminPanel() {
         const file = e.target.files[0];
 
         // Intercept images for cropping
+        // Si el archivo es una imagen y no es audio, evitamos subirlo directo
+        // y lo preparamos para el modal de recorte (ImageCropperModal)
         if (!isAudio && file.type.startsWith('image/')) {
             const reader = new FileReader();
             reader.readAsDataURL(file);
             reader.onload = () => {
+                // Guardamos la imagen localmente para mostrarla en el cropper
                 setCropImageSrc(reader.result as string);
-                setCropIsCover(isCover);
+                setCropIsCover(isCover); // Sabemos si es portada o arte principal
                 setCropFileName(file.name);
             };
             // Clear input so same file can be selected again if canceled
+            // Vaciamos el input para que detecte si subimos el mismo archivo de nuevo
             e.target.value = '';
             return;
         }
@@ -150,13 +154,16 @@ export default function AdminPanel() {
         }
     };
 
+    // Se ejecuta al confirmar el recorte en el modal
     const handleCropComplete = async (croppedBlob: Blob) => {
-        setCropImageSrc(null); // Close modal
+        setCropImageSrc(null); // Cierra el modal de recorte
+        // Sube el Blob de la imagen ya recortada a la base de datos
         await executeUpload(croppedBlob, false, cropIsCover, cropFileName);
     };
 
+    // Cancela el recorte y regresa a la pantalla anterior
     const handleCropCancel = () => {
-        setCropImageSrc(null);
+        setCropImageSrc(null); // Cierra el modal de recorte
     };
 
     const saveItem = async () => {
@@ -661,7 +668,7 @@ export default function AdminPanel() {
 
             </main>
 
-            {/* Image Cropper Modal */}
+            {/* Image Cropper Modal - Módulo encargado de recortar imágenes antes de subirlas (Cuadradas/Redondas) */}
             {cropImageSrc && (
                 <ImageCropperModal
                     imageSrc={cropImageSrc}

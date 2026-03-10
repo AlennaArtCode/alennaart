@@ -1,20 +1,26 @@
 // src/lib/cropUtils.ts
 
+// --- FUNCIONES AUXILIARES PARA EL RECORTE DE IMÁGENES ---
+
+// Crea un elemento de imagen en memoria a partir de una URL o cadena base64.
+// Esto nos permite manipular sus píxeles nativamente antes de subirla.
 export const createImage = (url: string): Promise<HTMLImageElement> =>
     new Promise((resolve, reject) => {
         const image = new Image()
         image.addEventListener('load', () => resolve(image))
         image.addEventListener('error', (error) => reject(error))
-        image.setAttribute('crossOrigin', 'anonymous') // needed to avoid cross-origin issues on CodeSandbox
+        image.setAttribute('crossOrigin', 'anonymous') // Necesario para evitar bloqueos CORS si la imagen viene de otro servidor
         image.src = url
     })
 
+// Convierte grados a radianes (necesario para las rotaciones del canvas)
 export function getRadianAngle(degreeValue: number) {
     return (degreeValue * Math.PI) / 180
 }
 
 /**
- * Returns the new bounding area of a rotated rectangle.
+ * Devuelve la nueva área (Bounding Box) o tamaño contenedor
+ * cuando una imagen es rotada.
  */
 export function rotateSize(width: number, height: number, rotation: number) {
     const rotRad = getRadianAngle(rotation)
@@ -28,7 +34,8 @@ export function rotateSize(width: number, height: number, rotation: number) {
 }
 
 /**
- * This function returns the cropped image as a Blob.
+ * Función principal: Extrae y devuelve la copia recortada como un archivo Blob.
+ * Este Blob luego puede subirse directamente a Supabase sin tener que guardarlo a disco.
  */
 export async function getCroppedImg(
     imageSrc: string,

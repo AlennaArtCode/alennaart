@@ -4,10 +4,10 @@ import { getCroppedImg } from '@/lib/cropUtils';
 import { X, Check } from 'lucide-react';
 
 interface ImageCropperModalProps {
-    imageSrc: string;
-    isCover: boolean;
-    onCropComplete: (croppedBlob: Blob) => void;
-    onCancel: () => void;
+    imageSrc: string; // URL o base64 de la imagen seleccionada temporalmente
+    isCover: boolean; // Bandera para saber si es portada o no, y aplicar lógicas visuales
+    onCropComplete: (croppedBlob: Blob) => void; // Función callback cuando el usuario finaliza
+    onCancel: () => void; // Función callback para cancelar proceso
 }
 
 export default function ImageCropperModal({ imageSrc, isCover, onCropComplete, onCancel }: ImageCropperModalProps) {
@@ -29,12 +29,17 @@ export default function ImageCropperModal({ imageSrc, isCover, onCropComplete, o
         setZoom(zoom);
     };
 
+    // --- PROCESAMIENTO DEL RECORTE ---
+    // Función central que se llama al pulsar "Apply Crop". 
+    // Toma las coordenadas y el nivel de zoom y delega a 'getCroppedImg' (tu herramienta de Canvas)
+    // la generación de una nueva imagen Blob.
     const confirmCrop = async () => {
         try {
             if (croppedAreaPixels) {
+                // extrae un archivo Blob puro, optimizado para subir a la nube
                 const croppedBlob = await getCroppedImg(imageSrc, croppedAreaPixels, 0);
                 if (croppedBlob) {
-                    onCropComplete(croppedBlob);
+                    onCropComplete(croppedBlob); // Le regresa la imagen lista al proceso principal (`page.tsx`)
                 }
             }
         } catch (e) {

@@ -174,7 +174,9 @@ export default function MusicClientView() {
         else setLoopMode('none');
     };
 
-    // Derived Data
+    // --- MÓDULO DE CLASIFICACIÓN DINÁMICA DE GÉNEROS ---
+    // Función que normaliza la rareza (que usamos como género musical)
+    // Si la rareza es un valor por defecto ('Common', 'Rare', etc), la agrupa en 'Otras Frecuencias'
     const normalizeGenre = (rarity: string) => {
         if (!rarity || ['Common', 'Rare', 'Legendary', 'Epic', 'Mythic'].includes(rarity)) {
             return 'Otras Frecuencias';
@@ -182,9 +184,12 @@ export default function MusicClientView() {
         return rarity;
     };
 
+    // Extraemos todos los géneros únicos de las canciones directamente desde la Base de Datos
     const genres = Array.from(new Set(audioTracks.map(t => normalizeGenre(t.rarity))));
 
-    // Specific order logic prioritizing known categories, otherwise alphabetically
+    // Lógica para ordenar los géneros:
+    // Priorizamos que Techno, Experimental y Urbano Trap aparezcan primero.
+    // El resto se ordena alfabéticamente.
     genres.sort((a, b) => {
         const order = ['Techno', 'Experimental', 'Urbano Trap', 'Otras Frecuencias'];
         const indexA = order.indexOf(a);
