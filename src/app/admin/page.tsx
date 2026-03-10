@@ -19,6 +19,16 @@ type GalleryItem = {
     created_at?: string;
 };
 
+type Ticket = {
+    id: string;
+    name: string;
+    email: string;
+    tag: string;
+    message: string;
+    status: string;
+    created_at: string;
+};
+
 // --- CONFIG ---
 const STORAGE_BUCKET = 'portfolio';
 
@@ -33,6 +43,7 @@ export default function AdminPanel() {
 
     // Data State
     const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
+    const [tickets, setTickets] = useState<Ticket[]>([]);
     const [uploading, setUploading] = useState(false);
 
     // Form State
@@ -43,7 +54,7 @@ export default function AdminPanel() {
     const [editingId, setEditingId] = useState<string | null>(null);
 
     // NFT Decorator State (New Request)
-    const [activeTab, setActiveTab] = useState<'upload' | 'music' | 'decorator'>('upload');
+    const [activeTab, setActiveTab] = useState<'upload' | 'music' | 'decorator' | 'tickets'>('upload');
 
     // Cropper State
     const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
@@ -94,6 +105,24 @@ export default function AdminPanel() {
 
         if (error) console.error('Error fetching:', error);
         else setGalleryItems(data || []);
+
+        fetchTickets();
+    };
+
+    const fetchTickets = async () => {
+        const { data, error } = await supabase
+            .from('tickets')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) console.error('Error fetching tickets:', error);
+        else setTickets(data || []);
+    };
+
+    const resolveTicket = async (id: string, currentStatus: string) => {
+        const newStatus = currentStatus === 'open' ? 'closed' : 'open';
+        const { error } = await supabase.from('tickets').update({ status: newStatus }).eq('id', id);
+        if (!error) fetchTickets();
     };
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, isAudio: boolean = false, isCover: boolean = false) => {
@@ -277,6 +306,17 @@ export default function AdminPanel() {
                     >
                         <Wand2 size={16} />
                         NFT Decorator
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('tickets')}
+                        className={`flex items-center gap-2 text-sm uppercase tracking-wider px-4 py-2 rounded transition-colors ${activeTab === 'tickets' ? 'bg-accent/20 text-accent' : 'text-white/40 hover:text-accent'} relative`}
+                    >
+                        Inbox
+                        {tickets.filter(t => t.status === 'open').length > 0 && (
+                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">
+                                {tickets.filter(t => t.status === 'open').length}
+                            </span>
+                        )}
                     </button>
                     <button onClick={handleLogout} className="text-xs uppercase tracking-widest text-white/40 hover:text-white transition-colors border-l border-white/10 pl-4 ml-2">
                         Logout
@@ -663,6 +703,50 @@ export default function AdminPanel() {
                             <span className="px-4 py-2 bg-white/10 rounded text-xs uppercase tracking-widest text-white/60">Metadata</span>
                         </div>
                         <p className="mt-8 text-xs text-accent font-mono">COMING SOON IN PHASE 2</p>
+                    </div>
+                )}
+
+                {/* --- TAB: TICKETS INBOX --- */}
+                {activeTab === 'tickets' && (
+                    <div className="space-y-6">
+                        <div className="flex justify-between items-center bg-[#0A0B0E] p-6 rounded border border-white/5">
+                            <div>
+                                <h2 className="text-xl font-serif text-white">Inbox & Transmissions</h2>
+                                <p className="text-sm text-content-muted mt-1">Manage incoming communications.</p>
+                            </div>
+                            <div className="text-accent font-mono text-sm">
+                                {tickets.filter(t => t.status === 'open').length} OPEN TICKETS
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {tickets.map(ticket => (
+                                <div key={ticket.id} className={`bg-[#0A0510] border ${ticket.status === 'open' ? 'border-accent/40' : 'border-white/10 opacity-50'} p-6 rounded space-y-4`}>
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <span className="text-[10px] font-mono tracking-widest text-accent uppercase">{ticket.tag}</span>
+                                            <h3 className="font-serif text-lg text-white mt-1">{ticket.name}</h3>
+                                            <a href={`mailto:${ticket.email}`} className="text-xs text-blue-400 hover:underline">{ticket.email}</a>
+                                        </div>
+                                        <span className="text-xs text-white/40">{new Date(ticket.created_at).toLocaleDateString()}</span>
+                                    </div>
+                                    <p className="text-sm text-white/70 bg-white/5 p-4 rounded font-mono break-words border-l-2 border-accent/50">{ticket.message}</p>
+                                    <div className="flex justify-end pt-2 border-t border-white/10">
+                                        <button
+                                            onClick={() => resolveTicket(ticket.id, ticket.status)}
+                                            className={`text-xs uppercase tracking-widest px-4 py-2 rounded transition-colors ${ticket.status === 'open' ? 'bg-accent text-black hover:bg-accent/90' : 'bg-white/10 text-white hover:bg-white/20'}`}
+                                        >
+                                            {ticket.status === 'open' ? 'Mark Resolved' : 'Reopen Ticket'}
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                            {tickets.length === 0 && (
+                                <div className="col-span-1 md:col-span-2 text-center py-12 text-content-muted border border-dashed border-white/10 rounded">
+                                    No incoming transmissions yet.
+                                </div>
+                            )}
+                        </div>
                     </div>
                 )}
 
