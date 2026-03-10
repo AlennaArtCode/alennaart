@@ -1,9 +1,41 @@
-'use client';
-
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import { supabase } from '@/lib/supabase';
+
+type GalleryItem = {
+    id: string;
+    title: string;
+    category: string;
+    rarity: string;
+    image_url: string;
+    image_path?: string;
+    description?: string;
+    created_at?: string;
+};
 
 export default function NFTsPage() {
+    const [nfts, setNfts] = useState<GalleryItem[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchNFTs = async () => {
+            const { data, error } = await supabase
+                .from('artworks')
+                .select('*')
+                .in('category', ['Season Pass', 'Weekly Chapter', '1/1 Edition', 'DELUXE NFT', 'NFT Collection'])
+                .eq('is_public', true)
+                .order('created_at', { ascending: false });
+
+            if (!error && data) {
+                setNfts(data);
+            }
+            setLoading(false);
+        };
+
+        fetchNFTs();
+    }, []);
+
     return (
         <main className="min-h-screen relative overflow-hidden bg-[#0A0510] text-content-primary">
 
@@ -102,24 +134,33 @@ export default function NFTsPage() {
                     </div>
                 </motion.section>
 
-                {/* Collections Gallery - Placeholder for more NFTs */}
+                {/* Collections Gallery - Real Data */}
                 <section className="relative pt-12 space-y-12">
                     <div className="flex items-center gap-6">
-                        <h2 className="text-3xl font-serif font-bold text-white tracking-widest uppercase">Past Collections</h2>
+                        <h2 className="text-3xl font-serif font-bold text-white tracking-widest uppercase">Vault Collection</h2>
                         <div className="h-px flex-1 bg-gradient-to-r from-white/20 to-transparent" />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <CollectionCard
-                            title="Genesis Zero"
-                            year="2024"
-                            image="https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2574&auto=format&fit=crop"
-                            desc="The foundational 10 pieces that started the journey. Sold out."
-                        />
-                        <div className="glass-panel border-dashed border-white/10 flex items-center justify-center min-h-[300px] text-content-muted rounded-xl">
-                            <span className="font-mono text-xs uppercase tracking-widest">Awaiting Transmission...</span>
+                    {loading ? (
+                        <div className="py-20 text-center text-white/20 font-mono animate-pulse">Syncing Vault...</div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            {nfts.map((nft) => (
+                                <CollectionCard
+                                    key={nft.id}
+                                    title={nft.title}
+                                    category={nft.category}
+                                    image={nft.image_url}
+                                    desc={nft.description || `A rare artifact from the ${nft.category} collection.`}
+                                />
+                            ))}
+                            {nfts.length === 0 && (
+                                <div className="glass-panel col-span-1 md:col-span-3 border-dashed border-white/10 flex items-center justify-center min-h-[300px] text-content-muted rounded-xl">
+                                    <span className="font-mono text-xs uppercase tracking-widest">Awaiting Transmission... Vault Empty.</span>
+                                </div>
+                            )}
                         </div>
-                    </div>
+                    )}
                 </section>
 
             </div>
@@ -127,25 +168,40 @@ export default function NFTsPage() {
     );
 }
 
-function CollectionCard({ title, year, image, desc }: { title: string, year: string, image: string, desc: string }) {
+function CollectionCard({ title, category, image, desc }: { title: string, category: string, image: string, desc: string }) {
+    const isVideo = image?.includes('.mp4');
+
     return (
-        <div className="glass-panel rounded-xl overflow-hidden group cursor-pointer hover:bg-white/5 transition-colors border border-white/5 hover:border-accent/30 flex flex-col">
-            <div className="relative h-48 overflow-hidden">
-                <Image
-                    src={image}
-                    alt={title}
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-105 opacity-80 group-hover:opacity-100 grayscale group-hover:grayscale-0"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0A0510] to-transparent" />
-                <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-md border border-white/10 px-2 py-1 rounded text-[9px] uppercase tracking-widest text-white/70">
-                    {year}
+        <div className="glass-panel rounded-xl overflow-hidden group cursor-pointer hover:bg-white/5 transition-colors border border-white/5 hover:border-accent/30 flex flex-col h-full">
+            <div className="relative h-64 overflow-hidden bg-black/50">
+                {isVideo ? (
+                    <video
+                        src={image}
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-105"
+                    />
+                ) : (
+                    <Image
+                        src={image || 'https://placehold.co/400?text=?'}
+                        alt={title}
+                        fill
+                        className="object-cover transition-transform duration-700 group-hover:scale-105 opacity-80 group-hover:opacity-100 grayscale hover:grayscale-0"
+                    />
+                )}
+
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0A0510] to-transparent pointer-events-none" />
+                <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-md border border-white/10 px-2 py-1 rounded text-[9px] uppercase tracking-widest text-white/70 z-10">
+                    {category}
                 </div>
             </div>
-            <div className="p-6 flex-1 flex flex-col">
+            <div className="p-6 flex-1 flex flex-col relative z-20">
                 <h3 className="text-xl font-serif font-bold text-white group-hover:text-accent transition-colors mb-2">{title}</h3>
-                <p className="text-sm text-content-muted font-light leading-relaxed">{desc}</p>
+                <p className="text-sm text-content-muted font-light leading-relaxed flex-1">{desc}</p>
             </div>
         </div>
     );
 }
+
