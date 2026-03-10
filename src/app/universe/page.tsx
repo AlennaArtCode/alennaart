@@ -1,35 +1,7 @@
 'use client';
 
-import { motion, Variants } from 'framer-motion';
+import { motion } from 'framer-motion';
 import Image from 'next/image';
-import SeasonPassCard from '@/components/commerce/SeasonPassCard';
-import QuestBoard from '@/components/engagement/QuestBoard';
-import RewardsTrack from '@/components/engagement/RewardsTrack';
-
-const floatingVariant: Variants = {
-    initial: { y: 0 },
-    animate: {
-        y: [-10, 10, -10],
-        transition: {
-            duration: 6,
-            ease: "easeInOut",
-            repeat: Infinity
-        }
-    }
-};
-
-const delayedFloat: Variants = {
-    initial: { y: 0 },
-    animate: {
-        y: [10, -10, 10],
-        transition: {
-            duration: 7,
-            ease: "easeInOut",
-            repeat: Infinity,
-            delay: 1
-        }
-    }
-};
 
 export default function UniversePage() {
     return (
@@ -50,99 +22,135 @@ export default function UniversePage() {
 
             <div className="relative z-10 max-w-7xl mx-auto px-6 py-24 space-y-24">
 
-                {/* Header - Command Center Style */}
-                <header className="text-center space-y-6">
+                {/* Header */}
+                <header className="text-center space-y-6 pt-12">
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8 }}
                         className="inline-block border border-accent/30 px-6 py-2 rounded-full backdrop-blur-md bg-white/5"
                     >
                         <span className="text-accent font-mono tracking-[0.3em] text-xs uppercase glow-text">
-                            Alennaverse System | Hub
+                            Portfolio & Upcoming Mints
                         </span>
                     </motion.div>
 
-                    <h1 className="text-6xl md:text-8xl font-bold font-serif tracking-tighter text-white drop-shadow-[0_0_30px_rgba(255,255,255,0.1)]">
-                        THE <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-accent-hover">UNIVERSE</span>
-                    </h1>
+                    <motion.h1
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 1, delay: 0.2 }}
+                        className="text-5xl md:text-7xl font-bold font-serif tracking-tighter text-white drop-shadow-[0_0_30px_rgba(255,255,255,0.1)]"
+                    >
+                        ALENNA'S PROJECTS <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-[#8a6e35]">//</span> ART
+                    </motion.h1>
 
-                    <p className="text-content-secondary max-w-2xl mx-auto text-lg font-light leading-relaxed">
-                        The nexus of all creation. Manage your assets, track your progress, and explore the archives of the past.
-                    </p>
+                    <motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 1, delay: 0.4 }}
+                        className="text-content-secondary max-w-2xl mx-auto text-lg font-light leading-relaxed"
+                    >
+                        Discover the expanding universe of my digital art. From exclusive NFT collections to ongoing creative endeavors, explore the visions shaping the Alenna Art legacy.
+                    </motion.p>
                 </header>
 
-                {/* Floating Dashboard Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-
-                    {/* Left Column - Season Pass (The Key) */}
-                    <motion.div
-                        variants={floatingVariant}
-                        initial="initial"
-                        animate="animate"
-                        className="lg:col-span-5 sticky top-24"
-                    >
-                        <div className="glass-panel p-2 rounded-3xl relative group">
-                            <div className="absolute -top-3 left-6 px-3 bg-[#0A0510] text-accent text-xs font-mono uppercase tracking-widest border border-accent/20 rounded">
-                                Season Access
+                {/* Featured Drop Section */}
+                <motion.section
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 1, delay: 0.6 }}
+                    className="relative"
+                >
+                    <div className="absolute -inset-4 bg-gradient-to-r from-accent/10 to-transparent blur-xl rounded-3xl" />
+                    <div className="relative glass-panel rounded-3xl overflow-hidden border border-accent/20">
+                        <div className="grid grid-cols-1 md:grid-cols-2">
+                            {/* Visual */}
+                            <div className="relative h-[400px] md:h-auto bg-black border-b md:border-b-0 md:border-r border-white/5 overflow-hidden group">
+                                <div className="absolute inset-0 bg-accent/10 mix-blend-overlay z-10 group-hover:opacity-0 transition-opacity duration-700" />
+                                <Image
+                                    src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop"
+                                    alt="Featured Project"
+                                    fill
+                                    className="object-cover transition-transform duration-1000 group-hover:scale-105"
+                                />
+                                <div className="absolute top-6 left-6 z-20">
+                                    <span className="bg-accent text-black font-bold text-[10px] uppercase tracking-widest px-3 py-1 rounded-full shadow-[0_0_15px_rgba(197,160,89,0.5)]">
+                                        Active Drop
+                                    </span>
+                                </div>
                             </div>
-                            <SeasonPassCard />
+
+                            {/* Info */}
+                            <div className="p-8 md:p-12 flex flex-col justify-center bg-gradient-to-br from-transparent to-black/50">
+                                <h2 className="text-3xl lg:text-5xl font-serif text-white mb-4">The Convergence Series</h2>
+                                <p className="text-content-secondary mb-8 leading-relaxed font-light">
+                                    A limited collection of 50 unique digital artifacts blending surreal geometry with high-fashion elements. Neural-generated textures combined with master-level digital painting techniques. Early access available for Genesis holders.
+                                </p>
+
+                                <div className="grid grid-cols-2 gap-4 mb-8">
+                                    <div className="bg-white/5 p-4 rounded-lg border border-white/10">
+                                        <div className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Network</div>
+                                        <div className="font-mono text-accent">Ethereum</div>
+                                    </div>
+                                    <div className="bg-white/5 p-4 rounded-lg border border-white/10">
+                                        <div className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Items</div>
+                                        <div className="font-mono text-accent">50 / 50 Remaining</div>
+                                    </div>
+                                </div>
+
+                                <button className="w-full py-4 text-center border-2 border-accent text-accent font-bold uppercase tracking-widest text-xs hover:bg-accent hover:text-black transition-all glow-button relative overflow-hidden group">
+                                    <span className="relative z-10">View Collection (Soon)</span>
+                                    <div className="absolute inset-0 bg-accent/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+                                </button>
+                            </div>
                         </div>
-                    </motion.div>
-
-                    {/* Right Column - Active Modules */}
-                    <div className="lg:col-span-7 space-y-8">
-
-                        {/* Rewards */}
-                        <motion.div
-                            variants={delayedFloat}
-                            initial="initial"
-                            animate="animate"
-                            className="glass-panel p-8 rounded-2xl relative overflow-hidden"
-                        >
-                            <div className="absolute top-0 right-0 w-40 h-40 bg-accent/5 blur-[50px] rounded-full" />
-                            <h2 className="text-2xl font-serif font-bold mb-6 flex items-center gap-3 text-white">
-                                <span className="w-2 h-2 bg-accent rounded-full animate-pulse shadow-[0_0_10px_#F0B429]" />
-                                Your Progression
-                            </h2>
-                            <RewardsTrack currentXP={1700} />
-                        </motion.div>
-
-                        {/* Quests */}
-                        <motion.div
-                            variants={floatingVariant}
-                            initial="initial"
-                            animate="animate"
-                        >
-                            <QuestBoard />
-                        </motion.div>
-
                     </div>
-                </div>
+                </motion.section>
 
-                {/* Legacy Collections - Horizontal Stream */}
-                <section className="relative pt-12">
-                    <div className="flex items-center gap-6 mb-16">
-                        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-                        <h2 className="text-3xl font-serif font-bold text-center text-white/50 tracking-widest uppercase">Legacy Archives</h2>
-                        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                {/* Projects Gallery */}
+                <section className="relative pt-12 space-y-12">
+                    <div className="flex items-center gap-6">
+                        <h2 className="text-3xl font-serif font-bold text-white tracking-widest uppercase">Ongoing Projects</h2>
+                        <div className="h-px flex-1 bg-gradient-to-r from-white/20 to-transparent" />
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {/* Placeholder for Past Collections */}
-                        <ArchiveCard
-                            year="2024"
-                            title="Genesis Zero"
-                            image="https://placehold.co/600x400/100515/333/png?text=Genesis"
+                        <ProjectCard
+                            title="Exemplaria"
+                            category="Digital Exhibit"
+                            status="In Progress"
+                            image="https://images.unsplash.com/photo-1549490349-8643362247b5?q=80&w=2600&auto=format&fit=crop"
+                            desc="The core database housing all multimedia creations. Serving as the foundation for the Alenna catalog."
                         />
-                        <ArchiveCard
-                            year="2023"
-                            title="Pre-Alpha Specs"
-                            image="https://placehold.co/600x400/100515/333/png?text=Pre-Alpha"
+                        <ProjectCard
+                            title="Chromatic Resurgence"
+                            category="NFT Concept"
+                            status="Planning Phase"
+                            image="https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?q=80&w=2670&auto=format&fit=crop"
+                            desc="Exploring pure color theory merged with hyper-realistic rendering. Expected Q4."
                         />
-                        <div className="glass-panel border-dashed border-white/10 flex items-center justify-center min-h-[200px] text-content-muted">
-                            <span className="font-mono text-xs uppercase tracking-widest">More Data Recovering...</span>
-                        </div>
+                        <ProjectCard
+                            title="Sonic Frequencies"
+                            category="Audio/Visual"
+                            status="Live"
+                            image="https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?q=80&w=2669&auto=format&fit=crop"
+                            desc="A multi-sensory experience pairing auditory tracks with visual spectacles."
+                        />
+                    </div>
+                </section>
+
+                {/* Pre-footer Call to Action */}
+                <section className="py-24 text-center">
+                    <h3 className="text-2xl font-serif text-white/80 mb-6">Stay updated on future mints</h3>
+                    <div className="inline-flex flex-col sm:flex-row gap-4 w-full max-w-md">
+                        <input
+                            type="email"
+                            placeholder="Transmission Address..."
+                            className="flex-1 bg-white/5 border border-white/20 rounded-md px-4 py-3 text-sm focus:border-accent outline-none font-mono text-white placeholder:text-white/30"
+                        />
+                        <button className="bg-white text-black px-6 py-3 font-bold uppercase text-xs tracking-widest hover:bg-accent transition-colors rounded-md">
+                            Subscribe
+                        </button>
                     </div>
                 </section>
 
@@ -151,17 +159,25 @@ export default function UniversePage() {
     );
 }
 
-function ArchiveCard({ title, year, image }: { title: string, year: string, image: string }) {
+function ProjectCard({ title, category, image, desc, status }: { title: string, category: string, image: string, desc: string, status: string }) {
     return (
-        <div className="glass-panel rounded-xl overflow-hidden group cursor-pointer hover:bg-white/5 transition-colors">
-            <div className="relative h-48 opacity-60 group-hover:opacity-100 transition-opacity grayscale group-hover:grayscale-0">
-                {/* Using standard img for placeholder or next/image if you prefer, keeping simple for archive */}
-                <Image src={image} alt={title} fill className="object-cover" />
+        <div className="glass-panel rounded-xl overflow-hidden group cursor-pointer hover:bg-white/5 transition-colors border border-white/5 hover:border-accent/30 flex flex-col">
+            <div className="relative h-56 overflow-hidden">
+                <Image
+                    src={image}
+                    alt={title}
+                    fill
+                    className="object-cover transition-transform duration-700 group-hover:scale-105 opacity-80 group-hover:opacity-100 grayscale hover:grayscale-0"
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0A0510] to-transparent" />
+                <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-md border border-white/10 px-2 py-1 rounded text-[9px] uppercase tracking-widest text-white/70">
+                    {status}
+                </div>
             </div>
-            <div className="p-6">
-                <span className="text-xs font-mono text-accent-muted block mb-1">{year}</span>
-                <h3 className="text-xl font-serif font-bold text-white group-hover:text-accent transition-colors">{title}</h3>
+            <div className="p-6 flex-1 flex flex-col">
+                <span className="text-[10px] font-bold tracking-[0.2em] text-accent block mb-2 uppercase">{category}</span>
+                <h3 className="text-xl font-serif font-bold text-white group-hover:text-accent transition-colors mb-3 leading-tight">{title}</h3>
+                <p className="text-sm text-content-muted font-light leading-relaxed flex-1">{desc}</p>
             </div>
         </div>
     );

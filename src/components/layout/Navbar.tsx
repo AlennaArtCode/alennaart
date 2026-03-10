@@ -31,7 +31,7 @@ export default function Navbar() {
                 {/* Desktop Nav - Center */}
                 <div className="hidden md:flex items-center justify-center gap-8">
                     <Link href="/universe" className="text-xs font-bold uppercase tracking-widest text-content-secondary hover:text-content-primary transition-colors">
-                        Universe
+                        Projects & NFTs
                     </Link>
                     <Link href="/#collection" className="text-xs font-bold uppercase tracking-widest text-content-secondary hover:text-content-primary transition-colors">
                         Portfolio
