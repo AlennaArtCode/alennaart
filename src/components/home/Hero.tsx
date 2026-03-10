@@ -5,8 +5,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRef } from 'react';
 import { Music } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function Hero() {
+    const { t } = useLanguage();
     const containerRef = useRef<HTMLDivElement>(null);
     const { scrollYProgress } = useScroll({
         target: containerRef,
@@ -31,17 +33,17 @@ export default function Hero() {
                 <div className="flex-1 text-center md:text-left space-y-8 z-20 order-2 md:order-1">
                     <div className="opacity-100 flex flex-col items-center md:items-start">
                         <p className="text-xl md:text-2xl text-accent font-serif italic mb-4">
-                            &quot;Pain has no form. <br /> But the cure is geometric.&quot;
+                            {t('hero', 'quote_1')} <br /> {t('hero', 'quote_2')}
                         </p>
 
                         <h1 className="text-5xl md:text-7xl lg:text-8xl font-serif font-medium leading-[0.9] text-white tracking-tight mb-6">
-                            Minting <br />
-                            The Future
+                            {t('hero', 'title_1')} <br />
+                            {t('hero', 'title_2')}
                         </h1>
 
                         <p className="text-lg text-white/40 font-light max-w-lg mx-auto md:mx-0 leading-relaxed mb-8">
-                            Discover the <strong>Exemplaria</strong> collection. <br />
-                            Exclusive Art Pieces Tokenized on the Blockchain.
+                            {t('hero', 'subtitle_1')} <br />
+                            {t('hero', 'subtitle_2')}
                         </p>
 
                         {/* PLAY / START INTERACTION */}
@@ -59,7 +61,7 @@ export default function Hero() {
                                         <path d="M8 5v14l11-7z" />
                                     </svg>
                                 </Link>
-                                <span className="text-xs sm:text-sm uppercase tracking-widest text-white/60 font-bold hidden sm:block">Explore</span>
+                                <span className="text-xs sm:text-sm uppercase tracking-widest text-white/60 font-bold hidden sm:block">{t('hero', 'explore')}</span>
                             </div>
 
                             <div className="w-px h-8 bg-white/20 hidden sm:block" />
@@ -69,7 +71,7 @@ export default function Hero() {
                                 className="group flex items-center gap-3 px-6 py-3 sm:py-4 rounded-full bg-white/5 border border-white/20 hover:border-accent hover:bg-accent/10 transition-all duration-300 hover:shadow-[0_0_20px_rgba(197,160,89,0.3)]"
                             >
                                 <Music size={18} className="text-accent group-hover:scale-110 transition-transform" />
-                                <span className="text-xs sm:text-sm uppercase tracking-widest text-white font-bold group-hover:text-accent transition-colors">Listen to Music</span>
+                                <span className="text-xs sm:text-sm uppercase tracking-widest text-white font-bold group-hover:text-accent transition-colors">{t('hero', 'listen')}</span>
                             </Link>
                         </div>
                     </div>
@@ -102,7 +104,7 @@ export default function Hero() {
                 onClick={() => document.getElementById('collection')?.scrollIntoView({ behavior: 'smooth' })}
                 className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/20 text-[10px] tracking-[0.4em] font-sans animate-bounce cursor-pointer hover:text-accent transition-colors"
             >
-                SCROLL TO EXPLORE
+                {t('hero', 'scroll')}
             </motion.div>
 
         </section >

@@ -1,12 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import WalletGatedButton from '@/components/auth/WalletGatedButton';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function Navbar() {
-    const [lang, setLang] = useState<'EN' | 'ES'>('EN');
+    const { lang, setLang, t } = useLanguage();
     const pathname = usePathname();
 
     if (pathname === '/executive') {
@@ -31,16 +31,16 @@ export default function Navbar() {
                 {/* Desktop Nav - Center */}
                 <div className="hidden md:flex items-center justify-center gap-8">
                     <Link href="/universe" className="text-xs font-bold uppercase tracking-widest text-content-secondary hover:text-content-primary transition-colors">
-                        Projects
+                        {t('nav', 'projects')}
                     </Link>
                     <Link href="/nfts" className="text-xs font-bold uppercase tracking-widest text-content-secondary hover:text-content-primary transition-colors">
-                        NFTs
+                        {t('nav', 'nfts')}
                     </Link>
                     <Link href="/music" className="text-xs font-bold uppercase tracking-widest text-content-secondary hover:text-content-primary transition-colors">
-                        Music
+                        {t('nav', 'music')}
                     </Link>
                     <Link href="/contact" className="text-xs font-bold uppercase tracking-widest text-content-secondary hover:text-content-primary transition-colors">
-                        Contact
+                        {t('nav', 'contact')}
                     </Link>
                 </div>
 
@@ -59,7 +59,7 @@ export default function Navbar() {
                     {/* Connect Button */}
                     <div className="hidden sm:block">
                         <WalletGatedButton onClick={() => { }} className="btn-primary text-xs py-2 px-6 !rounded-md">
-                            Connect
+                            {t('nav', 'connect')}
                         </WalletGatedButton>
 
 

@@ -2,8 +2,10 @@
 
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function UniversePage() {
+    const { t } = useLanguage();
     return (
         <main className="min-h-screen relative overflow-hidden bg-[#0A0510] text-content-primary">
 
@@ -31,7 +33,7 @@ export default function UniversePage() {
                         className="inline-block border border-accent/30 px-6 py-2 rounded-full backdrop-blur-md bg-white/5"
                     >
                         <span className="text-accent font-mono tracking-[0.3em] text-xs uppercase glow-text">
-                            Portfolio & Upcoming Mints
+                            {t('universe', 'subtitle')}
                         </span>
                     </motion.div>
 
@@ -41,7 +43,7 @@ export default function UniversePage() {
                         transition={{ duration: 1, delay: 0.2 }}
                         className="text-5xl md:text-7xl font-bold font-serif tracking-tighter text-white drop-shadow-[0_0_30px_rgba(255,255,255,0.1)]"
                     >
-                        ALENNA'S <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-[#8a6e35]">PROJECTS</span>
+                        {t('universe', 'title_part1')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-[#8a6e35]">{t('universe', 'title_part2')}</span>
                     </motion.h1>
 
                     <motion.p
@@ -50,7 +52,7 @@ export default function UniversePage() {
                         transition={{ duration: 1, delay: 0.4 }}
                         className="text-content-secondary max-w-2xl mx-auto text-lg font-light leading-relaxed"
                     >
-                        Discover the expanding universe of my digital art. From exclusive experimental modules to ongoing creative endeavors, explore the visions shaping the Alenna Art legacy.
+                        {t('universe', 'description')}
                     </motion.p>
                 </header>
 
@@ -58,7 +60,7 @@ export default function UniversePage() {
                 {/* Projects Gallery */}
                 <section className="relative pt-12 space-y-12">
                     <div className="flex items-center gap-6">
-                        <h2 className="text-3xl font-serif font-bold text-white tracking-widest uppercase">Ongoing Projects</h2>
+                        <h2 className="text-3xl font-serif font-bold text-white tracking-widest uppercase">{t('universe', 'ongoing')}</h2>
                         <div className="h-px flex-1 bg-gradient-to-r from-white/20 to-transparent" />
                     </div>
 
@@ -89,15 +91,15 @@ export default function UniversePage() {
 
                 {/* Pre-footer Call to Action */}
                 <section className="py-24 text-center">
-                    <h3 className="text-2xl font-serif text-white/80 mb-6">Stay updated on future mints</h3>
+                    <h3 className="text-2xl font-serif text-white/80 mb-6">{t('universe', 'stay_updated')}</h3>
                     <div className="inline-flex flex-col sm:flex-row gap-4 w-full max-w-md">
                         <input
                             type="email"
-                            placeholder="Transmission Address..."
+                            placeholder={t('universe', 'placeholder')}
                             className="flex-1 bg-white/5 border border-white/20 rounded-md px-4 py-3 text-sm focus:border-accent outline-none font-mono text-white placeholder:text-white/30"
                         />
                         <button className="bg-white text-black px-6 py-3 font-bold uppercase text-xs tracking-widest hover:bg-accent transition-colors rounded-md">
-                            Subscribe
+                            {t('universe', 'subscribe')}
                         </button>
                     </div>
                 </section>
