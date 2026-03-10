@@ -53,8 +53,8 @@ export default function AdminPanel() {
 
     const [editingId, setEditingId] = useState<string | null>(null);
 
-    // NFT Decorator State (New Request)
-    const [activeTab, setActiveTab] = useState<'upload' | 'music' | 'decorator' | 'tickets'>('upload');
+    // Navigation State
+    const [activeTab, setActiveTab] = useState<'upload' | 'music' | 'nfts' | 'decorator' | 'tickets'>('upload');
 
     // Cropper State
     const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
@@ -233,6 +233,8 @@ export default function AdminPanel() {
                 fetchItems();
                 if (activeTab === 'music') {
                     setNewItem({ title: '', category: 'Music', rarity: 'Experimental', image_url: '', image_path: '', is_public: false, description: '' });
+                } else if (activeTab === 'nfts') {
+                    setNewItem({ title: '', category: 'Season Pass', rarity: 'Legendary', image_url: '', image_path: '', is_public: false, description: '' });
                 } else {
                     setNewItem({ title: '', category: 'Geometry', rarity: 'Common', image_url: '', image_path: '', is_public: false, description: '' });
                 }
@@ -246,8 +248,11 @@ export default function AdminPanel() {
         setEditingId(item.id);
 
         // Auto-switch tabs based on category if needed
-        if (item.category === 'Music' || item.category === 'Videos' || item.image_url.includes('youtu') || item.image_url.includes('.mp3')) {
+        const nftCategories = ['Season Pass', 'Weekly Chapter', '1/1 Edition', 'NFT Collection'];
+        if (item.category === 'Music' || item.category === 'Videos' || item.image_url?.includes('youtu') || item.image_url?.includes('.mp3')) {
             setActiveTab('music');
+        } else if (nftCategories.includes(item.category)) {
+            setActiveTab('nfts');
         } else {
             setActiveTab('upload');
         }
@@ -259,6 +264,8 @@ export default function AdminPanel() {
         setEditingId(null);
         if (activeTab === 'music') {
             setNewItem({ title: '', category: 'Music', rarity: 'Experimental', image_url: '', image_path: '', is_public: false, description: '' });
+        } else if (activeTab === 'nfts') {
+            setNewItem({ title: '', category: 'Season Pass', rarity: 'Legendary', image_url: '', image_path: '', is_public: false, description: '' });
         } else {
             setNewItem({ title: '', category: 'Geometry', rarity: 'Common', image_url: '', image_path: '', is_public: false, description: '' });
         }
@@ -304,19 +311,28 @@ export default function AdminPanel() {
                     </button>
                     <button
                         onClick={() => {
+                            setActiveTab('nfts');
+                            if (!editingId) setNewItem({ ...newItem, category: 'Season Pass', rarity: 'Legendary', image_url: '' });
+                        }}
+                        className={`text-sm uppercase tracking-wider px-4 py-2 rounded transition-colors ${activeTab === 'nfts' ? 'bg-accent/20 text-accent' : 'text-white/40 hover:text-accent'}`}
+                    >
+                        NFTs
+                    </button>
+                    <button
+                        onClick={() => {
                             setActiveTab('music');
                             if (!editingId) setNewItem({ ...newItem, category: 'Music', rarity: 'Experimental', image_url: '' });
                         }}
                         className={`text-sm uppercase tracking-wider px-4 py-2 rounded transition-colors ${activeTab === 'music' ? 'bg-accent/20 text-accent' : 'text-white/40 hover:text-accent'}`}
                     >
-                        Media / Audio / Videos
+                        Media/Audio
                     </button>
                     <button
                         onClick={() => setActiveTab('decorator')}
                         className={`flex items-center gap-2 text-sm uppercase tracking-wider px-4 py-2 rounded transition-colors ${activeTab === 'decorator' ? 'bg-accent/20 text-accent' : 'text-white/40 hover:text-accent'}`}
                     >
                         <Wand2 size={16} />
-                        NFT Decorator
+                        Decorator
                     </button>
                     <button
                         onClick={() => setActiveTab('tickets')}
@@ -474,14 +490,191 @@ export default function AdminPanel() {
                             {/* LIST */}
                             <div className="space-y-4">
                                 <AnimatePresence>
-                                    {galleryItems.map((item) => (
+                                    {galleryItems
+                                        .filter(item => {
+                                            const nftCategories = ['Season Pass', 'Weekly Chapter', '1/1 Edition', 'NFT Collection'];
+                                            const isMedia = item.category === 'Music' || item.category === 'Videos' || item.image_url?.includes('youtu');
+                                            const isNFT = nftCategories.includes(item.category);
+                                            return !isMedia && !isNFT;
+                                        })
+                                        .map((item) => (
+                                            <InventoryCard key={item.id} item={item} onEdit={() => handleEditItem(item)} onDelete={() => deleteItem(item.id)} onToggle={() => toggleVisibility(item.id, item.is_public)} editingId={editingId} />
+                                        ))}
+                                    {galleryItems.filter(item => {
+                                        const nftCategories = ['Season Pass', 'Weekly Chapter', '1/1 Edition', 'NFT Collection'];
+                                        const isMedia = item.category === 'Music' || item.category === 'Videos' || item.image_url?.includes('youtu');
+                                        const isNFT = nftCategories.includes(item.category);
+                                        return !isMedia && !isNFT;
+                                    }).length === 0 && (
+                                            <div className="text-center py-20 text-white/20 font-mono">
+                                                NO ARTIFACTS FOUND IN DATABASE
+                                            </div>
+                                        )}
+                                </AnimatePresence>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* --- TAB: UPLOAD NFTS --- */}
+                {activeTab === 'nfts' && (
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+
+                        {/* LEFT COL: NFT STUDIO */}
+                        <div className="lg:col-span-1 space-y-6">
+                            <div className={`bg-[#0A0510] border-l-4 ${editingId ? 'border-primary' : 'border-accent'} p-6 rounded-r-xl shadow-2xl relative overflow-hidden group transition-all duration-300`}>
+
+                                <div className="flex justify-between items-center mb-6 relative z-10">
+                                    <h2 className="text-2xl font-serif text-white flex items-center gap-2">
+                                        {editingId ? <Edit2 size={24} className="text-primary" /> : <Upload size={24} className="text-accent" />}
+                                        {editingId ? 'Edit NFT Record' : 'Tokenize New NFT'}
+                                    </h2>
+                                    {editingId && (
+                                        <button onClick={cancelEdit} className="text-white/40 hover:text-white transition-colors cursor-pointer flex items-center gap-1 text-xs">
+                                            <X size={14} /> Cancel
+                                        </button>
+                                    )}
+                                </div>
+
+                                <div className="space-y-4 relative z-10">
+                                    {/* Title */}
+                                    <div>
+                                        <label className="text-[10px] uppercase tracking-widest text-white/40 mb-1 block">NFT Name / Identifier</label>
+                                        <input
+                                            value={newItem.title}
+                                            onChange={e => setNewItem({ ...newItem, title: e.target.value })}
+                                            className="w-full bg-white/5 border-b border-white/10 focus:border-accent outline-none py-2 px-3 text-lg font-serif placeholder:text-white/20 transition-colors"
+                                            placeholder="e.g. Genesis Key #001"
+                                        />
+                                    </div>
+
+                                    {/* Selects */}
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="text-[10px] uppercase tracking-widest text-white/40 mb-1 block">Collection</label>
+                                            <select
+                                                value={newItem.category}
+                                                onChange={e => setNewItem({ ...newItem, category: e.target.value })}
+                                                className="w-full bg-[#111] border border-white/10 rounded px-2 py-2 text-sm focus:border-accent outline-none"
+                                            >
+                                                <option value="Season Pass">Season Pass</option>
+                                                <option value="Weekly Chapter">Weekly Chapter</option>
+                                                <option value="1/1 Edition">1/1 Edition</option>
+                                                <option value="NFT Collection">Other Collection</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] uppercase tracking-widest text-white/40 mb-1 block">Tier / Rarity</label>
+                                            <select
+                                                value={newItem.rarity}
+                                                onChange={e => setNewItem({ ...newItem, rarity: e.target.value })}
+                                                className="w-full bg-[#111] border border-white/10 rounded px-2 py-2 text-sm focus:border-accent outline-none"
+                                            >
+                                                <option value="Legendary">Legendary (1/1)</option>
+                                                <option value="Epic">Epic</option>
+                                                <option value="Rare">Rare</option>
+                                                <option value="Common">Common</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    {/* Description */}
+                                    <div>
+                                        <label className="text-[10px] uppercase tracking-widest text-white/40 mb-1 block">Metadata Description</label>
+                                        <textarea
+                                            value={newItem.description || ''}
+                                            onChange={e => setNewItem({ ...newItem, description: e.target.value })}
+                                            className="w-full bg-white/5 border-b border-white/10 focus:border-accent outline-none py-2 px-3 text-sm font-mono placeholder:text-white/20 transition-colors h-24 resize-none"
+                                            placeholder="Lore or utility details..."
+                                        />
+                                    </div>
+
+                                    {/* DROPZONE (REAL) */}
+                                    <div>
+                                        <label className="text-[10px] uppercase tracking-widest text-white/40 mb-1 block">NFT Master Asset</label>
+                                        <div
+                                            className={`border-2 border-dashed rounded-lg p-6 text-center transition-all cursor-pointer relative ${newItem.image_url ? 'border-accent bg-accent/5' : 'border-white/10 hover:border-white/30'
+                                                }`}
+                                        >
+                                            <input
+                                                type="file"
+                                                accept="image/png, image/jpeg, image/gif, video/mp4"
+                                                onChange={handleFileUpload}
+                                                disabled={uploading}
+                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+                                            />
+
+                                            <div className="flex flex-col items-center gap-2 relative z-10">
+                                                {uploading ? (
+                                                    <div className="animate-spin w-6 h-6 border-2 border-accent border-t-transparent rounded-full" />
+                                                ) : newItem.image_url ? (
+                                                    <div className="relative w-full aspect-square rounded overflow-hidden mb-2 border border-white/20 relative group">
+                                                        {newItem.image_url.includes('.mp4') ? (
+                                                            <video src={newItem.image_url} autoPlay loop muted className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            /* eslint-disable-next-line @next/next/no-img-element */
+                                                            <img src={newItem.image_url} alt="NFT Preview" className="w-full h-full object-cover" />
+                                                        )}
+                                                    </div>
+                                                ) : (
+                                                    <Upload size={24} className="text-white/30" />
+                                                )}
+
+                                                <span className="text-xs text-accent placeholder:text-white/20">
+                                                    {uploading ? 'Minting Media...' : newItem.image_url ? 'Click to Change Asset' : 'Drop main image/video here'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Visibility Toggle */}
+                                    <div className="flex items-center justify-between bg-white/5 p-3 rounded">
+                                        <span className="text-sm text-white/70">List Publicly on Site</span>
+                                        <button
+                                            onClick={() => setNewItem({ ...newItem, is_public: !newItem.is_public })}
+                                            className={`w-10 h-5 rounded-full relative transition-colors ${newItem.is_public ? 'bg-accent' : 'bg-white/20'}`}
+                                        >
+                                            <div className={`absolute top-1 w-3 h-3 bg-black rounded-full transition-transform ${newItem.is_public ? 'left-6' : 'left-1'}`} />
+                                        </button>
+                                    </div>
+
+                                    {/* SUBMIT */}
+                                    <button
+                                        onClick={saveItem}
+                                        disabled={uploading || !newItem.image_url}
+                                        className={`w-full py-4 text-black font-bold uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-95 transition-all rounded-sm disabled:opacity-50 flex items-center justify-center gap-2 ${editingId ? 'bg-gradient-to-r from-primary to-primary-light shadow-[0_0_20px_rgba(255,255,255,0.3)]' : 'bg-gradient-to-r from-accent to-[#8a6e35] shadow-[0_0_20px_rgba(197,160,89,0.3)]'}`}
+                                    >
+                                        {editingId ? <Save size={18} /> : null}
+                                        {editingId ? 'Update Record' : 'Save NFT to Database'}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* RIGHT COL: NFT INVENTORY */}
+                        <div className="lg:col-span-2">
+                            <div className="flex justify-between items-center mb-6">
+                                <h2 className="text-2xl font-serif text-white">NFT Collection Manager (Realtime)</h2>
+                                <p className="text-xs text-white/30 font-mono">SYNCED WITH SUPABASE</p>
+                            </div>
+
+                            {/* LIST */}
+                            <div className="space-y-4">
+                                <AnimatePresence>
+                                    {galleryItems.filter(item => {
+                                        const nftCategories = ['Season Pass', 'Weekly Chapter', '1/1 Edition', 'NFT Collection'];
+                                        return nftCategories.includes(item.category);
+                                    }).map((item) => (
                                         <InventoryCard key={item.id} item={item} onEdit={() => handleEditItem(item)} onDelete={() => deleteItem(item.id)} onToggle={() => toggleVisibility(item.id, item.is_public)} editingId={editingId} />
                                     ))}
-                                    {galleryItems.length === 0 && (
-                                        <div className="text-center py-20 text-white/20 font-mono">
-                                            NO ARTIFACTS FOUND IN DATABASE
-                                        </div>
-                                    )}
+                                    {galleryItems.filter(item => {
+                                        const nftCategories = ['Season Pass', 'Weekly Chapter', '1/1 Edition', 'NFT Collection'];
+                                        return nftCategories.includes(item.category);
+                                    }).length === 0 && (
+                                            <div className="text-center py-20 text-white/20 font-mono">
+                                                NO NFTS FOUND IN DATABASE
+                                            </div>
+                                        )}
                                 </AnimatePresence>
                             </div>
                         </div>
@@ -685,10 +878,10 @@ export default function AdminPanel() {
                             {/* LIST */}
                             <div className="space-y-4">
                                 <AnimatePresence>
-                                    {galleryItems.filter(item => item.category === 'Music' || item.category === 'Videos' || item.image_url.includes('youtu')).map((item) => (
+                                    {galleryItems.filter(item => item.category === 'Music' || item.category === 'Videos' || item.image_url?.includes('youtu')).map((item) => (
                                         <InventoryCard key={item.id} item={item} onEdit={() => handleEditItem(item)} onDelete={() => deleteItem(item.id)} onToggle={() => toggleVisibility(item.id, item.is_public)} editingId={editingId} />
                                     ))}
-                                    {galleryItems.filter(item => item.category === 'Music' || item.category === 'Videos' || item.image_url.includes('youtu')).length === 0 && (
+                                    {galleryItems.filter(item => item.category === 'Music' || item.category === 'Videos' || item.image_url?.includes('youtu')).length === 0 && (
                                         <div className="text-center py-20 text-white/20 font-mono">
                                             NO MEDIA FILES FOUND IN DATABASE
                                         </div>
