@@ -41,7 +41,7 @@ export default function UniversePage() {
                         transition={{ duration: 1, delay: 0.2 }}
                         className="text-5xl md:text-7xl font-bold font-serif tracking-tighter text-white drop-shadow-[0_0_30px_rgba(255,255,255,0.1)]"
                     >
-                        ALENNA'S PROJECTS <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-[#8a6e35]">//</span> ART
+                        ALENNA'S <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-[#8a6e35]">PROJECTS</span>
                     </motion.h1>
 
                     <motion.p
@@ -50,62 +50,10 @@ export default function UniversePage() {
                         transition={{ duration: 1, delay: 0.4 }}
                         className="text-content-secondary max-w-2xl mx-auto text-lg font-light leading-relaxed"
                     >
-                        Discover the expanding universe of my digital art. From exclusive NFT collections to ongoing creative endeavors, explore the visions shaping the Alenna Art legacy.
+                        Discover the expanding universe of my digital art. From exclusive experimental modules to ongoing creative endeavors, explore the visions shaping the Alenna Art legacy.
                     </motion.p>
                 </header>
 
-                {/* Featured Drop Section */}
-                <motion.section
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 1, delay: 0.6 }}
-                    className="relative"
-                >
-                    <div className="absolute -inset-4 bg-gradient-to-r from-accent/10 to-transparent blur-xl rounded-3xl" />
-                    <div className="relative glass-panel rounded-3xl overflow-hidden border border-accent/20">
-                        <div className="grid grid-cols-1 md:grid-cols-2">
-                            {/* Visual */}
-                            <div className="relative h-[400px] md:h-auto bg-black border-b md:border-b-0 md:border-r border-white/5 overflow-hidden group">
-                                <div className="absolute inset-0 bg-accent/10 mix-blend-overlay z-10 group-hover:opacity-0 transition-opacity duration-700" />
-                                <Image
-                                    src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop"
-                                    alt="Featured Project"
-                                    fill
-                                    className="object-cover transition-transform duration-1000 group-hover:scale-105"
-                                />
-                                <div className="absolute top-6 left-6 z-20">
-                                    <span className="bg-accent text-black font-bold text-[10px] uppercase tracking-widest px-3 py-1 rounded-full shadow-[0_0_15px_rgba(197,160,89,0.5)]">
-                                        Active Drop
-                                    </span>
-                                </div>
-                            </div>
-
-                            {/* Info */}
-                            <div className="p-8 md:p-12 flex flex-col justify-center bg-gradient-to-br from-transparent to-black/50">
-                                <h2 className="text-3xl lg:text-5xl font-serif text-white mb-4">The Convergence Series</h2>
-                                <p className="text-content-secondary mb-8 leading-relaxed font-light">
-                                    A limited collection of 50 unique digital artifacts blending surreal geometry with high-fashion elements. Neural-generated textures combined with master-level digital painting techniques. Early access available for Genesis holders.
-                                </p>
-
-                                <div className="grid grid-cols-2 gap-4 mb-8">
-                                    <div className="bg-white/5 p-4 rounded-lg border border-white/10">
-                                        <div className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Network</div>
-                                        <div className="font-mono text-accent">Ethereum</div>
-                                    </div>
-                                    <div className="bg-white/5 p-4 rounded-lg border border-white/10">
-                                        <div className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Items</div>
-                                        <div className="font-mono text-accent">50 / 50 Remaining</div>
-                                    </div>
-                                </div>
-
-                                <button className="w-full py-4 text-center border-2 border-accent text-accent font-bold uppercase tracking-widest text-xs hover:bg-accent hover:text-black transition-all glow-button relative overflow-hidden group">
-                                    <span className="relative z-10">View Collection (Soon)</span>
-                                    <div className="absolute inset-0 bg-accent/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </motion.section>
 
                 {/* Projects Gallery */}
                 <section className="relative pt-12 space-y-12">
