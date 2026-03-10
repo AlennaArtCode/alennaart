@@ -35,14 +35,11 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
         return sectionData ? (sectionData[key] || key) : key;
     };
 
-    // To prevent hydration mismatch, only render after mount
-    if (!mounted) {
-        return <>{children}</>;
-    }
-
     return (
         <LanguageContext.Provider value={{ lang, setLang, t }}>
-            {children}
+            <div suppressHydrationWarning>
+                {mounted ? children : children}
+            </div>
         </LanguageContext.Provider>
     );
 }
