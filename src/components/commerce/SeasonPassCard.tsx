@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import WalletGatedButton from '@/components/auth/WalletGatedButton';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function SeasonPassCard() {
+    const { t } = useLanguage();
     const [isMinting, setIsMinting] = useState(false);
     const totalSupply = 120;
     const mintedCount = 42; // Mock data, replace with real on-chain count
@@ -32,29 +34,29 @@ export default function SeasonPassCard() {
                 <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center gap-2 mb-2">
                         <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest bg-accent text-primary-dark">
-                            Genesis
+                            {t('season_pass', 'badge')}
                         </span>
                     </div>
                     <div className="text-right">
                         <span className="block text-2xl font-bold font-mono text-accent-hover">99 ADA</span>
-                        <span className="text-xs text-content-muted">Fixed Price</span>
+                        <span className="text-xs text-content-muted">{t('season_pass', 'fixed')}</span>
                     </div>
                 </div>
 
                 <div className="mb-6 flex-grow">
-                    <h3 className="text-2xl font-bold text-content-primary mb-2">Genesis Access</h3>
+                    <h3 className="text-2xl font-bold text-content-primary mb-2">{t('season_pass', 'title')}</h3>
                     <ul className="space-y-2 text-sm text-content-secondary">
                         <li className="flex items-center gap-2">
-                            <span className="text-accent">✦</span> 20% Off on Weekly Chapters
+                            <span className="text-accent">✦</span> {t('season_pass', 'li1')}
                         </li>
                         <li className="flex items-center gap-2">
-                            <span className="text-accent">✦</span> Exclusive Week 4 & 8 Drops
+                            <span className="text-accent">✦</span> {t('season_pass', 'li2')}
                         </li>
                         <li className="flex items-center gap-2">
-                            <span className="text-accent">✦</span> 24h Early Access
+                            <span className="text-accent">✦</span> {t('season_pass', 'li3')}
                         </li>
                         <li className="flex items-center gap-2">
-                            <span className="text-accent">✦</span> Max 1 Per Wallet
+                            <span className="text-accent">✦</span> {t('season_pass', 'li4')}
                         </li>
                     </ul>
                 </div>
@@ -67,15 +69,15 @@ export default function SeasonPassCard() {
                         />
                     </div>
                     <div className="flex justify-between text-xs text-content-muted mb-2">
-                        <span>{mintedCount} / {totalSupply} Minted</span>
-                        <span>Limit Reached: {mintedCount >= totalSupply ? 'Yes' : 'No'}</span>
+                        <span>{mintedCount} / {totalSupply} {t('season_pass', 'minted')}</span>
+                        <span>{t('season_pass', 'limit')} {mintedCount >= totalSupply ? t('season_pass', 'yes') : t('season_pass', 'no')}</span>
                     </div>
 
                     <WalletGatedButton
                         onClick={handleMint}
                         className="w-full bg-accent hover:bg-accent-hover text-primary-dark py-3 font-bold"
                     >
-                        {isMinting ? 'Minting...' : 'Mint Season Pass'}
+                        {isMinting ? t('season_pass', 'minting') : t('season_pass', 'mint')}
                     </WalletGatedButton>
                 </div>
             </div>

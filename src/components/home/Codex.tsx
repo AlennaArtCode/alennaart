@@ -1,8 +1,10 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function Codex() {
+    const { t } = useLanguage();
     return (
         <section className="py-32 relative bg-[#050505] overflow-hidden">
             {/* Background Texture/Noise could go here */}
@@ -19,7 +21,7 @@ export default function Codex() {
                         transition={{ duration: 1.5, ease: "easeInOut" }}
                         className="text-6xl md:text-8xl font-serif text-white tracking-tight"
                     >
-                        THE CODEX
+                        {t('codex', 'title')}
                     </motion.h2>
                     <motion.p
                         initial={{ opacity: 0, y: 20 }}
@@ -28,7 +30,7 @@ export default function Codex() {
                         transition={{ duration: 1.5, delay: 0.4, ease: "easeInOut" }}
                         className="text-accent text-sm md:text-base font-sans uppercase tracking-[0.4em] font-light"
                     >
-                        Chronicles of Resistance
+                        {t('codex', 'subtitle')}
                     </motion.p>
                 </div>
 
@@ -42,8 +44,8 @@ export default function Codex() {
                         transition={{ duration: 1.5, delay: 0.6, ease: "easeInOut" }}
                     >
                         <p>
-                            <span className="float-left text-7xl md:text-8xl font-serif text-accent mr-4 mt-[-10px] leading-none">T</span>
-                            he universe tends towards chaos. Human memory tends towards fog. Exemplaria is my rebellion against both. In the beginning, there was no gold, only noise. I understood that if I could take a devastating emotion and force it to follow a straight line, that emotion ceased to hurt me.
+                            <span className="float-left text-7xl md:text-8xl font-serif text-accent mr-4 mt-[-10px] leading-none">{t('codex', 'p1_first_letter')}</span>
+                            {t('codex', 'p1_rest')}
                         </p>
                     </motion.div>
 
@@ -55,14 +57,14 @@ export default function Codex() {
                         className="flex flex-col justify-between"
                     >
                         <p>
-                            It began to build me. Geometry is not just form; it is structure for the spirit. Every golden line is a limit I imposed on myself to not overflow, and every piece is tangible proof that order can be born from the storm. In the end, we do not paint what we see, we paint what we need to survive.
+                            {t('codex', 'p2')}
                         </p>
 
                         {/* Signature or Seal */}
                         <div className="mt-8 self-end">
                             <div className="w-24 h-px bg-accent/50 mb-2" />
                             <p className="text-right text-xs font-sans uppercase tracking-widest text-accent/80">
-                                — Alenna, The Architect
+                                {t('codex', 'signature')}
                             </p>
                         </div>
                     </motion.div>

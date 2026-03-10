@@ -1,4 +1,7 @@
+import { useLanguage } from '@/context/LanguageContext';
+
 export default function ArtistBio() {
+    const { t } = useLanguage();
     return (
         <section className="py-24 bg-primary text-center md:text-left px-6">
             <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-12">
@@ -14,18 +17,18 @@ export default function ArtistBio() {
 
                 {/* Content */}
                 <div className="md:w-2/3 space-y-6">
-                    <h2 className="text-4xl font-bold bg-gradient-to-r from-content-primary to-content-secondary bg-clip-text text-transparent">Behind the Art</h2>
+                    <h2 className="text-4xl font-bold bg-gradient-to-r from-content-primary to-content-secondary bg-clip-text text-transparent">{t('artist', 'title')}</h2>
                     <div className="space-y-4 text-content-secondary text-lg leading-relaxed">
                         <p>
-                            Hello, I am <strong>Alenna</strong>. My work explores the intersection between the mystical and the digital.
+                            {t('artist', 'p1_1')} <strong>{t('artist', 'p1_2')}</strong>{t('artist', 'p1_3')}
                         </p>
                         <p>
-                            I create art for those seeking meaning beyond the pixel. With over 5 years in the cryptoart space, my mission is to build a universe where digital ownership is the key to real experiences.
+                            {t('artist', 'p2')}
                         </p>
                     </div>
 
                     <button className="text-content-primary border-b border-accent hover:text-accent hover:border-accent transition-colors pb-1">
-                        Read Manifesto &rarr;
+                        {t('artist', 'read_manifesto')}
                     </button>
                 </div>
             </div>

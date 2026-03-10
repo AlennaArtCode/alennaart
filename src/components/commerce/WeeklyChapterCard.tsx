@@ -3,6 +3,7 @@
 import CountdownTimer from '@/components/ui/CountdownTimer';
 import WalletGatedButton from '@/components/auth/WalletGatedButton';
 import Image from 'next/image';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface WeeklyChapterProps {
     chapterNumber: number;
@@ -12,6 +13,7 @@ interface WeeklyChapterProps {
 }
 
 export default function WeeklyChapterCard({ chapterNumber, title, image, dropDate }: WeeklyChapterProps) {
+    const { t } = useLanguage();
     const isHolder = false; // MOCK: Retrieve from context later
     const price = isHolder ? 199 : 249;
     const isLive = new Date() > new Date(dropDate);
@@ -25,7 +27,7 @@ export default function WeeklyChapterCard({ chapterNumber, title, image, dropDat
             <div className="relative md:w-1/2 h-64 md:h-auto">
                 <Image src={image} alt={title} fill className="object-cover" />
                 <div className="absolute top-4 left-4 bg-primary-dark/80 backdrop-blur text-content-primary text-xs px-2 py-1 rounded">
-                    Week {chapterNumber}
+                    {t('weekly_chapter', 'week')} {chapterNumber}
                 </div>
             </div>
 
@@ -34,7 +36,7 @@ export default function WeeklyChapterCard({ chapterNumber, title, image, dropDat
 
                 {!isLive ? (
                     <div className="mb-6">
-                        <p className="text-content-muted text-sm mb-2">Dropping In:</p>
+                        <p className="text-content-muted text-sm mb-2">{t('weekly_chapter', 'dropping')}</p>
                         <CountdownTimer targetDate={dropDate} />
                     </div>
                 ) : (
@@ -45,11 +47,11 @@ export default function WeeklyChapterCard({ chapterNumber, title, image, dropDat
                         </div>
                         {isHolder ? (
                             <span className="text-green-400 text-xs flex items-center gap-1">
-                                ● Holder Discount Applied
+                                ● {t('weekly_chapter', 'holder_discount')}
                             </span>
                         ) : (
                             <span className="text-content-muted text-xs">
-                                Holders pay 199 ADA
+                                {t('weekly_chapter', 'holders_pay')} 199 ADA
                             </span>
                         )}
                     </div>
@@ -58,11 +60,11 @@ export default function WeeklyChapterCard({ chapterNumber, title, image, dropDat
                 <div className="mt-auto">
                     {isLive ? (
                         <WalletGatedButton onClick={handleBuy} className="btn-primary w-full">
-                            Collect Chapter
+                            {t('weekly_chapter', 'collect')}
                         </WalletGatedButton>
                     ) : (
                         <button disabled className="w-full bg-primary-dark text-content-muted py-3 rounded cursor-not-allowed">
-                            Coming Soon
+                            {t('weekly_chapter', 'soon')}
                         </button>
                     )}
                 </div>

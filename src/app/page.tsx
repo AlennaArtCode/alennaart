@@ -6,8 +6,10 @@ import InnerCircle from '@/components/home/InnerCircle';
 import WeeklyChapterCard from '@/components/commerce/WeeklyChapterCard';
 import ArtistBio from '@/components/home/ArtistBio';
 import Codex from '@/components/home/Codex';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function Home() {
+  const { t } = useLanguage();
   return (
     <main className="min-h-screen bg-primary text-content-primary selection:bg-accent selection:text-primary-dark relative">
 
@@ -39,18 +41,18 @@ export default function Home() {
         <section className="py-32 px-6">
           <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
-              <h2 className="text-4xl md:text-5xl font-bold font-serif">Your Master Key</h2>
+              <h2 className="text-4xl md:text-5xl font-bold font-serif">{t('master_key', 'title')}</h2>
               <p className="text-xl text-content-secondary font-light">
-                The Season Pass is not just an NFT, it is your passport to the entire ecosystem.
+                {t('master_key', 'desc')}
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="glass-panel p-6 rounded-lg">
-                  <span className="text-accent-mystic font-bold block mb-1">20% OFF</span>
-                  <span className="text-sm text-content-muted">Permanent discount on chapters</span>
+                  <span className="text-accent-mystic font-bold block mb-1">{t('master_key', 'discount_badge')}</span>
+                  <span className="text-sm text-content-muted">{t('master_key', 'discount_desc')}</span>
                 </div>
                 <div className="glass-panel p-6 rounded-lg">
-                  <span className="text-accent font-bold block mb-1">BOSS DROPS</span>
-                  <span className="text-sm text-content-muted">Exclusive access to 1/1 pieces</span>
+                  <span className="text-accent font-bold block mb-1">{t('master_key', 'boss_badge')}</span>
+                  <span className="text-sm text-content-muted">{t('master_key', 'boss_desc')}</span>
                 </div>
               </div>
             </div>
@@ -66,8 +68,8 @@ export default function Home() {
         <section className="py-24 px-6">
           <div className="max-w-6xl mx-auto">
             <div className="flex justify-between items-end mb-12">
-              <h2 className="text-3xl font-bold font-serif">Recent Drops</h2>
-              <a href="/universe" className="text-content-muted hover:text-white transition-colors text-sm tracking-widest uppercase">View All &rarr;</a>
+              <h2 className="text-3xl font-bold font-serif">{t('recent_drops', 'title')}</h2>
+              <a href="/universe" className="text-content-muted hover:text-white transition-colors text-sm tracking-widest uppercase">{t('recent_drops', 'view_all')}</a>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
