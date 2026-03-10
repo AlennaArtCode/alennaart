@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
@@ -158,7 +160,7 @@ function ProjectCard({ title, category, image, desc, status }: { title: string, 
                     />
                 ) : (
                     <Image
-                        src={image || 'https://placehold.co/400?text=?'}
+                        src={image && image.trim() !== '' ? image : 'https://placehold.co/400?text=No+Image'}
                         alt={title}
                         fill
                         className="object-cover transition-transform duration-700 group-hover:scale-105 opacity-80 group-hover:opacity-100 grayscale hover:grayscale-0"

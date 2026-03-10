@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useState } from 'react';
 import Hero from '@/components/home/Hero';
 import InnerCircle from '@/components/home/InnerCircle';
@@ -121,7 +123,7 @@ export default function Home() {
                       />
                     ) : (
                       <Image
-                        src={featuredItem.image_url || 'https://placehold.co/800x600?text=?'}
+                        src={featuredItem.image_url && featuredItem.image_url.trim() !== '' ? featuredItem.image_url : 'https://placehold.co/800x600?text=No+Image'}
                         alt={featuredItem.title}
                         fill
                         className="object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"

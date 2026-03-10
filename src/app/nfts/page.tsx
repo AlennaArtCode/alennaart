@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
@@ -28,7 +30,10 @@ export default function NFTsPage() {
                 .order('created_at', { ascending: false });
 
             if (!error && data) {
+                console.log("FETCHED NFTs DATA for /nfts:", data);
                 setNfts(data);
+            } else if (error) {
+                console.error("FETCHED NFTs ERROR:", error);
             }
             setLoading(false);
         };
@@ -185,7 +190,7 @@ function CollectionCard({ title, category, image, desc }: { title: string, categ
                     />
                 ) : (
                     <Image
-                        src={image || 'https://placehold.co/400?text=?'}
+                        src={image && image.trim() !== '' ? image : 'https://placehold.co/400?text=No+Image'}
                         alt={title}
                         fill
                         className="object-cover transition-transform duration-700 group-hover:scale-105 opacity-80 group-hover:opacity-100 grayscale hover:grayscale-0"

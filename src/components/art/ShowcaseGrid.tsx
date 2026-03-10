@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
@@ -117,7 +119,7 @@ function NftCard({ item }: { item: ShowcaseItem }) {
                     />
                 ) : (
                     <Image
-                        src={item.image_url || 'https://placehold.co/400?text=?'}
+                        src={item.image_url && item.image_url.trim() !== '' ? item.image_url : 'https://placehold.co/400?text=No+Image'}
                         alt={item.title}
                         fill
                         className="object-cover transition-transform duration-700 ease-out group-hover:scale-105 opacity-90 group-hover:opacity-100"
