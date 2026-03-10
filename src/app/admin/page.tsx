@@ -248,7 +248,7 @@ export default function AdminPanel() {
         setEditingId(item.id);
 
         // Auto-switch tabs based on category if needed
-        const nftCategories = ['Season Pass', 'Weekly Chapter', '1/1 Edition', 'NFT Collection'];
+        const nftCategories = ['Season Pass', 'Weekly Chapter', '1/1 Edition', 'DELUXE NFT', 'NFT Collection'];
         if (item.category === 'Music' || item.category === 'Videos' || item.image_url?.includes('youtu') || item.image_url?.includes('.mp3')) {
             setActiveTab('music');
         } else if (nftCategories.includes(item.category)) {
@@ -492,7 +492,7 @@ export default function AdminPanel() {
                                 <AnimatePresence>
                                     {galleryItems
                                         .filter(item => {
-                                            const nftCategories = ['Season Pass', 'Weekly Chapter', '1/1 Edition', 'NFT Collection'];
+                                            const nftCategories = ['Season Pass', 'Weekly Chapter', '1/1 Edition', 'DELUXE NFT', 'NFT Collection'];
                                             const isMedia = item.category === 'Music' || item.category === 'Videos' || item.image_url?.includes('youtu');
                                             const isNFT = nftCategories.includes(item.category);
                                             return !isMedia && !isNFT;
@@ -501,7 +501,7 @@ export default function AdminPanel() {
                                             <InventoryCard key={item.id} item={item} onEdit={() => handleEditItem(item)} onDelete={() => deleteItem(item.id)} onToggle={() => toggleVisibility(item.id, item.is_public)} editingId={editingId} />
                                         ))}
                                     {galleryItems.filter(item => {
-                                        const nftCategories = ['Season Pass', 'Weekly Chapter', '1/1 Edition', 'NFT Collection'];
+                                        const nftCategories = ['Season Pass', 'Weekly Chapter', '1/1 Edition', 'DELUXE NFT', 'NFT Collection'];
                                         const isMedia = item.category === 'Music' || item.category === 'Videos' || item.image_url?.includes('youtu');
                                         const isNFT = nftCategories.includes(item.category);
                                         return !isMedia && !isNFT;
@@ -558,6 +558,7 @@ export default function AdminPanel() {
                                                 className="w-full bg-[#111] border border-white/10 rounded px-2 py-2 text-sm focus:border-accent outline-none"
                                             >
                                                 <option value="Season Pass">Season Pass</option>
+                                                <option value="DELUXE NFT">DELUXE NFT</option>
                                                 <option value="Weekly Chapter">Weekly Chapter</option>
                                                 <option value="1/1 Edition">1/1 Edition</option>
                                                 <option value="NFT Collection">Other Collection</option>
@@ -662,13 +663,13 @@ export default function AdminPanel() {
                             <div className="space-y-4">
                                 <AnimatePresence>
                                     {galleryItems.filter(item => {
-                                        const nftCategories = ['Season Pass', 'Weekly Chapter', '1/1 Edition', 'NFT Collection'];
+                                        const nftCategories = ['Season Pass', 'Weekly Chapter', '1/1 Edition', 'DELUXE NFT', 'NFT Collection'];
                                         return nftCategories.includes(item.category);
                                     }).map((item) => (
                                         <InventoryCard key={item.id} item={item} onEdit={() => handleEditItem(item)} onDelete={() => deleteItem(item.id)} onToggle={() => toggleVisibility(item.id, item.is_public)} editingId={editingId} />
                                     ))}
                                     {galleryItems.filter(item => {
-                                        const nftCategories = ['Season Pass', 'Weekly Chapter', '1/1 Edition', 'NFT Collection'];
+                                        const nftCategories = ['Season Pass', 'Weekly Chapter', '1/1 Edition', 'DELUXE NFT', 'NFT Collection'];
                                         return nftCategories.includes(item.category);
                                     }).length === 0 && (
                                             <div className="text-center py-20 text-white/20 font-mono">
