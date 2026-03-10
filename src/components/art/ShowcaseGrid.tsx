@@ -1,95 +1,58 @@
-'use client';
-
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-
-// --- DATA SOURCE ---
-// Using the exact JSON provided in the prompt
+import { supabase } from '@/lib/supabase';
 
 type ShowcaseItem = {
     id: string;
-    name: string;
-    subtitle: string;
-    image: string;
+    title: string;
+    category: string;
+    image_url: string;
     rarity: string;
-    rarityColor: string;
     description: string;
 };
 
-const showcaseData: ShowcaseItem[] = [
-    {
-        "id": "001",
-        "name": "KAISER",
-        "subtitle": "The Sovereign of the Golden Web",
-        "image": "image_9867e8.jpg",
-        "rarity": "LEGENDARY",
-        "rarityColor": "#FFD700",
-        "description": "The Silent Architect."
-    },
-    {
-        "id": "002",
-        "name": "ORIGO",
-        "subtitle": "The Zero Seed",
-        "image": "1 Sin Fondo.jpg",
-        "rarity": "LEGENDARY",
-        "rarityColor": "#FFD700",
-        "description": "Where eternity is born."
-    },
-    {
-        "id": "003",
-        "name": "LEGATUS",
-        "subtitle": "Digital Diplomacy",
-        "image": "Mask Sin fondo.jpg",
-        "rarity": "LEGENDARY",
-        "rarityColor": "#FFD700",
-        "description": "Witness of golden polygons."
-    },
-    {
-        "id": "004",
-        "name": "AEGIS",
-        "subtitle": "Impenetrable Bulwark",
-        "image": "7 Sin Fondo.jpg",
-        "rarity": "EPIC",
-        "rarityColor": "#cd7f32",
-        "description": "Geometry of absolute protection."
-    },
-    {
-        "id": "005",
-        "name": "CHRONOS",
-        "subtitle": "Engine of Cycles",
-        "image": "5 Sin Fondo.jpg",
-        "rarity": "EPIC",
-        "rarityColor": "#cd7f32",
-        "description": "Stellar mechanism of time."
-    },
-    {
-        "id": "006",
-        "name": "VOID WALKER",
-        "subtitle": "Astral Intrusion",
-        "image": "3 Sin Fondo.jpg",
-        "rarity": "ANOMALY",
-        "rarityColor": "#9d00ff",
-        "description": "Matrix Glitch Detected."
+// Map rarity to colors visually matching the original aesthetic
+const getRarityColor = (rarity: string) => {
+    switch (rarity?.toUpperCase()) {
+        case 'LEGENDARY': return '#FFD700'; // Gold
+        case 'EPIC': return '#cd7f32';     // Bronze/Copper
+        case 'RARE': return '#60a5fa';     // Blue
+        case 'ANOMALY': return '#9d00ff';  // Purple
+        default: return '#C5A059';         // Default Accent
     }
-];
-
-// Helper to get image path (mapping placeholders to local files if needed)
-const getImageUrl = (fileName: string) => {
-    // Basic mapping logic based on previous context, can be expanded
-    if (fileName.includes('image_9867e8')) return '/art/lion-transparent.png'; // Assuming Kaiser is the Lion or similar
-    if (fileName.includes('1 Sin Fondo')) return '/art/geometry_sample_1.png';
-    if (fileName.includes('7 Sin Fondo')) return '/art/geometry_sample_2.jpg';
-
-    // Fallback for others to placeholders if files don't strictly exist yet under those names
-    if (!fileName.startsWith('/')) {
-        return `https://placehold.co/600x800/100515/C5A059/png?text=${fileName.split('.')[0]}`;
-    }
-
-    return fileName;
 };
 
-
 export default function ShowcaseGrid() {
+    const [items, setItems] = useState<ShowcaseItem[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchShowcase = async () => {
+            const { data, error } = await supabase
+                .from('artworks')
+                .select('*')
+                // Let's bring in all public visual art for the portfolio vault
+                .not('category', 'eq', 'Music')
+                .eq('is_public', true)
+                .order('created_at', { ascending: false });
+
+            if (!error && data) {
+                setItems(data.map(d => ({
+                    id: d.id,
+                    title: d.title,
+                    category: d.category,
+                    image_url: d.image_url,
+                    rarity: d.rarity || 'COMMON',
+                    description: d.description || 'Verified on the main network.'
+                })));
+            }
+            setLoading(false);
+        };
+
+        fetchShowcase();
+    }, []);
+
     return (
         <section className="py-24 bg-[#050505] min-h-screen">
             <div className="container mx-auto px-6">
@@ -100,16 +63,27 @@ export default function ShowcaseGrid() {
                         Vitrina <span className="text-accent italic">Exemplaria</span>
                     </h2>
                     <p className="text-white/40 font-mono text-sm tracking-[0.3em] uppercase">
-                        The Exclusive Collection
+                        The Master Collection
                     </p>
                 </div>
 
                 {/* THE GRID */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {showcaseData.map((item) => (
-                        <NftCard key={item.id} item={item} />
-                    ))}
-                </div>
+                {loading ? (
+                    <div className="py-32 text-center text-white/30 font-mono uppercase tracking-widest text-sm animate-pulse">
+                        Accessing the Vault...
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {items.map((item) => (
+                            <NftCard key={item.id} item={item} />
+                        ))}
+                        {items.length === 0 && (
+                            <div className="col-span-full border-dashed border-white/10 flex items-center justify-center min-h-[300px] text-content-muted rounded-xl">
+                                <span className="font-mono text-xs uppercase tracking-widest">No assets found in the current sector.</span>
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
         </section>
     );
@@ -118,54 +92,68 @@ export default function ShowcaseGrid() {
 // --- SUB-COMPONENT: NFT CARD ---
 
 function NftCard({ item }: { item: ShowcaseItem }) {
+    const isVideo = item.image_url?.includes('.mp4');
+    const rarityColor = getRarityColor(item.rarity);
+
     return (
         <motion.div
             className="group relative flex flex-col h-[500px] w-full bg-[#0A0510] rounded-xl overflow-hidden cursor-crosshair transition-all duration-500"
             // Hover: Glow in Rarity Color
             whileHover={{
-                boxShadow: `0 0 30px ${item.rarityColor}40`, // 40 is opacity hex
+                boxShadow: `0 0 30px ${rarityColor}40`, // 40 is opacity hex
                 y: -10
             }}
         >
             {/* 1. IMAGE AREA (Top) */}
-            <div className="relative h-full w-full overflow-hidden">
-                <Image
-                    src={getImageUrl(item.image)}
-                    alt={item.name}
-                    fill
-                    className="object-cover transition-transform duration-700 ease-out group-hover:scale-105 opacity-90 group-hover:opacity-100"
-                />
+            <div className="relative h-full w-full overflow-hidden flex items-center justify-center bg-black/50">
+                {isVideo ? (
+                    <video
+                        src={item.image_url}
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="object-cover w-full h-full transition-transform duration-700 ease-out group-hover:scale-105 opacity-90 group-hover:opacity-100"
+                    />
+                ) : (
+                    <Image
+                        src={item.image_url || 'https://placehold.co/400?text=?'}
+                        alt={item.title}
+                        fill
+                        className="object-cover transition-transform duration-700 ease-out group-hover:scale-105 opacity-90 group-hover:opacity-100"
+                    />
+                )}
 
                 {/* Seamless Gradient Overlay - Hides bottom cuts */}
-                <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#0A0510] via-[#0A0510]/60 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#0A0510] via-[#0A0510]/60 to-transparent pointer-events-none" />
 
                 {/* General subtle overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/40 via-transparent to-transparent opacity-60" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/40 via-transparent to-transparent opacity-60 pointer-events-none" />
             </div>
 
             {/* 2. INFO PANEL (Bottom) - Glassmorphism */}
             <div
                 className="absolute bottom-4 left-4 right-4 p-5 backdrop-blur-md bg-white/[0.03] border border-white/10 rounded-lg flex flex-col gap-2 transition-all duration-300 group-hover:bg-white/[0.08]"
                 style={{
-                    borderLeft: `4px solid ${item.rarityColor}`
+                    borderLeft: `4px solid ${rarityColor}`
                 }}
             >
                 {/* Rarity Label */}
                 <span
                     className="text-[10px] font-sans font-bold tracking-[0.3em] uppercase"
-                    style={{ color: item.rarityColor }}
+                    style={{ color: rarityColor }}
                 >
                     {item.rarity}
                 </span>
 
                 {/* Title */}
                 <h3 className="text-2xl font-serif font-bold text-white leading-none">
-                    {item.name}
+                    {item.title}
                 </h3>
 
-                {/* Subtitle */}
+                {/* Subtitle / Category */}
                 <p className="text-[#C5A059] text-xs font-sans font-medium uppercase tracking-wider">
-                    {item.subtitle}
+                    {item.category}
                 </p>
 
                 {/* Description (Hidden by default, optional reveal on hover could go here, but staying clean per ref) */}

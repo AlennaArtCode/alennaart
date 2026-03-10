@@ -1,11 +1,42 @@
-'use client';
-
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { useLanguage } from '@/context/LanguageContext';
+import { supabase } from '@/lib/supabase';
+
+type ProjectItem = {
+    id: string;
+    title: string;
+    category: string;
+    image_url: string;
+    description?: string;
+};
 
 export default function UniversePage() {
     const { t } = useLanguage();
+    const [projects, setProjects] = useState<ProjectItem[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchProjects = async () => {
+            const { data, error } = await supabase
+                .from('artworks')
+                .select('*')
+                // Filter out strict NFTs or Music if we want Universe to be purely for 'Projects' and 'Art/Concepts'
+                // For now, we fetch categories that make sense for a "Project/Universe" showcase.
+                .in('category', ['Fine Art', 'Concept', 'Digital Exhibit', 'Anomaly', 'Geometry', 'Photography', '3D Design'])
+                .eq('is_public', true)
+                .order('created_at', { ascending: false });
+
+            if (!error && data) {
+                setProjects(data);
+            }
+            setLoading(false);
+        };
+
+        fetchProjects();
+    }, []);
+
     return (
         <main className="min-h-screen relative overflow-hidden bg-[#0A0510] text-content-primary">
 
@@ -64,29 +95,30 @@ export default function UniversePage() {
                         <div className="h-px flex-1 bg-gradient-to-r from-white/20 to-transparent" />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        <ProjectCard
-                            title="Exemplaria"
-                            category="Digital Exhibit"
-                            status="In Progress"
-                            image="https://images.unsplash.com/photo-1549490349-8643362247b5?q=80&w=2600&auto=format&fit=crop"
-                            desc="The core database housing all multimedia creations. Serving as the foundation for the Alenna catalog."
-                        />
-                        <ProjectCard
-                            title="Chromatic Resurgence"
-                            category="NFT Concept"
-                            status="Planning Phase"
-                            image="https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?q=80&w=2670&auto=format&fit=crop"
-                            desc="Exploring pure color theory merged with hyper-realistic rendering. Expected Q4."
-                        />
-                        <ProjectCard
-                            title="Sonic Frequencies"
-                            category="Audio/Visual"
-                            status="Live"
-                            image="https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?q=80&w=2669&auto=format&fit=crop"
-                            desc="A multi-sensory experience pairing auditory tracks with visual spectacles."
-                        />
-                    </div>
+                    {loading ? (
+                        <div className="py-20 text-center text-white/20 font-mono animate-pulse uppercase tracking-widest text-sm">
+                            Synchronizing Neural Link...
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {projects.map((project) => (
+                                <ProjectCard
+                                    key={project.id}
+                                    title={project.title}
+                                    category={project.category}
+                                    status="Live"
+                                    image={project.image_url}
+                                    desc={project.description || "A glimpse into the creative matrix. Full analysis pending."}
+                                />
+                            ))}
+
+                            {projects.length === 0 && (
+                                <div className="col-span-1 md:col-span-3 glass-panel border-dashed border-white/10 flex items-center justify-center min-h-[300px] text-content-muted rounded-xl">
+                                    <span className="font-mono text-xs uppercase tracking-widest">Awaiting Transmissions... The Universe is expanding.</span>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </section>
 
                 {/* Pre-footer Call to Action */}
@@ -110,24 +142,38 @@ export default function UniversePage() {
 }
 
 function ProjectCard({ title, category, image, desc, status }: { title: string, category: string, image: string, desc: string, status: string }) {
+    const isVideo = image?.includes('.mp4');
+
     return (
-        <div className="glass-panel rounded-xl overflow-hidden group cursor-pointer hover:bg-white/5 transition-colors border border-white/5 hover:border-accent/30 flex flex-col">
-            <div className="relative h-56 overflow-hidden">
-                <Image
-                    src={image}
-                    alt={title}
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-105 opacity-80 group-hover:opacity-100 grayscale hover:grayscale-0"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0A0510] to-transparent" />
-                <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-md border border-white/10 px-2 py-1 rounded text-[9px] uppercase tracking-widest text-white/70">
+        <div className="glass-panel rounded-xl overflow-hidden group cursor-pointer hover:bg-white/5 transition-colors border border-white/5 hover:border-accent/30 flex flex-col h-full">
+            <div className="relative h-56 overflow-hidden bg-black flex items-center justify-center">
+                {isVideo ? (
+                    <video
+                        src={image}
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-105 opacity-80 group-hover:opacity-100"
+                    />
+                ) : (
+                    <Image
+                        src={image || 'https://placehold.co/400?text=?'}
+                        alt={title}
+                        fill
+                        className="object-cover transition-transform duration-700 group-hover:scale-105 opacity-80 group-hover:opacity-100 grayscale hover:grayscale-0"
+                    />
+                )}
+
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0A0510] to-transparent pointer-events-none" />
+                <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-md border border-white/10 px-2 py-1 rounded text-[9px] uppercase tracking-widest text-white/70 z-10">
                     {status}
                 </div>
             </div>
-            <div className="p-6 flex-1 flex flex-col">
+            <div className="p-6 flex-1 flex flex-col relative z-20">
                 <span className="text-[10px] font-bold tracking-[0.2em] text-accent block mb-2 uppercase">{category}</span>
                 <h3 className="text-xl font-serif font-bold text-white group-hover:text-accent transition-colors mb-3 leading-tight">{title}</h3>
-                <p className="text-sm text-content-muted font-light leading-relaxed flex-1">{desc}</p>
+                <p className="text-sm text-content-muted font-light leading-relaxed flex-1 line-clamp-3 overflow-hidden text-ellipsis">{desc}</p>
             </div>
         </div>
     );
