@@ -33,6 +33,9 @@ export default function Navbar() {
                     <Link href="/universe" className="text-xs font-bold uppercase tracking-widest text-content-secondary hover:text-content-primary transition-colors">
                         Projects & NFTs
                     </Link>
+                    <Link href="/music" className="text-xs font-bold uppercase tracking-widest text-content-secondary hover:text-content-primary transition-colors">
+                        Audiovisual
+                    </Link>
                     <Link href="/#collection" className="text-xs font-bold uppercase tracking-widest text-content-secondary hover:text-content-primary transition-colors">
                         Portfolio
                     </Link>
