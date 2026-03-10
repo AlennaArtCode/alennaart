@@ -191,7 +191,7 @@ export default function MusicClientView() {
     // Priorizamos que Techno, Experimental y Urbano Trap aparezcan primero.
     // El resto se ordena alfabéticamente.
     genres.sort((a, b) => {
-        const order = ['Techno', 'Experimental', 'Urbano Trap', 'Otras Frecuencias'];
+        const order = ['Techno', 'Experimental', 'Trap/Reggaeton', 'Urbano Trap', 'Otras Frecuencias'];
         const indexA = order.indexOf(a);
         const indexB = order.indexOf(b);
         if (indexA === -1 && indexB !== -1) return 1;
@@ -203,7 +203,7 @@ export default function MusicClientView() {
     // --- MÓDULO DE CLASIFICACIÓN DE VIDEOS ---
     const videoGenres = Array.from(new Set(videoTracks.map(t => normalizeGenre(t.rarity))));
     videoGenres.sort((a, b) => {
-        const order = ['Techno', 'Experimental', 'Urbano Trap', 'Otras Frecuencias'];
+        const order = ['Techno', 'Experimental', 'Trap/Reggaeton', 'Urbano Trap', 'Otras Frecuencias'];
         const indexA = order.indexOf(a);
         const indexB = order.indexOf(b);
         if (indexA === -1 && indexB !== -1) return 1;
