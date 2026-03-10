@@ -200,6 +200,18 @@ export default function MusicClientView() {
         return a.localeCompare(b);
     });
 
+    // --- MÓDULO DE CLASIFICACIÓN DE VIDEOS ---
+    const videoGenres = Array.from(new Set(videoTracks.map(t => normalizeGenre(t.rarity))));
+    videoGenres.sort((a, b) => {
+        const order = ['Techno', 'Experimental', 'Urbano Trap', 'Otras Frecuencias'];
+        const indexA = order.indexOf(a);
+        const indexB = order.indexOf(b);
+        if (indexA === -1 && indexB !== -1) return 1;
+        if (indexB === -1 && indexA !== -1) return -1;
+        if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+        return a.localeCompare(b);
+    });
+
     const currentTrack = currentTrackIndex !== null ? audioTracks[currentTrackIndex] : null;
 
     return (
@@ -315,30 +327,39 @@ export default function MusicClientView() {
                                                 <span className="w-2 h-2 rounded-full bg-accent animate-pulse shadow-[0_0_10px_rgba(197,160,89,0.5)]" />
                                                 Transmisiones Audiovisuales
                                             </h2>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                                {videoTracks.map(video => (
-                                                    <div key={video.id} className="bg-[#0A0B0E]/80 border border-white/5 rounded-2xl overflow-hidden shadow-[0_0_20px_rgba(0,0,0,0.5)] group hover:border-accent/40 transition-all duration-500 hover:-translate-y-1">
-                                                        <div className="aspect-video w-full relative bg-black">
-                                                            <iframe
-                                                                src={getYouTubeEmbedUrl(video.image_url)}
-                                                                title={video.title}
-                                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                                                allowFullScreen
-                                                                className="absolute inset-0 w-full h-full border-0"
-                                                            ></iframe>
-                                                        </div>
-                                                        <div className="p-6">
-                                                            <div className="mb-2">
-                                                                <span className="text-[10px] font-mono uppercase tracking-widest text-accent border border-accent/30 bg-accent/5 px-2 py-0.5 rounded-full">
-                                                                    {video.rarity}
-                                                                </span>
-                                                            </div>
-                                                            <h3 className="font-serif text-xl font-bold text-white group-hover:text-accent transition-colors">{video.title}</h3>
-                                                            {video.description && <p className="text-sm text-content-muted mt-2 font-mono leading-relaxed truncate">{video.description}</p>}
-                                                        </div>
+                                            {videoGenres.map(genre => (
+                                                <div key={genre} className="space-y-4 mt-8 first:mt-4">
+                                                    <h3 className="text-xl font-serif text-accent/80 border-b border-white/10 pb-2 mb-6">
+                                                        {genre}
+                                                    </h3>
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                                        {videoTracks
+                                                            .filter(video => normalizeGenre(video.rarity) === genre)
+                                                            .map(video => (
+                                                                <div key={video.id} className="bg-[#0A0B0E]/80 border border-white/5 rounded-2xl overflow-hidden shadow-[0_0_20px_rgba(0,0,0,0.5)] group hover:border-accent/40 transition-all duration-500 hover:-translate-y-1">
+                                                                    <div className="aspect-video w-full relative bg-black">
+                                                                        <iframe
+                                                                            src={getYouTubeEmbedUrl(video.image_url)}
+                                                                            title={video.title}
+                                                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                                            allowFullScreen
+                                                                            className="absolute inset-0 w-full h-full border-0"
+                                                                        ></iframe>
+                                                                    </div>
+                                                                    <div className="p-6">
+                                                                        <div className="mb-2">
+                                                                            <span className="text-[10px] font-mono uppercase tracking-widest text-accent border border-accent/30 bg-accent/5 px-2 py-0.5 rounded-full">
+                                                                                {normalizeGenre(video.rarity)}
+                                                                            </span>
+                                                                        </div>
+                                                                        <h3 className="font-serif text-xl font-bold text-white group-hover:text-accent transition-colors">{video.title}</h3>
+                                                                        {video.description && <p className="text-sm text-content-muted mt-2 font-mono leading-relaxed truncate">{video.description}</p>}
+                                                                    </div>
+                                                                </div>
+                                                            ))}
                                                     </div>
-                                                ))}
-                                            </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     )}
                                 </div>
