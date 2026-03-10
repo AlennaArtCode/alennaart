@@ -175,18 +175,24 @@ export default function MusicClientView() {
     };
 
     // Derived Data
-    const genres = Array.from(new Set(audioTracks.map(t => {
-        if (t.rarity === 'Techno' || t.rarity === 'Experimental') return t.rarity;
-        return 'Otras Frecuencias';
-    })));
+    const normalizeGenre = (rarity: string) => {
+        if (!rarity || ['Common', 'Rare', 'Legendary', 'Epic', 'Mythic'].includes(rarity)) {
+            return 'Otras Frecuencias';
+        }
+        return rarity;
+    };
 
-    // Ensure specific order if possible (Techno, Experimental, Otras)
+    const genres = Array.from(new Set(audioTracks.map(t => normalizeGenre(t.rarity))));
+
+    // Specific order logic prioritizing known categories, otherwise alphabetically
     genres.sort((a, b) => {
-        if (a === 'Techno') return -1;
-        if (b === 'Techno') return 1;
-        if (a === 'Experimental') return -1;
-        if (b === 'Experimental') return 1;
-        return 0;
+        const order = ['Techno', 'Experimental', 'Urbano Trap', 'Otras Frecuencias'];
+        const indexA = order.indexOf(a);
+        const indexB = order.indexOf(b);
+        if (indexA === -1 && indexB !== -1) return 1;
+        if (indexB === -1 && indexA !== -1) return -1;
+        if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+        return a.localeCompare(b);
     });
 
     const currentTrack = currentTrackIndex !== null ? audioTracks[currentTrackIndex] : null;
@@ -246,7 +252,7 @@ export default function MusicClientView() {
                                                     </h3>
                                                     <AnimatePresence>
                                                         {audioTracks.map((track, globalIndex) => {
-                                                            const trackGenre = (track.rarity === 'Techno' || track.rarity === 'Experimental') ? track.rarity : 'Otras Frecuencias';
+                                                            const trackGenre = normalizeGenre(track.rarity);
                                                             if (trackGenre !== genre) return null;
 
                                                             const isTrackPlaying = currentTrackIndex === globalIndex && isPlaying;
@@ -376,7 +382,7 @@ export default function MusicClientView() {
                                         )}
                                         <div className="min-w-0">
                                             <h4 className="text-white font-serif font-bold truncate text-sm md:text-base">{currentTrack.title}</h4>
-                                            <p className="text-accent/80 text-xs font-mono tracking-wider truncate">{currentTrack.rarity === 'Techno' || currentTrack.rarity === 'Experimental' ? currentTrack.rarity : 'Frecuencia'}</p>
+                                            <p className="text-accent/80 text-xs font-mono tracking-wider truncate">{normalizeGenre(currentTrack.rarity)}</p>
                                         </div>
                                     </div>
 
