@@ -17,6 +17,7 @@ type Artwork = {
   category: string;
   rarity: string;
   image_url: string;
+  image_path?: string;
   description?: string;
   created_at: string;
 };
@@ -123,7 +124,7 @@ export default function Home() {
                       />
                     ) : (
                       <Image
-                        src={featuredItem.image_url && featuredItem.image_url.trim() !== '' ? featuredItem.image_url : 'https://placehold.co/800x600?text=No+Image'}
+                        src={(featuredItem.image_path || featuredItem.image_url).trim() !== '' ? (featuredItem.image_path || featuredItem.image_url) : 'https://placehold.co/800x600?text=No+Image'}
                         alt={featuredItem.title}
                         fill
                         className="object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
@@ -166,7 +167,7 @@ export default function Home() {
                         {isVideo ? (
                           <video src={drop.image_url} autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity duration-500 group-hover:scale-105" />
                         ) : (
-                          <Image src={drop.image_url} alt={drop.title} fill className="object-cover opacity-70 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" />
+                          <Image src={(drop.image_path || drop.image_url).trim() !== '' ? (drop.image_path || drop.image_url) : 'https://placehold.co/400x400?text=No+Image'} alt={drop.title} fill className="object-cover opacity-70 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" />
                         )}
                         <div className="absolute top-4 left-4 z-10">
                           <span className="bg-black/60 backdrop-blur-md text-white/80 font-mono text-[10px] px-3 py-1 rounded border border-white/10 uppercase tracking-widest">
