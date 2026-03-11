@@ -54,7 +54,7 @@ export default function AdminPanel() {
     const [editingId, setEditingId] = useState<string | null>(null);
 
     // Navigation State
-    const [activeTab, setActiveTab] = useState<'upload' | 'music' | 'nfts' | 'decorator' | 'tickets'>('upload');
+    const [activeTab, setActiveTab] = useState<'upload' | 'music' | 'nfts' | 'decorator' | 'tickets' | 'settings'>('upload');
 
     // Cropper State
     const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
@@ -293,19 +293,19 @@ export default function AdminPanel() {
     return (
         <div className="min-h-screen bg-[#050505] text-white font-sans pb-20">
             {/* TOP BAR */}
-            <header className="sticky top-0 z-50 bg-[#050505]/80 backdrop-blur-md border-b border-white/5 px-6 py-4 flex justify-between items-center">
-                <div className="flex items-center gap-3">
+            <header className="sticky top-0 z-50 bg-[#050505]/80 backdrop-blur-md border-b border-white/5 px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div className="flex items-center gap-3 w-full md:w-auto">
                     <div className="w-3 h-3 bg-accent rounded-full animate-pulse shadow-[0_0_10px_#C5A059]" />
                     <h1 className="font-serif text-xl tracking-widest text-accent">EXEMPLARIA <span className="text-xs font-sans text-white/50 tracking-normal">ADMIN SUITE</span></h1>
                 </div>
 
-                <div className="flex gap-4">
+                <div className="flex flex-wrap gap-2 md:gap-4 justify-center md:justify-end w-full md:w-auto">
                     <button
                         onClick={() => {
                             setActiveTab('upload');
                             if (!editingId) setNewItem({ ...newItem, category: 'Geometry', rarity: 'Common', image_url: '' });
                         }}
-                        className={`text-sm uppercase tracking-wider px-4 py-2 rounded transition-colors ${activeTab === 'upload' ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white'}`}
+                        className={`text-xs md:text-sm uppercase tracking-wider px-3 md:px-4 py-2 rounded transition-colors ${activeTab === 'upload' ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white'}`}
                     >
                         Upload Art
                     </button>
@@ -314,7 +314,7 @@ export default function AdminPanel() {
                             setActiveTab('nfts');
                             if (!editingId) setNewItem({ ...newItem, category: 'Season Pass', rarity: 'Legendary', image_url: '' });
                         }}
-                        className={`text-sm uppercase tracking-wider px-4 py-2 rounded transition-colors ${activeTab === 'nfts' ? 'bg-accent/20 text-accent' : 'text-white/40 hover:text-accent'}`}
+                        className={`text-xs md:text-sm uppercase tracking-wider px-3 md:px-4 py-2 rounded transition-colors ${activeTab === 'nfts' ? 'bg-accent/20 text-accent' : 'text-white/40 hover:text-accent'}`}
                     >
                         NFTs
                     </button>
@@ -323,20 +323,20 @@ export default function AdminPanel() {
                             setActiveTab('music');
                             if (!editingId) setNewItem({ ...newItem, category: 'Music', rarity: 'Experimental', image_url: '' });
                         }}
-                        className={`text-sm uppercase tracking-wider px-4 py-2 rounded transition-colors ${activeTab === 'music' ? 'bg-accent/20 text-accent' : 'text-white/40 hover:text-accent'}`}
+                        className={`text-xs md:text-sm uppercase tracking-wider px-3 md:px-4 py-2 rounded transition-colors ${activeTab === 'music' ? 'bg-accent/20 text-accent' : 'text-white/40 hover:text-accent'}`}
                     >
                         Media/Audio
                     </button>
                     <button
                         onClick={() => setActiveTab('decorator')}
-                        className={`flex items-center gap-2 text-sm uppercase tracking-wider px-4 py-2 rounded transition-colors ${activeTab === 'decorator' ? 'bg-accent/20 text-accent' : 'text-white/40 hover:text-accent'}`}
+                        className={`flex items-center gap-2 text-xs md:text-sm uppercase tracking-wider px-3 md:px-4 py-2 rounded transition-colors ${activeTab === 'decorator' ? 'bg-accent/20 text-accent' : 'text-white/40 hover:text-accent'}`}
                     >
                         <Wand2 size={16} />
                         Decorator
                     </button>
                     <button
                         onClick={() => setActiveTab('tickets')}
-                        className={`flex items-center gap-2 text-sm uppercase tracking-wider px-4 py-2 rounded transition-colors ${activeTab === 'tickets' ? 'bg-accent/20 text-accent' : 'text-white/40 hover:text-accent'} relative`}
+                        className={`flex items-center gap-2 text-xs md:text-sm uppercase tracking-wider px-3 md:px-4 py-2 rounded transition-colors ${activeTab === 'tickets' ? 'bg-accent/20 text-accent' : 'text-white/40 hover:text-accent'} relative`}
                     >
                         Inbox
                         {tickets.filter(t => t.status === 'open').length > 0 && (
@@ -345,7 +345,23 @@ export default function AdminPanel() {
                             </span>
                         )}
                     </button>
-                    <button onClick={handleLogout} className="text-xs uppercase tracking-widest text-white/40 hover:text-white transition-colors border-l border-white/10 pl-4 ml-2">
+                    <button
+                        onClick={() => {
+                            setActiveTab('settings');
+                            const configItem = galleryItems.find(item => item.category === 'Site Config' && item.title === 'Hero Image');
+                            if (configItem) {
+                                setNewItem(configItem);
+                                setEditingId(configItem.id);
+                            } else {
+                                setNewItem({ title: 'Hero Image', category: 'Site Config', rarity: 'Common', image_url: '', is_public: true });
+                                setEditingId(null);
+                            }
+                        }}
+                        className={`text-xs md:text-sm uppercase tracking-wider px-3 md:px-4 py-2 rounded transition-colors ${activeTab === 'settings' ? 'bg-accent/20 text-accent' : 'text-white/40 hover:text-accent'}`}
+                    >
+                        Settings
+                    </button>
+                    <button onClick={handleLogout} className="text-xs uppercase tracking-widest text-white/40 hover:text-white transition-colors border-l border-white/10 pl-3 md:pl-4 ml-1 md:ml-2 py-2">
                         Logout
                     </button>
                 </div>
@@ -951,6 +967,69 @@ export default function AdminPanel() {
                                     No incoming transmissions yet.
                                 </div>
                             )}
+                        </div>
+                    </div>
+                )}
+
+                {/* --- TAB: SETTINGS --- */}
+                {activeTab === 'settings' && (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                        <div className="space-y-6">
+                            <div className="bg-[#0A0510] border-l-4 border-accent p-6 rounded-r-xl shadow-2xl relative overflow-hidden group transition-all duration-300">
+                                <div className="flex justify-between items-center mb-6 relative z-10">
+                                    <h2 className="text-2xl font-serif text-white flex items-center gap-2">
+                                        <Wand2 size={24} className="text-accent" />
+                                        Hero Image Settings
+                                    </h2>
+                                </div>
+
+                                <div className="space-y-4 relative z-10">
+                                    <p className="text-xs text-white/50 pb-2">Upload a transparent PNG to change the main hero image on the home page (the lion).</p>
+                                    
+                                    {/* DROPZONE */}
+                                    <div>
+                                        <label className="text-[10px] uppercase tracking-widest text-white/40 mb-1 block">Hero Image (PNG Transparent)</label>
+                                        <div
+                                            className={`border-2 border-dashed rounded-lg p-6 text-center transition-all cursor-pointer relative ${newItem.image_url ? 'border-accent bg-accent/5' : 'border-white/10 hover:border-white/30'}`}
+                                        >
+                                            <input
+                                                type="file"
+                                                accept="image/png"
+                                                onChange={handleFileUpload}
+                                                disabled={uploading}
+                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+                                            />
+
+                                            <div className="flex flex-col items-center gap-2 relative z-10">
+                                                {uploading ? (
+                                                    <div className="animate-spin w-6 h-6 border-2 border-accent border-t-transparent rounded-full" />
+                                                ) : newItem.image_url ? (
+                                                    <div className="relative w-full rounded overflow-hidden mb-2 bg-black/50 p-4">
+                                                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                        <img src={newItem.image_url} alt="Hero Preview" className="w-full h-auto object-contain max-h-48 drop-shadow-[0_0_20px_rgba(240,180,41,0.5)]" />
+                                                    </div>
+                                                ) : (
+                                                    <Upload size={24} className="text-white/30" />
+                                                )}
+
+                                                <span className="text-xs text-accent placeholder:text-white/20">
+                                                    {uploading ? 'Uploading to Cloud...' : newItem.image_url ? 'Click to Change Image' : 'Click or Drag PNG here'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* SUBMIT */}
+                                    <button
+                                        onClick={saveItem}
+                                        disabled={uploading || !newItem.image_url}
+                                        className="w-full py-4 text-black font-bold uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-95 transition-all rounded-sm disabled:opacity-50 flex items-center justify-center gap-2 bg-gradient-to-r from-accent to-[#8a6e35] shadow-[0_0_20px_rgba(197,160,89,0.3)]"
+                                    >
+                                        <Save size={18} />
+                                        Save Hero Image
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 )}

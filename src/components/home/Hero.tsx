@@ -7,7 +7,7 @@ import { useRef } from 'react';
 import { Music } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 
-export default function Hero() {
+export default function Hero({ customImage }: { customImage?: string | null }) {
     const { t } = useLanguage();
     const containerRef = useRef<HTMLDivElement>(null);
     const { scrollYProgress } = useScroll({
@@ -83,8 +83,8 @@ export default function Hero() {
                 >
                     <div className="relative w-[350px] h-[350px] md:w-[650px] md:h-[650px]">
                         <Image
-                            src="/art/lion-transparent.png"
-                            alt="Lion Geometric Art"
+                            src={customImage || "/art/lion-transparent.png"}
+                            alt="Hero Art"
                             fill
                             className="object-contain drop-shadow-[0_0_60px_rgba(240,180,41,0.3)] animate-float-slow"
                             priority

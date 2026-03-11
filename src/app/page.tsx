@@ -26,15 +26,29 @@ export default function Home() {
   const { t } = useLanguage();
   const [featuredItem, setFeaturedItem] = useState<Artwork | null>(null);
   const [recentDrops, setRecentDrops] = useState<Artwork[]>([]);
+  const [heroImage, setHeroImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchHomeContent = async () => {
+      // 0. Fetch hero image config
+      const { data: heroData } = await supabase
+        .from('artworks')
+        .select('image_url')
+        .eq('category', 'Site Config')
+        .eq('title', 'Hero Image')
+        .single();
+
+      if (heroData?.image_url) {
+        setHeroImage(heroData.image_url);
+      }
+
       // 1. Fetch latest public item as featured
       const { data: featuredData } = await supabase
         .from('artworks')
         .select('*')
         .eq('is_public', true)
+        .neq('category', 'Site Config')
         .order('created_at', { ascending: false })
         .limit(1);
 
@@ -47,6 +61,7 @@ export default function Home() {
         .from('artworks')
         .select('*')
         .eq('is_public', true)
+        .neq('category', 'Site Config')
         .order('created_at', { ascending: false })
         .range(1, 2); // Get 2nd and 3rd newest
 
@@ -77,7 +92,7 @@ export default function Home() {
       <div className="relative z-10">
 
         {/* 1. Hero Section (The Hook) */}
-        <Hero />
+        <Hero customImage={heroImage} />
 
         {/* 2. dynamic Highlights Section */}
         {!loading && featuredItem && (
