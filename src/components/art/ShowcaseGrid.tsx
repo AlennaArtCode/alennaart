@@ -10,6 +10,7 @@ type ShowcaseItem = {
     title: string;
     category: string;
     image_url: string;
+    image_path?: string;
     rarity: string;
     description: string;
 };
@@ -119,7 +120,7 @@ function NftCard({ item }: { item: ShowcaseItem }) {
                     />
                 ) : (
                     <Image
-                        src={item.image_url && item.image_url.trim() !== '' ? item.image_url : 'https://placehold.co/400?text=No+Image'}
+                        src={(item.image_path || item.image_url || '').match(/\.(mp3|wav|ogg)$/i) ? 'https://placehold.co/400?text=Audio+File' : ((item.image_path || item.image_url || '').trim() !== '' ? (item.image_path || item.image_url) : 'https://placehold.co/400?text=No+Image')}
                         alt={item.title}
                         fill
                         className="object-cover transition-transform duration-700 ease-out group-hover:scale-105 opacity-90 group-hover:opacity-100"

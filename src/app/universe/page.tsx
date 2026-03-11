@@ -11,6 +11,7 @@ type ProjectItem = {
     title: string;
     category: string;
     image_url: string;
+    image_path?: string;
     description?: string;
 };
 
@@ -109,7 +110,7 @@ export default function UniversePage() {
                                     title={project.title}
                                     category={project.category}
                                     status="Live"
-                                    image={project.image_url}
+                                    image={project.image_path || project.image_url}
                                     desc={project.description || "A glimpse into the creative matrix. Full analysis pending."}
                                 />
                             ))}
@@ -160,7 +161,7 @@ function ProjectCard({ title, category, image, desc, status }: { title: string, 
                     />
                 ) : (
                     <Image
-                        src={image && image.trim() !== '' ? image : 'https://placehold.co/400?text=No+Image'}
+                        src={(image || '').match(/\.(mp3|wav|ogg)$/i) ? 'https://placehold.co/400?text=Audio+File' : ((image || '').trim() !== '' ? image : 'https://placehold.co/400?text=No+Image')}
                         alt={title}
                         fill
                         className="object-cover transition-transform duration-700 group-hover:scale-105 opacity-80 group-hover:opacity-100 grayscale hover:grayscale-0"
