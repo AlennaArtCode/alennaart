@@ -197,8 +197,7 @@ export default function AdminPanel() {
 
     const saveItem = async () => {
         // Validation: Required fields check based on category
-        const isTextConfig = newItem.category === 'Site Config' && newItem.title.includes('Texts');
-        const isImageConfig = newItem.category === 'Site Config' && !newItem.title.includes('Texts');
+        const isTextConfig = newItem.category === 'Site Config' && newItem.title?.includes('Texts');
 
         if (!newItem.title) return alert("Title is required.");
         if (!isTextConfig && !newItem.image_url) return alert("Image/Media URL is required for this item.");
@@ -206,6 +205,7 @@ export default function AdminPanel() {
         // For text-only configs, we use a placeholder image_url if empty to satisfy DB constraints if any
         const finalItem = {
             ...newItem,
+            title: newItem.title,
             image_url: newItem.image_url || 'text-only',
             image_path: newItem.image_path || newItem.image_url || 'text-only'
         };
