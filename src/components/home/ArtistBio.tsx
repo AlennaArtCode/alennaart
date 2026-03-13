@@ -1,17 +1,26 @@
 import { useLanguage } from '@/context/LanguageContext';
+import Image from 'next/image';
 
-export default function ArtistBio() {
+export default function ArtistBio({ customImage }: { customImage?: string | null }) {
     const { t } = useLanguage();
     return (
         <section className="py-24 bg-primary text-center md:text-left px-6">
             <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-12">
                 {/* Avatar / Image */}
                 <div className="md:w-1/3">
-                    <div className="w-64 h-64 grayscale hover:grayscale-0 transition-all duration-700 rounded-full overflow-hidden mx-auto border-2 border-primary-border">
-                        {/* Placeholder for Artist Image */}
-                        <div className="w-full h-full bg-primary-surface flex items-center justify-center text-content-muted">
-                            Artist Photo
-                        </div>
+                    <div className="w-64 h-64 grayscale hover:grayscale-0 transition-all duration-700 rounded-full overflow-hidden mx-auto border-2 border-primary-border relative group">
+                        {customImage ? (
+                            <Image
+                                src={customImage}
+                                alt="Artist Photo"
+                                fill
+                                className="object-cover transition-transform duration-700 group-hover:scale-110"
+                            />
+                        ) : (
+                            <div className="w-full h-full bg-primary-surface flex items-center justify-center text-content-muted">
+                                Artist Photo
+                            </div>
+                        )}
                     </div>
                 </div>
 

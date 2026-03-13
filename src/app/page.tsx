@@ -27,20 +27,22 @@ export default function Home() {
   const [featuredItem, setFeaturedItem] = useState<Artwork | null>(null);
   const [recentDrops, setRecentDrops] = useState<Artwork[]>([]);
   const [heroImage, setHeroImage] = useState<string | null>(null);
+  const [artistImage, setArtistImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchHomeContent = async () => {
-      // 0. Fetch hero image config
-      const { data: heroData } = await supabase
+      // 0. Fetch site config
+      const { data: configData } = await supabase
         .from('artworks')
-        .select('image_url')
-        .eq('category', 'Site Config')
-        .eq('title', 'Hero Image')
-        .single();
+        .select('title, image_url')
+        .eq('category', 'Site Config');
 
-      if (heroData?.image_url) {
-        setHeroImage(heroData.image_url);
+      if (configData) {
+        const hero = configData.find(c => c.title === 'Hero Image');
+        const artist = configData.find(c => c.title === 'Artist Image');
+        if (hero?.image_url) setHeroImage(hero.image_url);
+        if (artist?.image_url) setArtistImage(artist.image_url);
       }
 
       // 1. Fetch latest public item as featured
@@ -217,7 +219,7 @@ export default function Home() {
         <InnerCircle />
 
         {/* 5. Artist */}
-        <ArtistBio />
+        <ArtistBio customImage={artistImage} />
 
         {/* 6. The Codex (Manifesto) */}
         <Codex />

@@ -7,6 +7,7 @@ interface LanguageContextProps {
     lang: Language;
     setLang: (lang: Language) => void;
     t: (section: keyof typeof translations['EN'], key: string) => string;
+    refreshTranslations: () => Promise<void>;
 }
 
 const LanguageContext = createContext<LanguageContextProps | undefined>(undefined);
@@ -14,6 +15,33 @@ const LanguageContext = createContext<LanguageContextProps | undefined>(undefine
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
     const [lang, setLangState] = useState<Language>('EN');
     const [mounted, setMounted] = useState(false);
+    const [remoteTranslations, setRemoteTranslations] = useState<any>({});
+
+    const fetchRemoteTranslations = async () => {
+        try {
+            const { data, error } = await (await import('@/lib/supabase')).supabase
+                .from('artworks')
+                .select('title, description')
+                .eq('category', 'Site Config')
+                .like('title', '%Texts');
+
+            if (error) throw error;
+
+            const transformed: any = {};
+            data?.forEach(item => {
+                try {
+                    // Title format: "Hero Texts" -> section key: "hero"
+                    const sectionKey = item.title.replace(' Texts', '').toLowerCase();
+                    transformed[sectionKey] = JSON.parse(item.description || '{}');
+                } catch (e) {
+                    console.error(`Error parsing translation for ${item.title}:`, e);
+                }
+            });
+            setRemoteTranslations(transformed);
+        } catch (e) {
+            console.error('Failed to fetch remote translations:', e);
+        }
+    };
 
     useEffect(() => {
         // Load from localStorage if available
@@ -22,6 +50,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
             setLangState(savedLang);
         }
         setMounted(true);
+        fetchRemoteTranslations();
     }, []);
 
     const setLang = (newLang: Language) => {
@@ -30,13 +59,20 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     };
 
     const t = (section: keyof typeof translations['EN'], key: string): string => {
+        // 1. Try remote translations first
+        const remoteSection = remoteTranslations[section];
+        if (remoteSection && remoteSection[lang] && remoteSection[lang][key]) {
+            return remoteSection[lang][key];
+        }
+
+        // 2. Fallback to local translations
         const dictionary = translations[lang] || translations['EN'];
         const sectionData = dictionary[section] as Record<string, string>;
         return sectionData ? (sectionData[key] || key) : key;
     };
 
     return (
-        <LanguageContext.Provider value={{ lang, setLang, t }}>
+        <LanguageContext.Provider value={{ lang, setLang, t, refreshTranslations: fetchRemoteTranslations }}>
             <div suppressHydrationWarning>
                 {mounted ? children : children}
             </div>

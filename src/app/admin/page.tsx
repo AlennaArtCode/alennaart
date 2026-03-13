@@ -196,17 +196,29 @@ export default function AdminPanel() {
     };
 
     const saveItem = async () => {
-        if (!newItem.title || !newItem.image_url) return alert("Faltan datos (Título o Imagen/Media)");
+        // Validation: Required fields check based on category
+        const isTextConfig = newItem.category === 'Site Config' && newItem.title.includes('Texts');
+        const isImageConfig = newItem.category === 'Site Config' && !newItem.title.includes('Texts');
+
+        if (!newItem.title) return alert("Title is required.");
+        if (!isTextConfig && !newItem.image_url) return alert("Image/Media URL is required for this item.");
+
+        // For text-only configs, we use a placeholder image_url if empty to satisfy DB constraints if any
+        const finalItem = {
+            ...newItem,
+            image_url: newItem.image_url || 'text-only',
+            image_path: newItem.image_path || newItem.image_url || 'text-only'
+        };
 
         if (editingId) {
             const { error } = await supabase.from('artworks').update({
-                title: newItem.title,
-                category: newItem.category || 'Geometry',
-                rarity: newItem.rarity || 'Common',
-                image_url: newItem.image_url,
-                image_path: newItem.image_path || newItem.image_url,
-                is_public: newItem.is_public,
-                description: newItem.description
+                title: finalItem.title,
+                category: finalItem.category || 'Geometry',
+                rarity: finalItem.rarity || 'Common',
+                image_url: finalItem.image_url,
+                image_path: finalItem.image_path,
+                is_public: finalItem.is_public,
+                description: finalItem.description
             }).eq('id', editingId);
 
             if (error) {
@@ -218,26 +230,19 @@ export default function AdminPanel() {
             }
         } else {
             const { error } = await supabase.from('artworks').insert([{
-                title: newItem.title,
-                category: newItem.category,
-                rarity: newItem.rarity,
-                image_url: newItem.image_url,
-                image_path: newItem.image_path || newItem.image_url, // Fallback
-                is_public: newItem.is_public,
-                description: newItem.description
+                title: finalItem.title,
+                category: finalItem.category,
+                rarity: finalItem.rarity,
+                image_url: finalItem.image_url,
+                image_path: finalItem.image_path,
+                is_public: finalItem.is_public,
+                description: finalItem.description
             }]);
 
             if (error) {
                 alert("Error saving: " + error.message);
             } else {
                 fetchItems();
-                if (activeTab === 'music') {
-                    setNewItem({ title: '', category: 'Music', rarity: 'Experimental', image_url: '', image_path: '', is_public: false, description: '' });
-                } else if (activeTab === 'nfts') {
-                    setNewItem({ title: '', category: 'Season Pass', rarity: 'Legendary', image_url: '', image_path: '', is_public: false, description: '' });
-                } else {
-                    setNewItem({ title: '', category: 'Geometry', rarity: 'Common', image_url: '', image_path: '', is_public: false, description: '' });
-                }
                 alert("Arte minteado en la base de datos.");
             }
         }
@@ -974,61 +979,111 @@ export default function AdminPanel() {
                 {/* --- TAB: SETTINGS --- */}
                 {activeTab === 'settings' && (
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                        <div className="space-y-6">
-                            <div className="bg-[#0A0510] border-l-4 border-accent p-6 rounded-r-xl shadow-2xl relative overflow-hidden group transition-all duration-300">
-                                <div className="flex justify-between items-center mb-6 relative z-10">
-                                    <h2 className="text-2xl font-serif text-white flex items-center gap-2">
-                                        <Wand2 size={24} className="text-accent" />
-                                        Hero Image Settings
-                                    </h2>
+                        {/* IMAGES CONFIG */}
+                        <div className="space-y-8">
+                            <h2 className="text-2xl font-serif text-white flex items-center gap-2 mb-4">
+                                <Wand2 size={24} className="text-accent" />
+                                Site Appearance
+                            </h2>
+
+                            {/* HERO IMAGE */}
+                            <div className="bg-[#0A0510] border-l-4 border-accent p-6 rounded-r-xl shadow-2xl space-y-4">
+                                <h3 className="text-lg font-serif text-white">Hero Image</h3>
+                                <p className="text-xs text-white/50">Main image on the home page (transparent PNG recommended).</p>
+
+                                <div className="space-y-4">
+                                    <Dropzone 
+                                        onFileSelect={handleFileUpload} 
+                                        uploading={uploading} 
+                                        imageUrl={(galleryItems.find(i => i.title === 'Hero Image') as GalleryItem)?.image_url || newItem.image_url} 
+                                        label="Hero Image (Hero Image Title)"
+                                        onSave={() => {
+                                            const item = (galleryItems.find(i => i.title === 'Hero Image') || { title: 'Hero Image', category: 'Site Config', is_public: true }) as GalleryItem;
+                                            setNewItem({ ...item, image_url: newItem.image_url || item.image_url });
+                                            setEditingId(item.id || null);
+                                            setTimeout(saveItem, 100);
+                                        }}
+                                    />
                                 </div>
+                            </div>
 
-                                <div className="space-y-4 relative z-10">
-                                    <p className="text-xs text-white/50 pb-2">Upload a transparent PNG to change the main hero image on the home page (the lion).</p>
-                                    
-                                    {/* DROPZONE */}
-                                    <div>
-                                        <label className="text-[10px] uppercase tracking-widest text-white/40 mb-1 block">Hero Image (PNG Transparent)</label>
-                                        <div
-                                            className={`border-2 border-dashed rounded-lg p-6 text-center transition-all cursor-pointer relative ${newItem.image_url ? 'border-accent bg-accent/5' : 'border-white/10 hover:border-white/30'}`}
-                                        >
-                                            <input
-                                                type="file"
-                                                accept="image/png"
-                                                onChange={handleFileUpload}
-                                                disabled={uploading}
-                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
-                                            />
+                            {/* ARTIST IMAGE */}
+                            <div className="bg-[#0A0510] border-l-4 border-primary p-6 rounded-r-xl shadow-2xl space-y-4">
+                                <h3 className="text-lg font-serif text-white">Artist Profile Photo</h3>
+                                <p className="text-xs text-white/50">Large photo used in the "Behind the Art" section.</p>
 
-                                            <div className="flex flex-col items-center gap-2 relative z-10">
-                                                {uploading ? (
-                                                    <div className="animate-spin w-6 h-6 border-2 border-accent border-t-transparent rounded-full" />
-                                                ) : newItem.image_url ? (
-                                                    <div className="relative w-full rounded overflow-hidden mb-2 bg-black/50 p-4">
-                                                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                        <img src={newItem.image_url} alt="Hero Preview" className="w-full h-auto object-contain max-h-48 drop-shadow-[0_0_20px_rgba(240,180,41,0.5)]" />
-                                                    </div>
-                                                ) : (
-                                                    <Upload size={24} className="text-white/30" />
-                                                )}
-
-                                                <span className="text-xs text-accent placeholder:text-white/20">
-                                                    {uploading ? 'Uploading to Cloud...' : newItem.image_url ? 'Click to Change Image' : 'Click or Drag PNG here'}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* SUBMIT */}
-                                    <button
-                                        onClick={saveItem}
-                                        disabled={uploading || !newItem.image_url}
-                                        className="w-full py-4 text-black font-bold uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-95 transition-all rounded-sm disabled:opacity-50 flex items-center justify-center gap-2 bg-gradient-to-r from-accent to-[#8a6e35] shadow-[0_0_20px_rgba(197,160,89,0.3)]"
-                                    >
-                                        <Save size={18} />
-                                        Save Hero Image
-                                    </button>
+                                <div className="space-y-4">
+                                    <Dropzone 
+                                        onFileSelect={(e) => handleFileUpload(e)} // No isAudio, isCover is handled by executeUpload if needed
+                                        uploading={uploading} 
+                                        imageUrl={(galleryItems.find(i => i.title === 'Artist Image') as GalleryItem)?.image_url || (newItem.title === 'Artist Image' ? newItem.image_url : '')} 
+                                        label="Artist Image (Artist Image Title)"
+                                        onSave={() => {
+                                            const item = (galleryItems.find(i => i.title === 'Artist Image') || { title: 'Artist Image', category: 'Site Config', is_public: true }) as GalleryItem;
+                                            setNewItem({ ...item, image_url: newItem.image_url || item.image_url, title: 'Artist Image', category: 'Site Config' });
+                                            setEditingId(item.id || null);
+                                            setTimeout(saveItem, 100);
+                                        }}
+                                    />
                                 </div>
+                            </div>
+                        </div>
+
+                        {/* TEXTS CONFIG */}
+                        <div className="space-y-8">
+                            <h2 className="text-2xl font-serif text-white flex items-center gap-2 mb-4">
+                                <Edit2 size={24} className="text-accent" />
+                                Multilingual Content
+                            </h2>
+
+                            <div className="grid grid-cols-1 gap-6">
+                                <TextSectionEditor 
+                                    section="Hero" 
+                                    fields={['quote_1', 'quote_2', 'title_1', 'title_2', 'subtitle_1', 'subtitle_2']} 
+                                    galleryItems={galleryItems}
+                                    saveItem={async (sectionData) => {
+                                        const item = (galleryItems.find(i => i.title === 'Hero Texts') || { title: 'Hero Texts', category: 'Site Config', is_public: true }) as GalleryItem;
+                                        setNewItem({ ...item, description: JSON.stringify(sectionData), image_url: 'text-only' });
+                                        setEditingId(item.id || null);
+                                        setTimeout(saveItem, 100);
+                                    }}
+                                />
+
+                                <TextSectionEditor 
+                                    section="Artist" 
+                                    fields={['title', 'p1_1', 'p1_3', 'p2']} 
+                                    galleryItems={galleryItems}
+                                    saveItem={async (sectionData) => {
+                                        const item = (galleryItems.find(i => i.title === 'Artist Texts') || { title: 'Artist Texts', category: 'Site Config', is_public: true }) as GalleryItem;
+                                        setNewItem({ ...item, description: JSON.stringify(sectionData), image_url: 'text-only' });
+                                        setEditingId(item.id || null);
+                                        setTimeout(saveItem, 100);
+                                    }}
+                                />
+
+                                <TextSectionEditor 
+                                    section="Codex" 
+                                    fields={['title', 'subtitle', 'p1_first_letter', 'p1_rest', 'p2', 'signature']} 
+                                    galleryItems={galleryItems}
+                                    saveItem={async (sectionData) => {
+                                        const item = (galleryItems.find(i => i.title === 'Codex Texts') || { title: 'Codex Texts', category: 'Site Config', is_public: true }) as GalleryItem;
+                                        setNewItem({ ...item, description: JSON.stringify(sectionData), image_url: 'text-only' });
+                                        setEditingId(item.id || null);
+                                        setTimeout(saveItem, 100);
+                                    }}
+                                />
+
+                                <TextSectionEditor 
+                                    section="Community" 
+                                    fields={['badge', 'title', 'desc', 'join']} 
+                                    galleryItems={galleryItems}
+                                    saveItem={async (sectionData) => {
+                                        const item = (galleryItems.find(i => i.title === 'Community Texts') || { title: 'Community Texts', category: 'Site Config', is_public: true }) as GalleryItem;
+                                        setNewItem({ ...item, description: JSON.stringify(sectionData), image_url: 'text-only' });
+                                        setEditingId(item.id || null);
+                                        setTimeout(saveItem, 100);
+                                    }}
+                                />
                             </div>
                         </div>
                     </div>
@@ -1050,6 +1105,139 @@ export default function AdminPanel() {
 }
 
 // --- SUB-COMPONENTS ---
+
+function Dropzone({ onFileSelect, uploading, imageUrl, label, onSave }: { 
+    onFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void, 
+    uploading: boolean, 
+    imageUrl?: string | null, 
+    label: string,
+    onSave: () => void 
+}) {
+    return (
+        <div className="space-y-4">
+            <div
+                className={`border-2 border-dashed rounded-lg p-6 text-center transition-all cursor-pointer relative ${imageUrl ? 'border-accent bg-accent/5' : 'border-white/10 hover:border-white/30'}`}
+            >
+                <input
+                    type="file"
+                    accept="image/*"
+                    onChange={onFileSelect}
+                    disabled={uploading}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+                />
+
+                <div className="flex flex-col items-center gap-2 relative z-10">
+                    {uploading ? (
+                        <div className="animate-spin w-6 h-6 border-2 border-accent border-t-transparent rounded-full" />
+                    ) : imageUrl ? (
+                        <div className="relative w-full rounded overflow-hidden mb-2 bg-black/50 p-4">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={imageUrl} alt="Preview" className="w-full h-auto object-contain max-h-32 drop-shadow-[0_0_15px_rgba(240,180,41,0.3)]" />
+                        </div>
+                    ) : (
+                        <Upload size={24} className="text-white/30" />
+                    )}
+
+                    <span className="text-xs text-accent">
+                        {uploading ? 'Uploading...' : imageUrl ? 'Change Image' : 'Click to Upload'}
+                    </span>
+                </div>
+            </div>
+            
+            <button
+                onClick={onSave}
+                disabled={uploading}
+                className="w-full py-2 bg-white/10 hover:bg-white/20 text-white text-[10px] uppercase tracking-widest rounded transition-colors"
+            >
+                Confirm & Save {label.split('(')[0].trim()}
+            </button>
+        </div>
+    );
+}
+
+function TextSectionEditor({ section, fields, galleryItems, saveItem }: { 
+    section: string, 
+    fields: string[], 
+    galleryItems: GalleryItem[],
+    saveItem: (data: any) => Promise<void>
+}) {
+    const configItem = galleryItems.find(i => i.title === `${section} Texts`);
+    const initialData = configItem ? JSON.parse(configItem.description || '{}') : { EN: {}, ES: {} };
+    const [data, setData] = useState(initialData);
+    const [expanded, setExpanded] = useState(false);
+
+    const updateField = (lang: 'EN' | 'ES', field: string, value: string) => {
+        setData((prev: any) => ({
+            ...prev,
+            [lang]: {
+                ...prev[lang],
+                [field]: value
+            }
+        }));
+    };
+
+    return (
+        <div className="bg-[#0A0510] border border-white/5 rounded-lg overflow-hidden transition-all duration-300">
+            <button 
+                onClick={() => setExpanded(!expanded)}
+                className="w-full p-4 flex justify-between items-center hover:bg-white/5 transition-colors"
+            >
+                <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded bg-white/5 flex items-center justify-center">
+                        <Edit2 size={14} className="text-white/40" />
+                    </div>
+                    <span className="font-serif text-white">{section} Texts</span>
+                </div>
+                <div className={`transition-transform ${expanded ? 'rotate-180' : ''}`}>
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4L6 8L10 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </div>
+            </button>
+
+            {expanded && (
+                <div className="p-4 pt-0 space-y-6 animate-in slide-in-from-top-2 duration-300">
+                    <div className="grid grid-cols-2 gap-4">
+                        {/* EN Column */}
+                        <div className="space-y-4">
+                            <h4 className="text-[10px] uppercase tracking-widest text-blue-400 font-bold border-b border-blue-400/20 pb-1">English</h4>
+                            {fields.map(field => (
+                                <div key={`en-${field}`}>
+                                    <label className="text-[9px] uppercase tracking-widest text-white/30 mb-1 block">{field.replace(/_/g, ' ')}</label>
+                                    <textarea 
+                                        value={data.EN?.[field] || ''}
+                                        onChange={(e) => updateField('EN', field, e.target.value)}
+                                        className="w-full bg-black/40 border border-white/5 rounded p-2 text-xs text-white/80 focus:border-accent outline-none min-h-[40px] resize-y"
+                                    />
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* ES Column */}
+                        <div className="space-y-4">
+                            <h4 className="text-[10px] uppercase tracking-widest text-yellow-400 font-bold border-b border-yellow-400/20 pb-1">Spanish</h4>
+                            {fields.map(field => (
+                                <div key={`es-${field}`}>
+                                    <label className="text-[9px] uppercase tracking-widest text-white/30 mb-1 block">{field.replace(/_/g, ' ')}</label>
+                                    <textarea 
+                                        value={data.ES?.[field] || ''}
+                                        onChange={(e) => updateField('ES', field, e.target.value)}
+                                        className="w-full bg-black/40 border border-white/5 rounded p-2 text-xs text-white/80 focus:border-accent outline-none min-h-[40px] resize-y"
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <button 
+                        onClick={() => saveItem(data)}
+                        className="w-full py-2 bg-accent/20 hover:bg-accent/40 text-accent text-xs font-bold uppercase tracking-widest rounded transition-all"
+                    >
+                        Save {section} Translations
+                    </button>
+                </div>
+            )}
+        </div>
+    );
+}
 
 function InventoryCard({ item, onEdit, onDelete, onToggle, editingId }: { item: GalleryItem, onEdit: () => void, onDelete: () => void, onToggle: () => void, editingId?: string | null }) {
     return (
