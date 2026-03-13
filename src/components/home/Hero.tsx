@@ -86,7 +86,8 @@ export default function Hero({ customImage }: { customImage?: string | null }) {
                             src={customImage || "/art/lion-transparent.png"}
                             alt="Hero Art"
                             fill
-                            className="object-contain drop-shadow-[0_0_60px_rgba(240,180,41,0.3)] animate-float-slow"
+                            className="object-contain animate-float-slow"
+                            style={{ mixBlendMode: 'screen' }}
                             priority
                         />
                         {/* Seamless Fade at bottom */}
