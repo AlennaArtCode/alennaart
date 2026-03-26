@@ -115,7 +115,7 @@ const AudioArchives = ({
                             <p className="text-content-muted text-sm font-light max-w-xl italic">{info.desc}</p>
                         </motion.div>
 
-                        <div className="grid grid-cols-1 gap-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                             {audioTracks.map((track, globalIndex) => {
                                 const normalizeGenre = (rarity: string) => {
                                     if (!rarity || ['Common', 'Rare', 'Legendary', 'Epic', 'Mythic'].includes(rarity)) return 'Otras Frecuencias';
@@ -133,7 +133,7 @@ const AudioArchives = ({
                                         whileInView={{ opacity: 1, y: 0 }}
                                         viewport={{ once: true }}
                                         transition={{ delay: globalIndex * 0.05 }}
-                                        className={`group relative p-5 rounded-xl border transition-all duration-500 cursor-pointer overflow-hidden ${isTrackActive ? 'bg-accent/10 border-accent/50 shadow-[0_0_40px_rgba(197,160,89,0.1)]' : 'bg-white/[0.02] border-white/5 hover:border-white/20'}`}
+                                        className={`glass-panel group relative p-5 rounded-xl border transition-all duration-500 cursor-pointer overflow-hidden ${isTrackActive ? 'bg-accent/10 border-accent/50 shadow-[0_0_40px_rgba(197,160,89,0.1)]' : 'bg-white/[0.02] border-white/5 hover:border-white/20'} hover:shadow-[0_0_20px_rgba(197,160,89,0.5)]`}
                                         onClick={() => onPlayPause(globalIndex)}
                                     >
                                         {isTrackActive && (
@@ -219,7 +219,7 @@ const VisualTransmissions = ({ videoGenres, videoTracks, t }: { videoGenres: str
                                 initial={{ opacity: 0, y: 20 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
-                                className="group bg-black/40 border border-white/5 rounded-2xl overflow-hidden hover:border-accent/40 transition-all duration-700 hover:-translate-y-2 shadow-2xl"
+                                className="group glass-panel bg-black/40 border border-white/5 rounded-2xl overflow-hidden hover:border-accent/40 transition-all duration-700 hover:-translate-y-2 shadow-2xl"
                             >
                                 <div className="aspect-video w-full relative bg-black">
                                     <iframe

@@ -23,6 +23,9 @@ export default function WaveformViewer({ url, onMount, isPlaying, volume }: { ur
         });
 
         ws.load(url);
+        // Set initial volume
+        ws.setVolume(volume);
+
         wavesurferRef.current = ws;
         onMount(ws);
 
@@ -30,6 +33,12 @@ export default function WaveformViewer({ url, onMount, isPlaying, volume }: { ur
             ws.destroy();
         };
     }, [url]);
+
+    useEffect(() => {
+        if (wavesurferRef.current) {
+            wavesurferRef.current.setVolume(volume);
+        }
+    }, [volume]);
 
     // Handle external play/pause sync if needed, though usually ws handles itself
     // Or we handle it via the parent ref (which is what we do in page.tsx)

@@ -91,17 +91,33 @@ export default function AudioEditorPage() {
                     <div className="flex-1 flex flex-col p-6 overflow-y-auto space-y-6">
                         {/* WaveSurfer Tracks */}
                         {stems.map((stem, i) => (
-                            <div key={i} className="bg-[#0A0510] border border-white/10 rounded-xl p-4">
+                            <div key={i} className="glass-panel border border-white/10 rounded-xl p-4 relative group">
                                 <div className="flex justify-between items-center mb-4">
-                                    <span className="text-xs font-bold uppercase tracking-widest text-[#9d00ff]">{stem.name}</span>
+                                    <div className="flex items-center gap-3">
+                                        <button 
+                                            onClick={() => {
+                                                const newStems = [...stems];
+                                                newStems[i].active = !newStems[i].active;
+                                                setStems(newStems);
+                                            }}
+                                            className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${stem.active ? 'bg-accent text-black' : 'bg-white/10 text-white/50 hover:bg-white/20'}`}
+                                        >
+                                            <span className="text-xs font-bold">{stem.active ? 'M' : 'S'}</span>
+                                        </button>
+                                        <span className={`text-xs font-bold uppercase tracking-widest transition-colors ${stem.active ? 'text-[#9d00ff]' : 'text-white/30'}`}>
+                                            {stem.name}
+                                        </span>
+                                    </div>
                                     <button className="text-xs text-white/50 hover:text-white transition-colors">Opción</button>
                                 </div>
+                                <div className={`transition-opacity duration-300 ${stem.active ? 'opacity-100' : 'opacity-30'}`}>
                                 <WaveformViewer 
                                     url={stem.url} 
                                     onMount={(ws) => { if (i === 0) wavesurferRef.current = ws; }}
                                     isPlaying={isPlaying}
-                                    volume={volume}
+                                    volume={stem.active && !isMuted ? volume : 0}
                                 />
+                                </div>
                             </div>
                         ))}
                     </div>
