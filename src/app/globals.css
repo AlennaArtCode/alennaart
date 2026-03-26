@@ -35,8 +35,8 @@
 :root {
   font-family: var(--font-outfit), sans-serif;
   /* Default UI font - Scaled Up for Premium Feel */
-  font-size: 18px;
-  line-height: 1.7;
+  font-size: 16px;
+  line-height: 1.6;
   /* Altura de línea premium */
   font-weight: 300;
   /* Lighter weight for elegance */
@@ -50,6 +50,13 @@
   /* Suavizado de fuente para pantallas retina (clave para el look editorial) */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+@media (min-width: 768px) {
+  :root {
+    font-size: 18px;
+    line-height: 1.7;
+  }
 }
 
 html {

@@ -86,6 +86,25 @@ export const translations = {
             holders_pay: "Holders pay",
             collect: "Collect Chapter",
             soon: "Coming Soon"
+        },
+        music: {
+            hero_badge: "Sound Architecture // Audible Alchemy",
+            hero_title_main: "The Alchemy",
+            hero_title_sub: "of Sound",
+            hero_description: "Music was never just sound; it is a construction tool for the soul. Explore this collection of frequencies designed to alter states and transcend the everyday.",
+            section_archives: "Sound Archives",
+            section_transmissions: "Transmissions",
+            section_loading: "Scanning Frequencies...",
+            genre_techno_title: "The Pulse of Matter",
+            genre_techno_desc: "Industrial frequencies and synthetic rhythms exploring the connection between machine and spirit.",
+            genre_experimental_title: "Void Explorations",
+            genre_experimental_desc: "Soundscapes that challenge traditional structure, seeking beauty in chaos and dissonance.",
+            genre_trap_title: "Street Echoes",
+            genre_trap_desc: "The voice of the present. Urban energy distilled into states of euphoria and collective reflection.",
+            genre_other_title: "Ethereal States",
+            genre_other_desc: "Sounds that don't belong to a single place. A collection of audible moments and memories.",
+            track_placeholder: "A sound exploration recorded in the void.",
+            video_placeholder: "Visual documentation of the sound production."
         }
     },
     ES: {
@@ -175,6 +194,25 @@ export const translations = {
             holders_pay: "Titulares pagan",
             collect: "Coleccionar Capítulo",
             soon: "Próximamente"
+        },
+        music: {
+            hero_badge: "Arquitectura del Sonido // Alquimia Audible",
+            hero_title_main: "La Alquimia",
+            hero_title_sub: "del Sonido",
+            hero_description: "La música nunca fue solo sonido; es una herramienta de construcción para el alma. Explore esta colección de frecuencias diseñadas para alterar estados y trascender lo cotidiano.",
+            section_archives: "Archivos Sonoros",
+            section_transmissions: "Transmisiones",
+            section_loading: "Escaneando Frecuencias...",
+            genre_techno_title: "El Pulso de la Materia",
+            genre_techno_desc: "Frecuencias industriales y ritmos sintéticos que exploran la conexión entre la máquina y el espíritu.",
+            genre_experimental_title: "Exploraciones de Vacío",
+            genre_experimental_desc: "Paisajes sonoros que desafían la estructura tradicional, buscando la belleza en el caos y la disonancia.",
+            genre_trap_title: "Ecos de la Calle",
+            genre_trap_desc: "La voz del presente. Energía urbana destilada en estados de euforia y reflexión colectiva.",
+            genre_other_title: "Estados Etéreos",
+            genre_other_desc: "Sonidos que no pertenecen a un solo lugar. Una colección de momentos y memorias audibles.",
+            track_placeholder: "Una exploración sonora grabada en el vacío.",
+            video_placeholder: "Documentación visual de la producción sonora."
         }
     }
 };

@@ -96,7 +96,8 @@ export default function GallerySection() {
                                 CHROMATIC ANOMALIES
                             </h2>
                             <p className="text-accent-neon/60 font-mono text-sm tracking-widest mt-2 uppercase">
-                                {`// System Warning: Foreign Frequency Detected`}
+                                {/* // System Warning: Foreign Frequency Detected */}
+                                // System Warning: Foreign Frequency Detected
                             </p>
                         </div>
 
@@ -137,12 +138,12 @@ function ArtDetailModal({ item, onClose }: { item: GalleryItem, onClose: () => v
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md"
             onClick={onClose}
         >
             <motion.div
                 layoutId={`card-${item.id}`}
-                className={`relative bg-[#0A0510]/95 border border-accent/40 rounded-2xl shadow-[0_0_50px_rgba(197,160,89,0.2)] overflow-hidden transition-all duration-500 ${isExpanded ? 'w-full h-full max-w-5xl max-h-[90vh] flex flex-col md:flex-row' : 'w-full max-w-md'}`}
+                className={`relative bg-[#0A0510]/95 border border-accent/40 rounded-2xl shadow-[0_0_50px_rgba(197,160,89,0.2)] overflow-hidden transition-all duration-500 ${isExpanded ? 'w-full h-full max-w-6xl max-h-[95vh] flex flex-col md:flex-row' : 'w-full max-w-lg lg:max-w-4xl flex flex-col lg:flex-row'}`}
                 onClick={(e: React.MouseEvent) => e.stopPropagation()}
             >
                 {/* Background Glows (Only in standard view) */}
@@ -156,77 +157,67 @@ function ArtDetailModal({ item, onClose }: { item: GalleryItem, onClose: () => v
                 {/* Close Button */}
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 z-20 text-white/50 hover:text-white transition-colors bg-black/20 p-2 rounded-full backdrop-blur-sm"
+                    className="absolute top-4 right-4 z-[110] text-white/50 hover:text-white transition-colors bg-black/40 p-2 rounded-full backdrop-blur-sm"
                 >
                     <X size={24} />
                 </button>
 
                 {/* IMAGE SECTION */}
                 <div
-                    className={`relative cursor-zoom-in group flex items-center justify-center overflow-hidden ${isExpanded ? 'w-full md:w-2/3 h-[30vh] md:h-full bg-black/40' : 'w-full h-80'}`}
+                    className={`relative cursor-zoom-in group flex items-center justify-center overflow-hidden bg-black/20 ${isExpanded ? 'w-full md:w-3/4 h-[40vh] md:h-full' : 'w-full lg:w-1/2 h-64 sm:h-80 lg:h-auto'}`}
                     onClick={() => setIsExpanded(!isExpanded)}
                 >
-                    {/* Spotlight Effect - Behind Image - Softer and Larger */}
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(197,160,89,0.25)_0%,transparent_60%)] opacity-100 blur-3xl" />
+                    {/* Spotlight Effect */}
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(197,160,89,0.15)_0%,transparent_70%)] opacity-100 blur-3xl" />
 
-                    <Image
-                        src={item.image_url}
-                        alt={item.title}
-                        fill
-                        className={`object-contain transition-transform duration-700 z-10 drop-shadow-[0_0_15px_rgba(0,0,0,0.5)] ${isExpanded ? 'p-4 scale-100' : 'scale-90 group-hover:scale-100'}`}
-                    />
+                    <div className="relative w-full h-full p-6">
+                        <Image
+                            src={item.image_url}
+                            alt={item.title}
+                            fill
+                            className={`object-contain transition-transform duration-700 z-10 drop-shadow-[0_0_20px_rgba(0,0,0,0.5)] ${isExpanded ? 'p-2 scale-100' : 'scale-90 group-hover:scale-100'}`}
+                            sizes="(max-width: 768px) 100vw, 800px"
+                        />
+                    </div>
 
-                    {/* Seamless Fade - Top and Bottom */}
-                    <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-[#0A0510] to-transparent z-20 pointer-events-none" />
-                    <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-[#0A0510] to-transparent z-20 pointer-events-none" />
+                    {/* Seamless Fade */}
+                    <div className="absolute top-0 left-0 w-full h-16 bg-gradient-to-b from-[#0A0510] to-transparent z-20 pointer-events-none" />
+                    <div className="absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-[#0A0510] to-transparent z-20 pointer-events-none" />
                 </div>
 
                 {/* INFO SECTION */}
-                <div className={`relative p-6 md:p-8 space-y-6 flex flex-col overflow-y-auto scrollbar-thin scrollbar-thumb-accent/20 scrollbar-track-transparent ${isExpanded ? 'w-full md:w-1/3 border-t md:border-t-0 md:border-l border-white/10 h-[calc(100%-30vh)] md:h-full' : 'justify-center'}`}>
+                <div className={`relative p-6 md:p-10 flex flex-col overflow-y-auto scrollbar-thin scrollbar-thumb-accent/20 scrollbar-track-transparent ${isExpanded ? 'w-full md:w-1/4 border-t md:border-t-0 md:border-l border-white/10' : 'w-full lg:w-1/2 border-t lg:border-t-0 lg:border-l border-white/10'}`}>
 
-                    <div className="space-y-6 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+                    <div className="space-y-6">
                         <div>
-                            <h3 className="text-xs uppercase tracking-[0.2em] text-[#C5A059] mb-2 font-mono">Archive // 024-X</h3>
-                            <h2 className="text-4xl md:text-5xl font-serif text-white leading-none">{item.title}</h2>
-                            <p className="text-lg text-white/50 font-serif italic mt-2">{item.subtitle}</p>
+                            <span className="text-[10px] uppercase tracking-[0.3em] text-accent/60 mb-2 font-mono block">Archive // 024-X</span>
+                            <h2 className="text-3xl md:text-5xl font-serif text-white leading-[1.1]">{item.title}</h2>
+                            <p className="text-base md:text-lg text-white/40 font-serif italic mt-2">{item.subtitle}</p>
                         </div>
 
-                        {/* GOLDEN THREAD ANIMATION - Module 3 */}
-                        <div className="relative py-4">
-                            <svg width="100%" height="2" className="overflow-visible">
-                                <motion.line
-                                    x1="0" y1="1" x2="100%" y2="1"
-                                    stroke="#C5A059"
-                                    strokeWidth="1"
-                                    strokeOpacity="0.5"
-                                    initial={{ pathLength: 0 }}
-                                    animate={{ pathLength: 1 }}
-                                    transition={{ duration: 1.5, ease: "easeInOut", delay: 0.5 }}
-                                />
-                                <motion.circle
-                                    r="2" fill="#C5A059"
-                                    initial={{ cx: "0%", opacity: 0 }}
-                                    animate={{ cx: "100%", opacity: [0, 1, 0] }}
-                                    transition={{ duration: 1.5, ease: "easeInOut", delay: 0.5 }}
-                                    cy="1"
-                                />
-                            </svg>
+                        {/* GOLDEN THREAD ANIMATION */}
+                        <div className="relative h-px w-full bg-accent/20 overflow-hidden">
+                            <motion.div
+                                initial={{ x: '-100%' }}
+                                animate={{ x: '100%' }}
+                                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                                className="absolute inset-0 bg-gradient-to-r from-transparent via-accent to-transparent"
+                            />
                         </div>
 
-                        {/* MEMORY LOG / BITÁCORA */}
-                        <div className="border border-[#C5A059]/30 bg-[#0A0510]/50 p-6 rounded-sm relative overflow-hidden group">
-                            {/* Decorative "Confidential" elements */}
-                            <div className="absolute top-0 right-0 p-2 opacity-20">
-                                <div className="border border-[#C5A059] px-2 text-[8px] font-mono text-[#C5A059] uppercase">Classified</div>
+                        {/* MEMORY LOG */}
+                        <div className="border border-accent/20 bg-white/[0.02] p-6 rounded-lg relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 p-2 opacity-30">
+                                <div className="border border-accent/40 px-2 py-0.5 text-[8px] font-mono text-accent uppercase tracking-widest">Classified</div>
                             </div>
-                            <div className="space-y-4 font-mono text-sm leading-relaxed opacity-80">
-                                <p className="text-white/80">{item.description || "Data corruption detected. Description unavailable."}</p>
+                            <div className="space-y-4 font-sans text-sm md:text-base leading-relaxed text-content-secondary">
+                                <p>{item.description || "Data corruption detected. Description unavailable."}</p>
                             </div>
                         </div>
 
                         {/* Action Area */}
-                        <div className="pt-4 flex items-center gap-4">
-                            <button className="flex-1 bg-gradient-to-r from-accent to-[#8a6e35] text-black font-bold py-4 px-8 rounded-sm hover:scale-[1.02] transition-transform uppercase tracking-widest text-sm shadow-[0_0_20px_rgba(197,160,89,0.3)]">
+                        <div className="pt-4">
+                            <button className="w-full bg-accent text-black font-bold py-4 px-8 rounded-btn hover:bg-accent-hover transition-all uppercase tracking-[0.2em] text-xs shadow-glow hover:scale-[1.02] active:scale-95">
                                 Mint Artifact
                             </button>
                         </div>

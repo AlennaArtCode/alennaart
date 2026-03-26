@@ -3,7 +3,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/lib/supabase';
-import { Play, Pause, SkipBack, SkipForward, Repeat, Repeat1, Rewind, FastForward, Volume2, VolumeX } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Repeat, Repeat1, Volume2, VolumeX } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
+
+// --- TYPES ---
 
 type MusicItem = {
     id: string;
@@ -16,12 +19,12 @@ type MusicItem = {
     created_at: string;
 };
 
-// YOUTUBE HELPER
+// --- HELPERS ---
+
 function getYouTubeEmbedUrl(url: string) {
     let videoId = '';
-    if (url.includes('youtu.be/')) {
-        videoId = url.split('youtu.be/')[1]?.split('?')[0];
-    } else if (url.includes('youtube.com/watch')) {
+    if (url.includes('youtu.be/')) videoId = url.split('youtu.be/')[1]?.split('?')[0];
+    else if (url.includes('youtube.com/watch')) {
         const urlObj = new URL(url);
         videoId = urlObj.searchParams.get('v') || '';
     }
@@ -35,12 +38,221 @@ const formatTime = (time: number) => {
     return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 };
 
+// --- COMPONENTS ---
+
+const MusicHero = ({ t }: { t: any }) => (
+    <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1.2, ease: 'easeOut' }}
+        className="text-center mb-24 max-w-4xl mx-auto space-y-6"
+    >
+        <div className="inline-block border border-accent/30 px-5 py-2 rounded-full backdrop-blur-md bg-white/5 mb-4">
+            <span className="text-accent font-mono tracking-[0.4em] text-[10px] uppercase">
+                {t('music', 'hero_badge')}
+            </span>
+        </div>
+
+        <h1 className="text-5xl md:text-7xl lg:text-8xl font-serif font-bold text-white tracking-tighter leading-none mb-8">
+            {t('music', 'hero_title_main')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent via-[#e8c97a] to-accent">{t('music', 'hero_title_sub')}</span>
+        </h1>
+
+        <p className="text-content-secondary text-lg md:text-xl font-light leading-relaxed max-w-2xl mx-auto">
+            {t('music', 'hero_description')}
+        </p>
+
+        <div className="flex justify-center items-center gap-6 pt-8">
+            <div className="h-px w-20 bg-gradient-to-r from-transparent to-accent/30" />
+            <div className="w-2.5 h-2.5 rounded-full bg-accent animate-pulse shadow-[0_0_15px_rgba(197,160,89,0.5)]" />
+            <div className="h-px w-20 bg-gradient-to-l from-transparent to-accent/30" />
+        </div>
+    </motion.div>
+);
+
+const AudioArchives = ({ 
+    genres, 
+    audioTracks, 
+    currentTrackIndex, 
+    isPlaying, 
+    onPlayPause,
+    t
+}: { 
+    genres: string[], 
+    audioTracks: MusicItem[], 
+    currentTrackIndex: number | null, 
+    isPlaying: boolean,
+    onPlayPause: (index: number) => void,
+    t: any
+}) => {
+    const getGenreInfo = (genre: string) => {
+        const key = genre.toLowerCase().includes('techno') ? 'techno' :
+                    genre.toLowerCase().includes('experimental') ? 'experimental' :
+                    (genre.toLowerCase().includes('trap') || genre.toLowerCase().includes('urbano')) ? 'trap' : 'other';
+        return {
+            title: t('music', `genre_${key}_title`),
+            desc: t('music', `genre_${key}_desc`)
+        };
+    };
+
+    return (
+        <div className="space-y-20">
+            <div className="flex items-center gap-4 mb-16">
+                <h2 className="text-3xl font-serif font-bold text-white tracking-widest uppercase">{t('music', 'section_archives')}</h2>
+                <div className="h-px flex-1 bg-gradient-to-r from-white/20 to-transparent" />
+            </div>
+
+            {genres.map((genre) => {
+                const info = getGenreInfo(genre);
+                return (
+                    <div key={genre} className="space-y-8">
+                        <motion.div 
+                            initial={{ opacity: 0, x: -20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            className="space-y-2"
+                        >
+                            <h3 className="text-2xl md:text-3xl font-serif font-bold text-accent">{info.title}</h3>
+                            <p className="text-content-muted text-sm font-light max-w-xl italic">{info.desc}</p>
+                        </motion.div>
+
+                        <div className="grid grid-cols-1 gap-2">
+                            {audioTracks.map((track, globalIndex) => {
+                                const normalizeGenre = (rarity: string) => {
+                                    if (!rarity || ['Common', 'Rare', 'Legendary', 'Epic', 'Mythic'].includes(rarity)) return 'Otras Frecuencias';
+                                    return rarity;
+                                };
+                                if (normalizeGenre(track.rarity) !== genre) return null;
+
+                                const isTrackActive = currentTrackIndex === globalIndex;
+                                const isTrackPlaying = isTrackActive && isPlaying;
+
+                                return (
+                                    <motion.div
+                                        key={track.id}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        viewport={{ once: true }}
+                                        transition={{ delay: globalIndex * 0.05 }}
+                                        className={`group relative p-5 rounded-xl border transition-all duration-500 cursor-pointer overflow-hidden ${isTrackActive ? 'bg-accent/10 border-accent/50 shadow-[0_0_40px_rgba(197,160,89,0.1)]' : 'bg-white/[0.02] border-white/5 hover:border-white/20'}`}
+                                        onClick={() => onPlayPause(globalIndex)}
+                                    >
+                                        {isTrackActive && (
+                                            <motion.div 
+                                                className="absolute inset-0 bg-gradient-to-r from-accent/5 to-transparent pointer-events-none"
+                                                animate={{ opacity: [0.3, 0.6, 0.3] }}
+                                                transition={{ duration: 4, repeat: Infinity }}
+                                            />
+                                        )}
+
+                                        <div className="relative z-10 flex items-center gap-6">
+                                            <div className="relative w-16 h-16 rounded-md overflow-hidden shrink-0 border border-white/10 group-hover:border-accent/40 transition-colors">
+                                                {track.image_path && track.image_path !== track.image_url && !track.image_path.includes('youtu') ? (
+                                                    <img src={track.image_path} alt={track.title} className="w-full h-full object-cover" />
+                                                ) : <div className="w-full h-full flex items-center justify-center bg-white/5"><Volume2 size={24} className="text-white/20" /></div>}
+                                                {isTrackActive && (
+                                                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                                        {isTrackPlaying ? (
+                                                            <div className="flex gap-1 h-5 items-end">
+                                                                {[1, 2, 3].map(i => (
+                                                                    <motion.div 
+                                                                        key={i}
+                                                                        className="w-1 bg-accent rounded-full"
+                                                                        animate={{ height: ["20%", "100%", "40%"] }}
+                                                                        transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.2 }}
+                                                                    />
+                                                                ))}
+                                                            </div>
+                                                        ) : <Play size={20} className="text-white" />}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-3">
+                                                    <h4 className={`text-xl font-serif font-bold truncate transition-colors ${isTrackActive ? 'text-accent' : 'text-white group-hover:text-accent'}`}>{track.title}</h4>
+                                                    {isTrackActive && <span className="text-[9px] font-mono text-accent uppercase tracking-widest animate-pulse">Now Playing</span>}
+                                                </div>
+                                                <p className="text-content-muted text-sm font-light leading-relaxed line-clamp-1 mt-1">{track.description || t('music', 'track_placeholder')}</p>
+                                            </div>
+
+                                            <div className="hidden md:flex items-center gap-4 text-white/20 group-hover:text-white/40 transition-colors">
+                                               <span className="text-[10px] font-mono tracking-widest uppercase">{genre}</span>
+                                               <Play size={16} className={isTrackActive ? 'text-accent' : ''} />
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                );
+            })}
+        </div>
+    );
+};
+
+const VisualTransmissions = ({ videoGenres, videoTracks, t }: { videoGenres: string[], videoTracks: MusicItem[], t: any }) => (
+    <div className="space-y-16 pt-32 border-t border-white/5">
+        <div className="flex items-center gap-4 mb-8">
+            <h2 className="text-3xl font-serif font-bold text-white tracking-widest uppercase">{t('music', 'section_transmissions')}</h2>
+            <div className="h-px flex-1 bg-gradient-to-r from-accent/20 to-transparent" />
+        </div>
+
+        {videoGenres.map(genre => (
+            <div key={genre} className="space-y-8">
+                <div className="border-l-2 border-accent/40 pl-6 mb-8">
+                    <h3 className="text-xl font-serif font-bold text-white uppercase tracking-wider">{genre}</h3>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    {videoTracks
+                        .filter(video => {
+                            const normalizeGenre = (rarity: string) => {
+                                if (!rarity || ['Common', 'Rare', 'Legendary', 'Epic', 'Mythic'].includes(rarity)) return 'Otras Frecuencias';
+                                return rarity;
+                            };
+                            return normalizeGenre(video.rarity) === genre;
+                        })
+                        .map(video => (
+                            <motion.div 
+                                key={video.id}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                className="group bg-black/40 border border-white/5 rounded-2xl overflow-hidden hover:border-accent/40 transition-all duration-700 hover:-translate-y-2 shadow-2xl"
+                            >
+                                <div className="aspect-video w-full relative bg-black">
+                                    <iframe
+                                        src={getYouTubeEmbedUrl(video.image_url)}
+                                        title={video.title}
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowFullScreen
+                                        className="absolute inset-0 w-full h-full border-0 grayscale hover:grayscale-0 transition-all duration-1000"
+                                    ></iframe>
+                                </div>
+                                <div className="p-8 space-y-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-accent" />
+                                        <h3 className="font-serif text-2xl font-bold text-white group-hover:text-accent transition-colors">{video.title}</h3>
+                                    </div>
+                                    <p className="text-content-secondary text-sm font-light leading-relaxed h-12 line-clamp-2">{video.description || t('music', 'video_placeholder')}</p>
+                                </div>
+                            </motion.div>
+                        ))}
+                </div>
+            </div>
+        ))}
+    </div>
+);
+
+// --- MAIN COMPONENT ---
+
 export default function MusicClientView() {
+    const { t } = useLanguage();
     const [audioTracks, setAudioTracks] = useState<MusicItem[]>([]);
     const [videoTracks, setVideoTracks] = useState<MusicItem[]>([]);
     const [loading, setLoading] = useState(true);
 
-    // Player State
     const [currentTrackIndex, setCurrentTrackIndex] = useState<number | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [loopMode, setLoopMode] = useState<"none" | "all" | "one">("all");
@@ -72,90 +284,44 @@ export default function MusicClientView() {
         fetchMusic();
     }, []);
 
-    // Sync Audio Element
     useEffect(() => {
-        if (audioRef.current) {
-            audioRef.current.volume = isMuted ? 0 : volume;
-        }
+        if (audioRef.current) audioRef.current.volume = isMuted ? 0 : volume;
     }, [volume, isMuted, currentTrackIndex]);
 
     useEffect(() => {
         if (audioRef.current && currentTrackIndex !== null && isPlaying) {
             audioRef.current.play().catch((e) => console.error("Playback failed", e));
-        } else if (audioRef.current && !isPlaying) {
-            audioRef.current.pause();
-        }
+        } else if (audioRef.current && !isPlaying) audioRef.current.pause();
     }, [currentTrackIndex, isPlaying]);
 
-    // Player Controls
     const handlePlayPause = (index?: number) => {
         if (index !== undefined) {
-            if (currentTrackIndex === index) {
-                setIsPlaying(!isPlaying);
-            } else {
-                setCurrentTrackIndex(index);
-                setIsPlaying(true);
-            }
-        } else {
-            setIsPlaying(!isPlaying);
-        }
+            if (currentTrackIndex === index) setIsPlaying(!isPlaying);
+            else { setCurrentTrackIndex(index); setIsPlaying(true); }
+        } else setIsPlaying(!isPlaying);
     };
 
     const handleNext = () => {
         if (currentTrackIndex === null) return;
-        if (currentTrackIndex < audioTracks.length - 1) {
-            setCurrentTrackIndex(currentTrackIndex + 1);
-            setIsPlaying(true);
-        } else if (loopMode === 'all') {
-            setCurrentTrackIndex(0);
-            setIsPlaying(true);
-        } else {
-            setIsPlaying(false);
-            setProgress(0);
-        }
+        if (currentTrackIndex < audioTracks.length - 1) { setCurrentTrackIndex(currentTrackIndex + 1); setIsPlaying(true); }
+        else if (loopMode === 'all') { setCurrentTrackIndex(0); setIsPlaying(true); }
+        else { setIsPlaying(false); setProgress(0); }
     };
 
     const handlePrev = () => {
         if (currentTrackIndex === null) return;
-        if (progress > 3) {
-            if (audioRef.current) audioRef.current.currentTime = 0;
-        } else if (currentTrackIndex > 0) {
-            setCurrentTrackIndex(currentTrackIndex - 1);
-            setIsPlaying(true);
-        } else if (loopMode === 'all') {
-            setCurrentTrackIndex(audioTracks.length - 1);
-            setIsPlaying(true);
-        }
-    };
-
-    const handleRewind = () => {
-        if (audioRef.current) {
-            audioRef.current.currentTime = Math.max(0, audioRef.current.currentTime - 10);
-        }
-    };
-
-    const handleFastForward = () => {
-        if (audioRef.current) {
-            audioRef.current.currentTime = Math.min(duration, audioRef.current.currentTime + 10);
-        }
+        if (progress > 3) { if (audioRef.current) audioRef.current.currentTime = 0; }
+        else if (currentTrackIndex > 0) { setCurrentTrackIndex(currentTrackIndex - 1); setIsPlaying(true); }
+        else if (loopMode === 'all') { setCurrentTrackIndex(audioTracks.length - 1); setIsPlaying(true); }
     };
 
     const handleEnded = () => {
-        if (loopMode === 'one') {
-            if (audioRef.current) {
-                audioRef.current.currentTime = 0;
-                audioRef.current.play();
-            }
-        } else {
-            handleNext();
-        }
+        if (loopMode === 'one' && audioRef.current) { audioRef.current.currentTime = 0; audioRef.current.play(); }
+        else handleNext();
     };
 
     const handleTimeUpdate = () => {
-        if (audioRef.current) {
-            setProgress(audioRef.current.currentTime);
-            setDuration(audioRef.current.duration || 0);
-        }
+        if (audioRef.current) { setProgress(audioRef.current.currentTime); setDuration(audioRef.current.duration || 0); }
     };
 
     const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -174,22 +340,12 @@ export default function MusicClientView() {
         else setLoopMode('none');
     };
 
-    // --- MÓDULO DE CLASIFICACIÓN DINÁMICA DE GÉNEROS ---
-    // Función que normaliza la rareza (que usamos como género musical)
-    // Si la rareza es un valor por defecto ('Common', 'Rare', etc), la agrupa en 'Otras Frecuencias'
     const normalizeGenre = (rarity: string) => {
-        if (!rarity || ['Common', 'Rare', 'Legendary', 'Epic', 'Mythic'].includes(rarity)) {
-            return 'Otras Frecuencias';
-        }
+        if (!rarity || ['Common', 'Rare', 'Legendary', 'Epic', 'Mythic'].includes(rarity)) return 'Otras Frecuencias';
         return rarity;
     };
 
-    // Extraemos todos los géneros únicos de las canciones directamente desde la Base de Datos
     const genres = Array.from(new Set(audioTracks.map(t => normalizeGenre(t.rarity))));
-
-    // Lógica para ordenar los géneros:
-    // Priorizamos que Techno, Experimental y Urbano Trap aparezcan primero.
-    // El resto se ordena alfabéticamente.
     genres.sort((a, b) => {
         const order = ['Techno', 'Experimental', 'Trap/Reggaeton', 'Urbano Trap', 'Otras Frecuencias'];
         const indexA = order.indexOf(a);
@@ -200,7 +356,6 @@ export default function MusicClientView() {
         return a.localeCompare(b);
     });
 
-    // --- MÓDULO DE CLASIFICACIÓN DE VIDEOS ---
     const videoGenres = Array.from(new Set(videoTracks.map(t => normalizeGenre(t.rarity))));
     videoGenres.sort((a, b) => {
         const order = ['Techno', 'Experimental', 'Trap/Reggaeton', 'Urbano Trap', 'Otras Frecuencias'];
@@ -215,256 +370,112 @@ export default function MusicClientView() {
     const currentTrack = currentTrackIndex !== null ? audioTracks[currentTrackIndex] : null;
 
     return (
-        <section className="relative min-h-screen bg-[#0F1116] text-white pt-32 pb-40 overflow-hidden">
-            {/* BACKGROUND GLOW */}
-            <div className="absolute inset-x-0 top-0 h-[60vh] bg-[radial-gradient(ellipse_at_top,rgba(197,160,89,0.15),transparent_70%)] pointer-events-none" />
-
-            <div className="container mx-auto px-6 relative z-10">
-                <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 1, ease: 'easeOut' }}
-                    className="text-center mb-16"
-                >
-                    <h3 className="text-xs uppercase tracking-[0.3em] text-accent mb-4 font-mono">
-                        Sonic Frequencies // 001
-                    </h3>
-                    <h1 className="text-5xl md:text-7xl font-serif font-bold text-transparent bg-clip-text bg-gradient-to-r from-content-primary to-content-secondary drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] mb-6">
-                        Trayectoria Musical
-                    </h1>
-                    <div className="flex justify-center items-center gap-4 my-8">
-                        <div className="w-12 h-[1px] bg-accent/30" />
-                        <div className="w-2 h-2 rounded-full bg-accent/80 shadow-[0_0_10px_rgba(197,160,89,0.5)]" />
-                        <div className="w-12 h-[1px] bg-accent/30" />
-                    </div>
-                </motion.div>
-
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 1, delay: 0.3 }}
-                    className="max-w-4xl mx-auto"
-                >
-                    <div className="relative p-1 bg-gradient-to-br from-white/10 to-transparent rounded-2xl">
-                        <div className="bg-[#0A0B0E]/80 backdrop-blur-xl border border-white/5 rounded-2xl p-8 md:p-12 shadow-[0_0_40px_rgba(0,0,0,0.5)]">
-                            {loading ? (
-                                <div className="flex flex-col items-center justify-center py-20 text-center">
-                                    <div className="w-8 h-8 rounded-full border-t-2 border-accent animate-spin mb-4" />
-                                    <p className="font-mono text-accent text-sm tracking-widest uppercase animate-pulse">Scanning Frequencies...</p>
-                                </div>
-                            ) : audioTracks.length > 0 || videoTracks.length > 0 ? (
-                                <div className="space-y-16">
-                                    {/* AUDIO TRACKS GROUPED BY GENRE */}
-                                    {genres.length > 0 && (
-                                        <div className="space-y-12">
-                                            <h2 className="text-3xl font-serif text-white flex items-center gap-3">
-                                                <span className="w-2 h-2 rounded-full bg-white/30" />
-                                                Archivos Sonoros
-                                            </h2>
-
-                                            {genres.map(genre => (
-                                                <div key={genre} className="space-y-4">
-                                                    <h3 className="text-xl font-serif text-accent/80 border-b border-white/10 pb-2 mb-4">
-                                                        {genre}
-                                                    </h3>
-                                                    <AnimatePresence>
-                                                        {audioTracks.map((track, globalIndex) => {
-                                                            const trackGenre = normalizeGenre(track.rarity);
-                                                            if (trackGenre !== genre) return null;
-
-                                                            const isTrackPlaying = currentTrackIndex === globalIndex && isPlaying;
-                                                            return (
-                                                                <motion.div
-                                                                    key={track.id}
-                                                                    initial={{ opacity: 0, y: 20 }}
-                                                                    animate={{ opacity: 1, y: 0 }}
-                                                                    className={`group flex items-center gap-6 p-4 rounded-xl border transition-all duration-500 cursor-pointer ${currentTrackIndex === globalIndex ? 'bg-accent/10 border-accent shadow-[0_0_30px_rgba(197,160,89,0.15)]' : 'bg-primary-dark/50 border-white/5 hover:border-white/20'}`}
-                                                                    onClick={() => handlePlayPause(globalIndex)}
-                                                                >
-                                                                    {track.image_path && track.image_path !== track.image_url && !track.image_path.includes('youtu') ? (
-                                                                        <div className="w-14 h-14 rounded-md overflow-hidden shrink-0 border border-white/10 relative shadow-[0_0_15px_rgba(0,0,0,0.5)]">
-                                                                            <img src={track.image_path} alt={track.title} className="w-full h-full object-cover" />
-                                                                        </div>
-                                                                    ) : (
-                                                                        <div className="w-14 h-14 flex items-center justify-center shrink-0 rounded-md border border-white/10 bg-white/5">
-                                                                            {isTrackPlaying ? <Pause size={20} className="text-accent" /> : <Play size={20} className="text-white/50 ml-1" />}
-                                                                        </div>
-                                                                    )}
-
-                                                                    <div className="flex-1">
-                                                                        <h3 className={`text-lg font-serif font-bold transition-colors ${currentTrackIndex === globalIndex ? 'text-accent' : 'text-content-primary group-hover:text-white'}`}>
-                                                                            {track.title}
-                                                                        </h3>
-                                                                        {track.description && (
-                                                                            <p className="text-content-muted text-sm line-clamp-1">{track.description}</p>
-                                                                        )}
-                                                                    </div>
-
-                                                                    <div className="flex items-center gap-1 h-6 opacity-0 group-hover:opacity-100 md:opacity-100 transition-opacity">
-                                                                        {[...Array(4)].map((_, idx) => (
-                                                                            <motion.div
-                                                                                key={idx}
-                                                                                className={`w-1 rounded-full ${isTrackPlaying ? 'bg-accent' : 'bg-white/20'}`}
-                                                                                animate={isTrackPlaying ? { height: ["20%", "100%", "40%", "80%", "20%"] } : { height: "20%" }}
-                                                                                transition={{ repeat: Infinity, duration: 0.8 + Math.random(), ease: "easeInOut" }}
-                                                                                style={{ height: '4px' }}
-                                                                            />
-                                                                        ))}
-                                                                    </div>
-                                                                </motion.div>
-                                                            );
-                                                        })}
-                                                    </AnimatePresence>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-
-                                    {/* VIDEO STRIP */}
-                                    {videoTracks.length > 0 && (
-                                        <div className="space-y-6 pt-8 border-t border-white/5">
-                                            <h2 className="text-2xl font-serif text-white flex items-center gap-3">
-                                                <span className="w-2 h-2 rounded-full bg-accent animate-pulse shadow-[0_0_10px_rgba(197,160,89,0.5)]" />
-                                                Transmisiones Audiovisuales
-                                            </h2>
-                                            {videoGenres.map(genre => (
-                                                <div key={genre} className="space-y-4 mt-8 first:mt-4">
-                                                    <h3 className="text-xl font-serif text-accent/80 border-b border-white/10 pb-2 mb-6">
-                                                        {genre}
-                                                    </h3>
-                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                                        {videoTracks
-                                                            .filter(video => normalizeGenre(video.rarity) === genre)
-                                                            .map(video => (
-                                                                <div key={video.id} className="bg-[#0A0B0E]/80 border border-white/5 rounded-2xl overflow-hidden shadow-[0_0_20px_rgba(0,0,0,0.5)] group hover:border-accent/40 transition-all duration-500 hover:-translate-y-1">
-                                                                    <div className="aspect-video w-full relative bg-black">
-                                                                        <iframe
-                                                                            src={getYouTubeEmbedUrl(video.image_url)}
-                                                                            title={video.title}
-                                                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                                                            allowFullScreen
-                                                                            className="absolute inset-0 w-full h-full border-0"
-                                                                        ></iframe>
-                                                                    </div>
-                                                                    <div className="p-6">
-                                                                        <div className="mb-2">
-                                                                            <span className="text-[10px] font-mono uppercase tracking-widest text-accent border border-accent/30 bg-accent/5 px-2 py-0.5 rounded-full">
-                                                                                {normalizeGenre(video.rarity)}
-                                                                            </span>
-                                                                        </div>
-                                                                        <h3 className="font-serif text-xl font-bold text-white group-hover:text-accent transition-colors">{video.title}</h3>
-                                                                        {video.description && <p className="text-sm text-content-muted mt-2 font-mono leading-relaxed truncate">{video.description}</p>}
-                                                                    </div>
-                                                                </div>
-                                                            ))}
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            ) : null}
-                        </div>
-                    </div>
-                </motion.div>
+        <main className="min-h-screen relative overflow-hidden bg-[#0A0510] text-content-primary">
+            <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+                <div className="orb-glow w-[900px] h-[900px] bg-accent-mystic/10 top-[-20%] right-[-15%]" />
+                <div className="orb-glow w-[700px] h-[700px] bg-[#C5A059]/5 bottom-[-10%] left-[-10%]" />
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0A0510]/80 to-[#0A0510]" />
             </div>
 
-            {/* GLOBAL STICKY AUDIO PLAYER */}
+            <div className="relative z-10 pt-32 pb-48">
+                <div className="container mx-auto px-6">
+                    <MusicHero t={t} />
+
+                    <div className="max-w-5xl mx-auto">
+                        {loading ? (
+                            <div className="flex flex-col items-center justify-center py-32 text-center">
+                                <div className="w-10 h-10 rounded-full border-t-2 border-accent animate-spin mb-4" />
+                                <p className="font-mono text-accent text-sm tracking-[0.5em] uppercase">{t('music', 'section_loading')}</p>
+                            </div>
+                        ) : (audioTracks.length > 0 || videoTracks.length > 0) ? (
+                            <>
+                                <AudioArchives 
+                                    genres={genres}
+                                    audioTracks={audioTracks}
+                                    currentTrackIndex={currentTrackIndex}
+                                    isPlaying={isPlaying}
+                                    onPlayPause={handlePlayPause}
+                                    t={t}
+                                />
+                                <VisualTransmissions 
+                                    videoGenres={videoGenres}
+                                    videoTracks={videoTracks}
+                                    t={t}
+                                />
+                            </>
+                        ) : (
+                            <motion.div 
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="flex flex-col items-center justify-center py-32 text-center space-y-4"
+                            >
+                                <div className="w-16 h-px bg-white/20" />
+                                <h3 className="text-xl font-serif text-white/40 italic">Silencio Creativo</h3>
+                                <p className="text-content-muted text-sm max-w-xs font-light">Las frecuencias están siendo calibradas. Vuelve pronto para escuchar el eco de lo nuevo.</p>
+                                <div className="w-16 h-px bg-white/20" />
+                            </motion.div>
+                        )}
+                    </div>
+                </div>
+            </div>
+
             <AnimatePresence>
                 {currentTrack && (
                     <motion.div
-                        initial={{ y: 150, opacity: 0 }}
+                        initial={{ y: 200, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
-                        exit={{ y: 150, opacity: 0 }}
-                        className="fixed bottom-0 left-0 right-0 z-50 p-4 pb-6 md:pb-4 pointer-events-none"
+                        exit={{ y: 200, opacity: 0 }}
+                        className="fixed bottom-0 left-0 right-0 z-50 p-6 pointer-events-none"
                     >
                         <div className="container mx-auto max-w-5xl pointer-events-auto">
-                            <div className="bg-[#0A0B0E]/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_-10px_40px_rgba(0,0,0,0.8)] overflow-hidden">
-
-                                {/* Top Progress Bar */}
-                                <div
-                                    ref={progressRef}
-                                    className="h-1.5 w-full bg-white/10 cursor-pointer group relative"
-                                    onClick={handleProgressClick}
-                                >
-                                    <div
-                                        className="h-full bg-gradient-to-r from-accent/50 to-accent relative"
-                                        style={{ width: `${(progress / duration) * 100 || 0}%` }}
-                                    >
-                                        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-[0_0_10px_rgba(255,255,255,0.8)]" />
-                                    </div>
+                            <div className="bg-black/80 backdrop-blur-3xl border border-white/10 rounded-3xl shadow-[0_-20px_60px_rgba(0,0,0,0.6)] overflow-hidden">
+                                <div ref={progressRef} className="h-1 bg-white/10 w-full cursor-pointer group" onClick={handleProgressClick}>
+                                    <motion.div className="h-full bg-accent" style={{ width: `${(progress / duration) * 100}%` }} />
                                 </div>
-
-                                <div className="p-4 px-6 flex flex-col md:flex-row items-center justify-between gap-4">
-
-                                    {/* Track Info */}
-                                    <div className="flex items-center gap-4 w-full md:w-1/3">
-                                        {currentTrack.image_path && currentTrack.image_path !== currentTrack.image_url ? (
-                                            <img src={currentTrack.image_path} alt={currentTrack.title} className="w-12 h-12 rounded-md object-cover border border-white/10" />
-                                        ) : (
-                                            <div className="w-12 h-12 rounded-md bg-white/5 border border-white/10 flex items-center justify-center">
-                                                <Play size={16} className="text-white/20" />
-                                            </div>
-                                        )}
+                                <div className="p-4 md:p-6 flex flex-col md:flex-row items-center justify-between gap-6">
+                                    <div className="flex items-center gap-5 w-full md:w-1/3">
+                                        <div className="w-14 h-14 rounded-xl overflow-hidden border border-white/10 shrink-0">
+                                            {currentTrack.image_path && currentTrack.image_path !== currentTrack.image_url ? (
+                                                <img src={currentTrack.image_path} alt="" className="w-full h-full object-cover" />
+                                            ) : <div className="w-full h-full bg-accent/20 flex items-center justify-center"><Volume2 className="text-accent" /></div>}
+                                        </div>
                                         <div className="min-w-0">
-                                            <h4 className="text-white font-serif font-bold truncate text-sm md:text-base">{currentTrack.title}</h4>
-                                            <p className="text-accent/80 text-xs font-mono tracking-wider truncate">{normalizeGenre(currentTrack.rarity)}</p>
+                                            <h4 className="text-white font-serif font-bold truncate text-lg">{currentTrack.title}</h4>
+                                            <p className="text-accent/60 text-xs font-mono uppercase tracking-widest">{normalizeGenre(currentTrack.rarity)}</p>
                                         </div>
                                     </div>
-
-                                    {/* Controls */}
-                                    <div className="flex flex-col items-center justify-center w-full md:w-1/3 gap-2">
-                                        <div className="flex items-center gap-6">
-                                            <button onClick={toggleLoopMode} className={`transition-colors ${loopMode !== 'none' ? 'text-accent' : 'text-white/40 hover:text-white'}`} title="Loop">
-                                                {loopMode === 'one' ? <Repeat1 size={18} /> : <Repeat size={18} />}
-                                            </button>
-
-                                            <button onClick={handleRewind} className="text-white/60 hover:text-white transition-colors" title="Rewind 10s">
-                                                <Rewind size={20} />
-                                            </button>
-
-                                            <button onClick={handlePrev} className="text-white/80 hover:text-white transition-colors">
-                                                <SkipBack size={24} fill="currentColor" />
-                                            </button>
-
-                                            <button
-                                                onClick={() => handlePlayPause()}
-                                                className="w-12 h-12 flex items-center justify-center rounded-full bg-white text-[#0A0B0E] hover:scale-105 transition-transform shadow-[0_0_20px_rgba(255,255,255,0.2)]"
+                                    <div className="flex flex-col items-center gap-3 w-full md:w-1/3">
+                                        <div className="flex items-center gap-8">
+                                            <button onClick={handlePrev} className="text-white/60 hover:text-white transition-colors"><SkipBack fill="currentColor" size={28} /></button>
+                                            <button 
+                                                onClick={() => handlePlayPause()} 
+                                                className="w-14 h-14 rounded-full bg-white text-black flex items-center justify-center hover:scale-110 active:scale-95 transition-transform"
                                             >
-                                                {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" className="ml-1" />}
+                                                {isPlaying ? <Pause fill="currentColor" size={32} /> : <Play fill="currentColor" size={32} className="ml-1" />}
                                             </button>
-
-                                            <button onClick={handleNext} className="text-white/80 hover:text-white transition-colors">
-                                                <SkipForward size={24} fill="currentColor" />
-                                            </button>
-
-                                            <button onClick={handleFastForward} className="text-white/60 hover:text-white transition-colors" title="Forward 10s">
-                                                <FastForward size={20} />
-                                            </button>
+                                            <button onClick={handleNext} className="text-white/60 hover:text-white transition-colors"><SkipForward fill="currentColor" size={28} /></button>
                                         </div>
-                                        <div className="flex items-center gap-2 text-[10px] font-mono text-white/40 w-full max-w-[300px] justify-between px-4">
-                                            <span>{formatTime(progress)}</span>
-                                            <span>{formatTime(duration)}</span>
+                                        <div className="flex items-center gap-4 w-full">
+                                            <span className="text-[10px] font-mono text-white/40">{formatTime(progress)}</span>
+                                            <div className="flex-1 h-1 bg-white/5 rounded-full overflow-hidden">
+                                                <div className="h-full bg-white/20" style={{ width: `${(progress / duration) * 100}%` }} />
+                                            </div>
+                                            <span className="text-[10px] font-mono text-white/40">{formatTime(duration)}</span>
                                         </div>
                                     </div>
-
-                                    {/* Volume */}
-                                    <div className="hidden md:flex items-center justify-end gap-3 w-1/3">
-                                        <button onClick={() => setIsMuted(!isMuted)} className="text-white/60 hover:text-white transition-colors">
-                                            {isMuted || volume === 0 ? <VolumeX size={18} /> : <Volume2 size={18} />}
+                                    <div className="hidden md:flex items-center justify-end gap-6 w-1/3 text-white/40">
+                                        <button onClick={toggleLoopMode} className={loopMode !== 'none' ? 'text-accent' : ''}>
+                                            {loopMode === 'one' ? <Repeat1 size={20} /> : <Repeat size={20} />}
                                         </button>
-                                        <div className="w-24 h-1 bg-white/10 rounded-full cursor-pointer relative"
-                                            onClick={(e) => {
-                                                const rect = e.currentTarget.getBoundingClientRect();
-                                                const vol = (e.clientX - rect.left) / rect.width;
-                                                setVolume(Math.max(0, Math.min(1, vol)));
-                                                setIsMuted(false);
-                                            }}>
-                                            <div className="absolute left-0 top-0 bottom-0 bg-white/60 rounded-full" style={{ width: `${(isMuted ? 0 : volume) * 100}%` }} />
-                                            <div className="absolute top-1/2 -translate-y-1/2 w-2 h-2 bg-white rounded-full opacity-0 hover:opacity-100 shadow-[0_0_10px_rgba(255,255,255,0.8)]" style={{ left: `calc(${(isMuted ? 0 : volume) * 100}% - 4px)` }} />
+                                        <div className="flex items-center gap-2 group">
+                                            <button onClick={() => setIsMuted(!isMuted)}>{isMuted || volume === 0 ? <VolumeX size={20} /> : <Volume2 size={20} />}</button>
+                                            <input 
+                                                type="range" min="0" max="1" step="0.01" value={isMuted ? 0 : volume} 
+                                                onChange={(e) => { setVolume(parseFloat(e.target.value)); setIsMuted(false); }}
+                                                className="w-20 h-1 bg-white/10 rounded-full appearance-none outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2 [&::-webkit-slider-thumb]:h-2 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:rounded-full"
+                                            />
                                         </div>
                                     </div>
-
                                 </div>
                             </div>
                         </div>
@@ -472,17 +483,9 @@ export default function MusicClientView() {
                 )}
             </AnimatePresence>
 
-            {/* Hidden Native Audio Element */}
             {currentTrack && (
-                <audio
-                    ref={audioRef}
-                    src={currentTrack.image_url}
-                    onTimeUpdate={handleTimeUpdate}
-                    onEnded={handleEnded}
-                    onLoadedMetadata={handleTimeUpdate}
-                    preload="auto"
-                />
+                <audio ref={audioRef} src={currentTrack.image_url} onTimeUpdate={handleTimeUpdate} onEnded={handleEnded} onLoadedMetadata={handleTimeUpdate} preload="auto" />
             )}
-        </section>
+        </main>
     );
 }
