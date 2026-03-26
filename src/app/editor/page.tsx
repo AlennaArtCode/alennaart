@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import WaveformViewer from '@/components/editor/WaveformViewer';
 import Toolbar from '@/components/editor/Toolbar';
 import AIControls from '@/components/editor/AIControls';
+import DittoExportModal from '@/components/editor/DittoExportModal';
 
 export default function AudioEditorPage() {
     const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -13,6 +14,9 @@ export default function AudioEditorPage() {
     
     // Stems (original, vocals, drums, bass)
     const [stems, setStems] = useState<{ name: string; url: string; active: boolean }[]>([]);
+    
+    // Ditto Distribution
+    const [isDittoModalOpen, setIsDittoModalOpen] = useState(false);
 
     const wavesurferRef = useRef<any>(null);
 
@@ -64,6 +68,7 @@ export default function AudioEditorPage() {
                 <Toolbar 
                     onImport={handleImport} 
                     onExport={handleExport} 
+                    onDitto={() => setIsDittoModalOpen(true)}
                     hasAudio={!!audioUrl} 
                 />
             </header>
@@ -142,6 +147,12 @@ export default function AudioEditorPage() {
                     ]);
                 }} />
             </footer>
+
+            <DittoExportModal 
+                isOpen={isDittoModalOpen}
+                onClose={() => setIsDittoModalOpen(false)}
+                audioBuffer={wavesurferRef.current?.getDecodedData() || null}
+            />
         </main>
     );
 }
